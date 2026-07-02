@@ -1608,46 +1608,64 @@
                     <!-- Sol Sütun: Haberler / Duyurular -->
                     <div id="left-news-list" style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
                         <h3><i data-lucide="megaphone" size="20"></i> Haberler ve Duyurular</h3>
-                        
-                        <!-- Static Fallback Items (will be overwritten if fetch succeeds) -->
-                        <div class="news-card">
+                        <a href="https://ceylanpinarfenlisesi.meb.k12.tr/icerikler/öğrencilerimiz-gazzeye-bağış-yaptı_16780532.html" target="_blank" class="news-card">
                             <span class="ribbon">Yeni</span>
                             <div class="news-icon-wrapper">
                                 <i data-lucide="bell" size="20"></i>
                             </div>
                             <div class="news-content">
-                                <h4>Deneme Analiz Sistemi Güncellendi</h4>
-                                <p>Yeni arayüz ve e-Okul esintili mobil görünüm devreye alındı.</p>
+                                <h4>Öğrencilerimiz Gazze'ye Bağış yaptı</h4>
+                                <p>Ceylanpınar Fen Lisesi resmi haber duyurusu.</p>
                             </div>
                             <i data-lucide="chevron-right" class="news-arrow" size="16"></i>
-                        </div>
-
-                        <div class="news-card">
+                        </a>
+                        <a href="https://ceylanpinarfenlisesi.meb.k12.tr/icerikler/afet-tatbikatı-başarıyla-gerçekleştirildi_16683329.html" target="_blank" class="news-card">
+                            
                             <div class="news-icon-wrapper">
                                 <i data-lucide="calendar" size="20"></i>
                             </div>
                             <div class="news-content">
-                                <h4>Yaz Dönemi Destekleme Kursları</h4>
-                                <p>12. sınıflar için hazırlık ders programları yakında yayınlanacak.</p>
+                                <h4>Afet Tatbikatı Başarıyla Gerçekleştirildi.</h4>
+                                <p>Ceylanpınar Fen Lisesi resmi haber duyurusu.</p>
                             </div>
                             <i data-lucide="chevron-right" class="news-arrow" size="16"></i>
-                        </div>
+                        </a>
+                        <a href="https://ceylanpinarfenlisesi.meb.k12.tr/icerikler/motivasyon-semineri_16594914.html" target="_blank" class="news-card">
+                            
+                            <div class="news-icon-wrapper">
+                                <i data-lucide="calendar" size="20"></i>
+                            </div>
+                            <div class="news-content">
+                                <h4>Motivasyon semineri</h4>
+                                <p>Ceylanpınar Fen Lisesi resmi haber duyurusu.</p>
+                            </div>
+                            <i data-lucide="chevron-right" class="news-arrow" size="16"></i>
+                        </a>
                     </div>
 
                     <!-- Sağ Sütun: Sınav ve Genel Duyurular -->
                     <div id="right-news-list" style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
                         <h3><i data-lucide="award" size="20"></i> Sınav ve Gelişim Duyuruları</h3>
-
-                        <div class="news-card">
+                        <a href="https://ceylanpinarfenlisesi.meb.k12.tr/icerikler/satranç-turnuvasi_16397754.html" target="_blank" class="news-card">
                             <div class="news-icon-wrapper">
                                 <i data-lucide="file-text" size="20"></i>
                             </div>
                             <div class="news-content">
-                                <h4>YKS Tercih Danışmanlığı</h4>
-                                <p>Rehberlik servisimiz tercih dönemi boyunca aktif hizmet verecektir.</p>
+                                <h4>SATRANÇ TURNUVASI</h4>
+                                <p>Ceylanpınar Fen Lisesi resmi sınav ve gelişim duyurusu.</p>
                             </div>
                             <i data-lucide="chevron-right" class="news-arrow" size="16"></i>
-                        </div>
+                        </a>
+                        <a href="https://ceylanpinarfenlisesi.meb.k12.tr/icerikler/kutadgu-bilig_15749417.html" target="_blank" class="news-card">
+                            <div class="news-icon-wrapper">
+                                <i data-lucide="file-text" size="20"></i>
+                            </div>
+                            <div class="news-content">
+                                <h4>Kutadgu Bilig</h4>
+                                <p>Ceylanpınar Fen Lisesi resmi sınav ve gelişim duyurusu.</p>
+                            </div>
+                            <i data-lucide="chevron-right" class="news-arrow" size="16"></i>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -1874,7 +1892,7 @@
                             <span style="font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Yeni Sınav İçe Aktar (.xlsx/.xlsm)</span>
                             <div class="dropzone" onclick="document.getElementById('excel-file-input-mobile').click()">
                                 <i data-lucide="file-spreadsheet" size="28" style="color:#1e3c72;"></i>
-                                <strong style="font-size:0.85rem; color:#1e293b;">Excel Dosyası Seçin</strong>
+                                <strong style="font-size:0.85rem; color:#1e3c72;">Excel Dosyası Seçin</strong>
                                 <p style="font-size:0.7rem;">Sınav Excel'ini seçmek için buraya dokunun</p>
                                 <input type="file" id="excel-file-input-mobile" accept=".xlsx,.xlsm" onchange="handleExcelImport(event)">
                             </div>
@@ -2016,11 +2034,11 @@
                     throw new Error('CORS proxy response was not ok.');
                 })
                 .then(data => {
-                    const html = data.contents;
-                    if (!html) throw new Error('Proxy returned empty content.');
+                    const htmlContent = data.contents;
+                    if (!htmlContent) throw new Error('Proxy returned empty content.');
                     
                     const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
+                    const doc = parser.parseFromString(htmlContent, 'text/html');
 
                     // Parse news items
                     const news = [];
@@ -2068,7 +2086,7 @@
                     updateNewsColumns(news, announcements, slider);
                 })
                 .catch(err => {
-                    console.warn("Could not fetch live MEB news, using default static fallback:", err);
+                    console.warn("Could not fetch live MEB news at runtime:", err);
                 });
         }
 
@@ -2166,6 +2184,112 @@
                 }
                 navigate(targetState, false);
             });
+        }
+
+        // e-Okul Mobile Bottom Nav Controller: Teacher Analysis View
+        function switchAnalysisTab(tabName) {
+            document.querySelectorAll('#mobile-nav-analysis .mobile-nav-item').forEach(item => item.classList.remove('active'));
+            document.getElementById(`nav-analysis-${tabName}`).classList.add('active');
+
+            // Hide all sub-tabs
+            document.getElementById('analysis-tab-karne').style.setProperty('display', 'none', 'important');
+            document.getElementById('analysis-tab-grafik').style.setProperty('display', 'none', 'important');
+            document.getElementById('analysis-tab-istatistik').style.setProperty('display', 'none', 'important');
+            document.getElementById('analysis-tab-ayarlar').style.setProperty('display', 'none', 'important');
+
+            // Show selected sub-tab
+            if (tabName === 'karne') {
+                document.getElementById('analysis-tab-karne').style.setProperty('display', 'flex', 'important');
+            } else if (tabName === 'grafik') {
+                document.getElementById('analysis-tab-grafik').style.setProperty('display', 'flex', 'important');
+                if (activeStudent) {
+                    setTimeout(() => renderProgressChart(activeStudent), 50); // delay to let canvas layout settle
+                }
+            } else if (tabName === 'istatistik') {
+                document.getElementById('analysis-tab-istatistik').style.setProperty('display', 'block', 'important');
+            } else if (tabName === 'ayarlar') {
+                document.getElementById('analysis-tab-ayarlar').style.setProperty('display', 'block', 'important');
+            }
+            lucide.createIcons();
+        }
+
+        // Responsive resize handler to reset layout displaying rules
+        window.addEventListener('resize', () => {
+            const isMobile = window.innerWidth <= 768;
+            
+            // Adjust portal grid displays
+            if (!isMobile) {
+                // On desktop, show karne & graphic, hide mobile-only tabs
+                document.getElementById('analysis-tab-karne').style.display = 'flex';
+                document.getElementById('analysis-tab-grafik').style.display = 'block';
+                document.getElementById('analysis-tab-istatistik').style.display = 'none';
+                document.getElementById('analysis-tab-ayarlar').style.display = 'none';
+            } else {
+                // If resized back to mobile, maintain active tabs
+                if (document.getElementById('teacher-analysis-view').style.display !== 'none') {
+                    const activeAnalysisTab = document.querySelector('#mobile-nav-analysis .mobile-nav-item.active').id.replace('nav-analysis-', '');
+                    switchAnalysisTab(activeAnalysisTab);
+                }
+            }
+        });
+
+        // IndexedDB Management
+        function initIndexedDB() {
+            const request = indexedDB.open('SchoolExamsDB', 1);
+
+            request.onerror = (event) => {
+                console.error("IndexedDB load error:", event);
+                showToast("Veritabanı yüklenemedi, veriler geçici bellekten okunuyor.", "warning");
+                examDatabase = DEFAULT_DATA;
+                refreshDashboard();
+            };
+
+            request.onsuccess = (event) => {
+                db = event.target.result;
+                loadRecordsFromDB();
+            };
+
+            request.onupgradeneeded = (event) => {
+                const database = event.target.result;
+                const objectStore = database.createObjectStore("exams", { keyPath: "id", autoIncrement: true });
+                objectStore.createIndex("no", "no", { unique: false });
+                objectStore.createIndex("name", "name", { unique: false });
+                objectStore.createIndex("deneme", "deneme", { unique: false });
+            };
+        }
+
+        function loadRecordsFromDB() {
+            const transaction = db.transaction(["exams"], "readonly");
+            const objectStore = transaction.objectStore("exams");
+            const request = objectStore.getAll();
+
+            request.onsuccess = (event) => {
+                const results = event.target.result;
+                if (results.length === 0) {
+                    console.log("Database is empty. Populating default records...");
+                    populateDefaultData();
+                } else {
+                    examDatabase = results;
+                    console.log(`Loaded ${results.length} records from IndexedDB`);
+                    refreshDashboard();
+                }
+            };
+        }
+
+        function populateDefaultData() {
+            const transaction = db.transaction(["exams"], "readwrite");
+            const objectStore = transaction.objectStore("exams");
+            
+            DEFAULT_DATA.forEach(record => {
+                objectStore.add(record);
+            });
+
+            transaction.oncomplete = () => {
+                console.log("Default records written to IndexedDB.");
+                examDatabase = DEFAULT_DATA;
+                showToast("Varsayılan veritabanı (672 kayıt) başarıyla yüklendi.");
+                refreshDashboard();
+            };
         }
 
         function navigate(state, push = true) {
@@ -2350,138 +2474,224 @@
             refreshDashboard();
         }
 
-        // e-Okul Mobile Bottom Nav Controller: Teacher Analysis View
-        function switchAnalysisTab(tabName) {
-            document.querySelectorAll('#mobile-nav-analysis .mobile-nav-item').forEach(item => item.classList.remove('active'));
-            document.getElementById(`nav-analysis-${tabName}`).classList.add('active');
-
-            // Hide all sub-tabs
-            document.getElementById('analysis-tab-karne').style.setProperty('display', 'none', 'important');
-            document.getElementById('analysis-tab-grafik').style.setProperty('display', 'none', 'important');
-            document.getElementById('analysis-tab-istatistik').style.setProperty('display', 'none', 'important');
-            document.getElementById('analysis-tab-ayarlar').style.setProperty('display', 'none', 'important');
-
-            // Show selected sub-tab
-            if (tabName === 'karne') {
-                document.getElementById('analysis-tab-karne').style.setProperty('display', 'flex', 'important');
-            } else if (tabName === 'grafik') {
-                document.getElementById('analysis-tab-grafik').style.setProperty('display', 'flex', 'important');
-                if (activeStudent) {
-                    setTimeout(() => renderProgressChart(activeStudent), 50); // delay to let canvas layout settle
-                }
-            } else if (tabName === 'istatistik') {
-                document.getElementById('analysis-tab-istatistik').style.setProperty('display', 'block', 'important');
-            } else if (tabName === 'ayarlar') {
-                document.getElementById('analysis-tab-ayarlar').style.setProperty('display', 'block', 'important');
+        function renderProgressChart(records) {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            if (progressChart) {
+                progressChart.destroy();
             }
-            lucide.createIcons();
-        }
 
-        // Responsive resize handler to reset layout displaying rules
-        window.addEventListener('resize', () => {
-            const isMobile = window.innerWidth <= 768;
-            
-            // Adjust portal grid displays
-            if (!isMobile) {
-                // On desktop, show karne & graphic, hide mobile-only tabs
-                document.getElementById('analysis-tab-karne').style.display = 'flex';
-                document.getElementById('analysis-tab-grafik').style.display = 'block';
-                document.getElementById('analysis-tab-istatistik').style.display = 'none';
-                document.getElementById('analysis-tab-ayarlar').style.display = 'none';
-            } else {
-                // If resized back to mobile, maintain active tabs
-                if (document.getElementById('teacher-analysis-view').style.display !== 'none') {
-                    const activeAnalysisTab = document.querySelector('#mobile-nav-analysis .mobile-nav-item.active').id.replace('nav-analysis-', '');
-                    switchAnalysisTab(activeAnalysisTab);
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)';
+            const textColor = isDark ? '#94a3b8' : '#64748b';
+
+            // Calculate overall average net for each exam across ALL students in the database
+            const examAvgsMap = {};
+            examDatabase.forEach(rec => {
+                if (rec.subjects && rec.subjects.toplam) {
+                    if (!examAvgsMap[rec.deneme]) {
+                        examAvgsMap[rec.deneme] = { sum: 0, count: 0 };
+                    }
+                    examAvgsMap[rec.deneme].sum += rec.subjects.toplam.n;
+                    examAvgsMap[rec.deneme].count++;
                 }
-            }
-        });
-
-        // IndexedDB Management
-        function initIndexedDB() {
-            const request = indexedDB.open('SchoolExamsDB', 1);
-
-            request.onerror = (event) => {
-                console.error("IndexedDB load error:", event);
-                showToast("Veritabanı yüklenemedi, veriler geçici bellekten okunuyor.", "warning");
-                examDatabase = DEFAULT_DATA;
-                refreshDashboard();
-            };
-
-            request.onsuccess = (event) => {
-                db = event.target.result;
-                loadRecordsFromDB();
-            };
-
-            request.onupgradeneeded = (event) => {
-                const database = event.target.result;
-                const objectStore = database.createObjectStore("exams", { keyPath: "id", autoIncrement: true });
-                objectStore.createIndex("no", "no", { unique: false });
-                objectStore.createIndex("name", "name", { unique: false });
-                objectStore.createIndex("deneme", "deneme", { unique: false });
-            };
-        }
-
-        function loadRecordsFromDB() {
-            const transaction = db.transaction(["exams"], "readonly");
-            const objectStore = transaction.objectStore("exams");
-            const request = objectStore.getAll();
-
-            request.onsuccess = (event) => {
-                const results = event.target.result;
-                if (results.length === 0) {
-                    console.log("Database is empty. Populating default records...");
-                    populateDefaultData();
-                } else {
-                    examDatabase = results;
-                    console.log(`Loaded ${results.length} records from IndexedDB`);
-                    refreshDashboard();
-                }
-            };
-        }
-
-        function populateDefaultData() {
-            const transaction = db.transaction(["exams"], "readwrite");
-            const objectStore = transaction.objectStore("exams");
-            
-            DEFAULT_DATA.forEach(record => {
-                objectStore.add(record);
             });
 
-            transaction.oncomplete = () => {
-                console.log("Default records written to IndexedDB.");
-                examDatabase = DEFAULT_DATA;
-                showToast("Varsayılan veritabanı (672 kayıt) başarıyla yüklendi.");
-                refreshDashboard();
-            };
-        }
-
-        function saveRecordsToDB(newRecords, message = "Veritabanı güncellendi") {
-            if (!db) {
-                examDatabase = [...examDatabase, ...newRecords];
-                refreshDashboard();
-                showToast(message);
-                return;
-            }
-
-            const transaction = db.transaction(["exams"], "readwrite");
-            const objectStore = transaction.objectStore("exams");
-
-            newRecords.forEach(record => {
-                objectStore.add(record);
+            const labels = records.map(r => r.deneme);
+            const studentNets = records.map(r => r.subjects && r.subjects.toplam ? r.subjects.toplam.n : 0);
+            
+            // Map student's exams to the calculated school averages
+            const schoolNets = records.map(r => {
+                const stats = examAvgsMap[r.deneme];
+                return stats ? parseFloat((stats.sum / stats.count).toFixed(2)) : 0;
             });
 
-            transaction.oncomplete = () => {
-                const reloadTransaction = db.transaction(["exams"], "readonly");
-                const reloadStore = reloadTransaction.objectStore("exams");
-                const request = reloadStore.getAll();
-                
-                request.onsuccess = (event) => {
-                    examDatabase = event.target.result;
-                    refreshDashboard();
-                    showToast(message);
-                };
+            progressChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Öğrenci Net Toplamı',
+                            data: studentNets,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59,130,246,0.1)',
+                            borderWidth: 3,
+                            pointBackgroundColor: '#3b82f6',
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Okul Genel Net Ortalaması',
+                            data: schoolNets,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2.5,
+                            borderDash: [5, 5],
+                            pointBackgroundColor: '#ef4444',
+                            pointRadius: 4,
+                            tension: 0.3,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false // We use our custom legend in HTML
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            padding: 12,
+                            backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                            titleColor: isDark ? '#f8fafc' : '#0f172a',
+                            bodyColor: isDark ? '#94a3b8' : '#475569',
+                            borderColor: isDark ? '#334155' : '#e2e8f0',
+                            borderWidth: 1,
+                            titleFont: { family: 'Plus Jakarta Sans', weight: '700' },
+                            bodyFont: { family: 'Plus Jakarta Sans' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: gridColor },
+                            ticks: { color: textColor, font: { family: 'Plus Jakarta Sans', size: 10 } }
+                        },
+                        y: {
+                            min: 0,
+                            max: 120,
+                            grid: { color: gridColor },
+                            ticks: { color: textColor, font: { family: 'Plus Jakarta Sans', size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Excel Drag and Drop
+        function setupDragAndDrop() {
+            const dropzone = document.getElementById('excel-dropzone');
+            if(!dropzone) return;
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropzone.classList.add('dragover');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropzone.classList.remove('dragover');
+                }, false);
+            });
+
+            dropzone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) {
+                    importExcelFile(files[0]);
+                }
+            });
+        }
+
+        function handleExcelImport(event) {
+            const file = event.target.files[0];
+            if (file) {
+                importExcelFile(file);
+            }
+        }
+
+        function importExcelFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    
+                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    if (rows.length < 3) {
+                        showToast("Hata: Dosya formatı uyumsuz veya veri yok.", "error");
+                        return;
+                    }
+
+                    const newRecords = [];
+                    let importedExamName = "Bilinmeyen Deneme";
+
+                    for(let i = 2; i < rows.length; i++) {
+                        if (rows[i][38]) {
+                            importedExamName = rows[i][38];
+                            break;
+                        }
+                    }
+
+                    for (let r = 2; r < rows.length; r++) {
+                        const row = rows[r];
+                        if (!row || row.length === 0) continue;
+
+                        const rawNo = row[0];
+                        const rawName = row[1];
+                        if (!rawName || String(rawName).trim() === "") continue;
+
+                        const no = rawNo ? parseInt(rawNo) : 0;
+                        const name = String(rawName).trim();
+                        const snf = row[2] ? String(row[2]).trim() : "";
+                        const sube = row[3] ? String(row[3]).trim() : "";
+
+                        const parseSubject = (startIdx) => {
+                            const d = parseFloat(row[startIdx]) || 0;
+                            const y = parseFloat(row[startIdx+1]) || 0;
+                            const b = parseFloat(row[startIdx+2]) || 0;
+                            const n = parseFloat(row[startIdx+3]) || parseFloat(d - (y / 4.0)) || 0;
+                            return { d, y, b, n: Math.max(0, n) };
+                        };
+
+                        const subjects = {
+                            turkce: parseSubject(4),
+                            sosyal: parseSubject(8),
+                            matematik: parseSubject(12),
+                            geometri: parseSubject(16),
+                            fizik: parseSubject(20),
+                            kimya: parseSubject(24),
+                            biyoloji: parseSubject(28),
+                            toplam: parseSubject(32)
+                        };
+
+                        const puan = parseFloat(row[36]) || 0;
+                        const siralama = parseInt(row[37]) || 0;
+                        const deneme = row[38] ? String(row[38]).trim() : importedExamName;
+
+                        newRecords.push({
+                            no,
+                            name,
+                            class: snf,
+                            branch: sube,
+                            subjects,
+                            puan,
+                            siralama,
+                            deneme
+                        });
+                    }
+
+                    if (newRecords.length > 0) {
+                        saveRecordsToDB(newRecords, `"${importedExamName}" sınavına ait ${newRecords.length} kayıt eklendi!`);
+                    } else {
+                        showToast("Dosyada geçerli öğrenci kaydı bulunamadı.", "error");
+                    }
+
+                } catch (error) {
+                    console.error("Excel import error:", error);
+                    showToast("Excel dosyası çözümlenirken hata oluştu.", "error");
+                }
             };
+            reader.readAsArrayBuffer(file);
         }
 
         function resetToDefault() {
@@ -2807,45 +3017,6 @@
                 }
             };
             reader.readAsArrayBuffer(file);
-        }
-
-        // Backup Export / Import
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(examDatabase, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `sinav_veri_tabani_yedek_${new Date().toISOString().slice(0,10)}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-            showToast("Veri yedek dosyası (.json) bilgisayarınıza indirildi.");
-        }
-
-        function triggerImport() {
-            document.getElementById('backup-file-input').click();
-        }
-
-        function importData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const records = JSON.parse(e.target.result);
-                    if (!Array.isArray(records)) {
-                        showToast("Hata: Geçersiz yedek dosyası formatı.", "error");
-                        return;
-                    }
-
-                    if (confirm(`Yedek dosyasındaki ${records.length} kaydı veritabanına eklemek istiyor musunuz?`)) {
-                        saveRecordsToDB(records, "Yedek başarıyla yüklendi!");
-                    }
-                } catch (error) {
-                    showToast("Hata: Dosya içeriği okunamadı.", "error");
-                }
-            };
-            reader.readAsText(file);
         }
 
         // Toast notifications
