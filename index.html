@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ceylanpınar Fen Lisesi - Öğretmen Portal Hub</title>
+    <title>Ceylanpınar Fen Lisesi - Portal Hub</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,6 +22,7 @@
             --border-color: #e2e8f0;
             --accent-gradient: linear-gradient(135deg, #4f46e5, #7c3aed);
             --accent-color: #4f46e5;
+            --accent-hover: #4338ca;
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
             --radius-md: 12px;
@@ -36,6 +37,7 @@
             --border-color: #334155;
             --accent-gradient: linear-gradient(135deg, #6366f1, #a855f7);
             --accent-color: #6366f1;
+            --accent-hover: #4f46e5;
         }
 
         * {
@@ -59,22 +61,26 @@
         header {
             background: var(--bg-card);
             border-bottom: 1px solid var(--border-color);
-            padding: 1.25rem 2rem;
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .logo-section {
             display: flex;
             align-items: center;
             gap: 1rem;
+            cursor: pointer;
         }
 
         .logo-icon {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             border-radius: var(--radius-md);
             display: flex;
             align-items: center;
@@ -89,7 +95,7 @@
         }
 
         .logo-title {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             font-weight: 700;
             letter-spacing: -0.02em;
             line-height: 1.2;
@@ -97,10 +103,39 @@
         }
 
         .logo-subtitle {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-secondary);
             font-weight: 500;
             line-height: 1.2;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary {
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
         }
 
         .theme-toggle {
@@ -132,37 +167,141 @@
             margin: 0 auto;
         }
 
-        .portal-header {
+        /* Selection Screen */
+        .portal-selection {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             text-align: center;
-            margin-bottom: 4rem;
+            gap: 3rem;
+            width: 100%;
+            max-width: 800px;
         }
 
-        .portal-header h2 {
+        .portal-welcome {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .welcome-logo {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.08));
+        }
+
+        .portal-welcome h2 {
             font-size: 2.25rem;
             font-weight: 800;
             letter-spacing: -0.03em;
-            margin-bottom: 0.75rem;
             background: var(--accent-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .portal-header p {
+        .portal-welcome p {
             font-size: 1.05rem;
             color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto;
-            line-height: 1.5;
             font-weight: 500;
         }
 
-        /* Grid */
+        .selection-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            width: 100%;
+        }
+
+        .selection-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 1.5rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .selection-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent-color);
+        }
+
+        .selection-card-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(79, 70, 229, 0.08);
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .selection-card:hover .selection-card-icon {
+            background: var(--accent-gradient);
+            color: white;
+        }
+
+        .selection-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .selection-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Hub Section (Hidden by Default) */
+        .hub-section {
+            display: none;
+            width: 100%;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hub-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .hub-title-area h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.25rem;
+        }
+
+        .hub-title-area p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
         .portal-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 2rem;
             width: 100%;
-            margin-bottom: 4rem;
         }
 
         /* Portal Card */
@@ -214,14 +353,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: var(--shadow-sm);
         }
 
         .portal-card:hover .card-icon-wrapper {
             background: var(--accent-gradient);
             color: white;
             border-color: transparent;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
         }
 
         .card-content h3 {
@@ -282,6 +419,102 @@
             opacity: 0;
         }
 
+        /* Password Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .modal.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal.open .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .input-group label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--bg-page);
+            color: var(--text-primary);
+            outline: none;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .input-field:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            display: none;
+        }
+
         /* Footer */
         footer {
             text-align: center;
@@ -311,14 +544,21 @@
             main {
                 padding: 2rem 1rem;
             }
-            .portal-header {
-                margin-bottom: 2.5rem;
+            .selection-grid {
+                grid-template-columns: 1fr;
+                gap: 1.25rem;
             }
-            .portal-header h2 {
-                font-size: 1.75rem;
+            .selection-card {
+                padding: 2rem 1.5rem;
             }
-            .portal-header p {
-                font-size: 0.95rem;
+            .hub-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+                text-align: center;
+            }
+            .hub-header .btn {
+                justify-content: center;
             }
             .portal-grid {
                 grid-template-columns: 1fr;
@@ -330,70 +570,166 @@
 <body>
 
     <header>
-        <div class="logo-section">
+        <div class="logo-section" onclick="showSelectionScreen()">
             <div class="logo-icon">
                 <img class="logo-img" src="logo.png" alt="Logo">
             </div>
             <div>
                 <h1 class="logo-title">Ceylanpınar Fen Lisesi</h1>
-                <p class="logo-subtitle">Öğretmen Portal Hub</p>
+                <p class="logo-subtitle">Portal Hub</p>
             </div>
         </div>
-        <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Temayı Değiştir">
-            <i data-lucide="moon"></i>
-        </button>
+        <div class="header-actions">
+            <button class="btn btn-secondary" id="logout-btn" style="display:none;" onclick="logout()">
+                <i data-lucide="log-out"></i> Çıkış Yap
+            </button>
+            <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Temayı Değiştir">
+                <i data-lucide="moon"></i>
+            </button>
+        </div>
     </header>
 
     <main>
-        <div class="portal-header">
-            <h2>Öğretmen ve İdare Uygulamaları</h2>
-            <p>Okulumuz öğretmenleri ve idari kadrosu için geliştirilen dijital araçlara tek bir panelden kolayca erişin.</p>
-        </div>
-
-        <div class="portal-grid">
-            <!-- Sınav Analiz Kartı -->
-            <a href="https://deneme-analizi.netlify.app" class="portal-card" target="_blank">
-                <div class="card-icon-wrapper">
-                    <i data-lucide="bar-chart-3" size="24"></i>
-                </div>
-                <div class="card-content">
-                    <h3>Deneme Analiz Sistemi <span class="badge">Aktif</span></h3>
-                    <p>TYT deneme sınav sonuçlarını analiz edin, öğrenci karneleri çıkartın ve gelişim istatistiklerini takip edin.</p>
-                </div>
-                <div class="card-action">
-                    Sisteme Giriş Yap <i data-lucide="arrow-right" size="16"></i>
-                </div>
-            </a>
-
-            <!-- Rehberlik Kartı (Yakında) -->
-            <div class="portal-card portal-card-disabled">
-                <div class="card-icon-wrapper">
-                    <i data-lucide="users" size="24"></i>
-                </div>
-                <div class="card-content">
-                    <h3>Rehberlik & Öğrenci Takip <span class="badge badge-disabled">Yakında</span></h3>
-                    <p>Öğrenci görüşmelerini, sınıf rehberlik notlarını ve davranış gelişim kayıtlarını dijital olarak tutun.</p>
-                </div>
-                <div class="card-action" style="color: var(--text-secondary); cursor: not-allowed;">
-                    Kullanıma Kapalı <i data-lucide="lock" size="16"></i>
-                </div>
+        <!-- Seçim Ekranı -->
+        <div class="portal-selection" id="selection-screen">
+            <div class="portal-welcome">
+                <img class="welcome-logo" src="logo.png" alt="Okul Logosu">
+                <h2>Ceylanpınar Fen Lisesi</h2>
+                <p>Uygulama Seçim Portalı</p>
             </div>
 
-            <!-- Program Kartı (Yakında) -->
-            <div class="portal-card portal-card-disabled">
-                <div class="card-icon-wrapper">
-                    <i data-lucide="calendar" size="24"></i>
+            <div class="selection-grid">
+                <!-- Öğretmen Kartı -->
+                <div class="selection-card" onclick="openLoginModal()">
+                    <div class="selection-card-icon">
+                        <i data-lucide="user-cog" size="36"></i>
+                    </div>
+                    <h3>Öğretmen ve İdare Girişi</h3>
+                    <p>Sınav analizi, öğrenci takibi ve diğer yönetimsel araçlara erişmek için şifreyle giriş yapın.</p>
                 </div>
-                <div class="card-content">
-                    <h3>Ders Programı & Nöbetler <span class="badge badge-disabled">Yakında</span></h3>
-                    <p>Haftalık ders programlarını, nöbet çizelgelerini ve öğretmen izin/yedek planlamalarını yönetin.</p>
+
+                <!-- Öğrenci Kartı -->
+                <div class="selection-card" onclick="showStudentHub()">
+                    <div class="selection-card-icon">
+                        <i data-lucide="graduation-cap" size="36"></i>
+                    </div>
+                    <h3>Öğrenci Girişi</h3>
+                    <p>Sınav sonuçlarınızı incelemek, ders programlarınızı görmek ve karnelerinize erişmek için tıklayın.</p>
                 </div>
-                <div class="card-action" style="color: var(--text-secondary); cursor: not-allowed;">
-                    Kullanıma Kapalı <i data-lucide="lock" size="16"></i>
+            </div>
+        </div>
+
+        <!-- Öğretmen Paneli (Locked) -->
+        <div class="hub-section" id="teacher-hub">
+            <div class="hub-header">
+                <div class="hub-title-area">
+                    <h2>Öğretmen ve Yönetici Portalı</h2>
+                    <p>Analiz ve yönetim uygulamaları</p>
+                </div>
+            </div>
+            <div class="portal-grid">
+                <!-- Sınav Analiz Kartı -->
+                <a href="https://deneme-analizi.netlify.app" class="portal-card" target="_blank">
+                    <div class="card-icon-wrapper">
+                        <i data-lucide="bar-chart-3" size="24"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Deneme Analiz Sistemi <span class="badge">Aktif</span></h3>
+                        <p>Deneme sınav sonuçlarını veri tabanına yükleyin, öğrenci karneleri çıkartın ve gelişim istatistiklerini takip edin.</p>
+                    </div>
+                    <div class="card-action">
+                        Sisteme Giriş Yap <i data-lucide="arrow-right" size="16"></i>
+                    </div>
+                </a>
+
+                <!-- Rehberlik Kartı (Placeholder) -->
+                <div class="portal-card portal-card-disabled">
+                    <div class="card-icon-wrapper">
+                        <i data-lucide="users" size="24"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Rehberlik & Öğrenci Takip <span class="badge badge-disabled">Yakında</span></h3>
+                        <p>Öğrenci görüşmelerini, sınıf rehberlik notlarını ve davranış gelişim kayıtlarını dijital olarak tutun.</p>
+                    </div>
+                    <div class="card-action" style="color: var(--text-secondary);">
+                        Kullanıma Kapalı <i data-lucide="lock" size="16"></i>
+                    </div>
+                </div>
+
+                <!-- Program Kartı (Placeholder) -->
+                <div class="portal-card portal-card-disabled">
+                    <div class="card-icon-wrapper">
+                        <i data-lucide="calendar" size="24"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Ders Programı & Nöbetler <span class="badge badge-disabled">Yakında</span></h3>
+                        <p>Haftalık ders programlarını, nöbet çizelgelerini ve öğretmen izin/yedek planlamalarını yönetin.</p>
+                    </div>
+                    <div class="card-action" style="color: var(--text-secondary);">
+                        Kullanıma Kapalı <i data-lucide="lock" size="16"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Öğrenci Paneli -->
+        <div class="hub-section" id="student-hub">
+            <div class="hub-header">
+                <div class="hub-title-area">
+                    <h2>Öğrenci Bilgi Portalı</h2>
+                    <p>Kişisel sınav ve başarı takibi</p>
+                </div>
+            </div>
+            <div class="portal-grid">
+                <!-- Deneme Sonuç Sorgulama Kartı -->
+                <div class="portal-card portal-card-disabled">
+                    <div class="card-icon-wrapper">
+                        <i data-lucide="search" size="24"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Sınav Sonuç Sorgulama <span class="badge badge-disabled">Yakında</span></h3>
+                        <p>Öğrenci numaranızla giriş yaparak deneme sınav sonuçlarınızı ve gelişim grafiklerinizi inceleyin.</p>
+                    </div>
+                    <div class="card-action" style="color: var(--text-secondary);">
+                        Kullanıma Kapalı <i data-lucide="lock" size="16"></i>
+                    </div>
+                </div>
+
+                <!-- Haftalık Ders Programı Kartı -->
+                <div class="portal-card portal-card-disabled">
+                    <div class="card-icon-wrapper">
+                        <i data-lucide="calendar-days" size="24"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Haftalık Ders Programı <span class="badge badge-disabled">Yakında</span></h3>
+                        <p>Sınıfınızın haftalık güncel ders saatlerini ve öğretmen programlarını takip edin.</p>
+                    </div>
+                    <div class="card-action" style="color: var(--text-secondary);">
+                        Kullanıma Kapalı <i data-lucide="lock" size="16"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
+
+    <!-- Password Modal -->
+    <div class="modal" id="login-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Öğretmen Girişi</h3>
+                <button class="close-btn" onclick="closeLoginModal()"><i data-lucide="x"></i></button>
+            </div>
+            <p style="font-size: 0.85rem; color:var(--text-secondary); font-weight:500;">
+                Yönetici uygulamalarına erişebilmek için lütfen öğretmen giriş şifresini yazın.
+            </p>
+            <div class="input-group">
+                <label for="password-input">Giriş Şifresi</label>
+                <input type="password" id="password-input" class="input-field" placeholder="••••••••" onkeydown="handlePasswordKeydown(event)">
+                <span class="error-message" id="login-error">Hatalı şifre! Lütfen tekrar deneyin.</span>
+            </div>
+            <button class="btn btn-primary" style="justify-content:center;" onclick="verifyPassword()">Giriş Yap</button>
+        </div>
+    </div>
 
     <footer>
         &copy; 2026 Ceylanpınar Fen Lisesi. Tüm Hakları Saklıdır.
@@ -403,8 +739,10 @@
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             initTheme();
+            checkSession();
         });
 
+        // Theme management
         function initTheme() {
             const currentTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', currentTheme);
@@ -426,6 +764,74 @@
                 btn.innerHTML = '<i data-lucide="moon"></i>';
             }
             lucide.createIcons({ attrs: { class: 'lucide' } });
+        }
+
+        // Login Logic
+        function openLoginModal() {
+            document.getElementById('login-modal').classList.add('open');
+            document.getElementById('password-input').focus();
+            document.getElementById('login-error').style.display = 'none';
+        }
+
+        function closeLoginModal() {
+            document.getElementById('login-modal').classList.remove('open');
+            document.getElementById('password-input').value = '';
+        }
+
+        function handlePasswordKeydown(event) {
+            if (event.key === 'Enter') {
+                verifyPassword();
+            }
+        }
+
+        function verifyPassword() {
+            const passwordVal = document.getElementById('password-input').value;
+            
+            // Default password is set to ceylanpinar2014
+            if (passwordVal === 'ceylanpinar2014') {
+                sessionStorage.setItem('teacher_logged_in', 'true');
+                closeLoginModal();
+                showTeacherHub();
+            } else {
+                document.getElementById('login-error').style.display = 'block';
+                document.getElementById('password-input').value = '';
+                document.getElementById('password-input').focus();
+            }
+        }
+
+        // Screen Routing
+        function showTeacherHub() {
+            document.getElementById('selection-screen').style.display = 'none';
+            document.getElementById('student-hub').style.display = 'none';
+            document.getElementById('teacher-hub').style.display = 'block';
+            document.getElementById('logout-btn').style.display = 'inline-flex';
+        }
+
+        function showStudentHub() {
+            document.getElementById('selection-screen').style.display = 'none';
+            document.getElementById('teacher-hub').style.display = 'none';
+            document.getElementById('student-hub').style.display = 'block';
+            document.getElementById('logout-btn').style.display = 'inline-flex';
+        }
+
+        function showSelectionScreen() {
+            document.getElementById('teacher-hub').style.display = 'none';
+            document.getElementById('student-hub').style.display = 'none';
+            document.getElementById('selection-screen').style.display = 'flex';
+            document.getElementById('logout-btn').style.display = 'none';
+        }
+
+        function logout() {
+            sessionStorage.removeItem('teacher_logged_in');
+            showSelectionScreen();
+        }
+
+        function checkSession() {
+            if (sessionStorage.getItem('teacher_logged_in') === 'true') {
+                showTeacherHub();
+            } else {
+                showSelectionScreen();
+            }
         }
     </script>
 </body>
