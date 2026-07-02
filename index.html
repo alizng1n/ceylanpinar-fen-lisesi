@@ -526,7 +526,7 @@
         .news-card:hover {
             transform: translateX(6px);
             border-color: #1e3c72;
-            box-shadow: 0 10px 22px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 22 rgba(0,0,0,0.1);
         }
 
         .news-icon-wrapper {
@@ -553,7 +553,7 @@
         }
 
         .news-content p {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #64748b;
             line-height: 1.4;
             font-weight: 500;
@@ -1139,6 +1139,62 @@
             color: var(--accent-color);
         }
 
+        /* Modern Redesigned Footer (Addresses copyright text removal) */
+        footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            padding: 2.5rem 2rem;
+            width: 100%;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1100px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .footer-col {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .footer-col h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .footer-col p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        body.portal-mode footer .footer-col h4 {
+            color: #ffffff !important;
+        }
+
+        [data-theme="dark"] body.portal-mode footer .footer-col h4 {
+            color: #ffffff !important;
+        }
+
+        body.portal-mode footer .footer-col p {
+            color: #475569 !important;
+        }
+
+        [data-theme="dark"] body.portal-mode footer .footer-col p {
+            color: rgba(255, 255, 255, 0.75) !important;
+        }
+
         /* Print CSS Styling */
         @media print {
             body, html {
@@ -1146,7 +1202,7 @@
                 color: black !important;
             }
 
-            header, aside, .search-container, .btn, .header-actions, .theme-toggle, .dropzone, .sidebar-card, .toast, .portal-selection, .hub-section, .mobile-nav-bar {
+            header, aside, .search-container, .btn, .header-actions, .theme-toggle, .dropzone, .sidebar-card, .toast, .portal-selection, .hub-section, .mobile-nav-bar, footer {
                 display: none !important;
             }
 
@@ -1414,18 +1470,36 @@
             .news-content p {
                 font-size: 0.75rem;
             }
+            
+            /* Footer mobile layout */
+            footer {
+                padding: 2rem 1rem;
+            }
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                text-align: center;
+            }
+            .footer-col {
+                text-align: center;
+                align-items: center;
+            }
+            .footer-col h4 {
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body class="portal-mode">
 
     <header>
-        <div class="logo-section" onclick="handleLogoClick()">
+        <!-- Id and default hidden logo for selection page header -->
+        <div class="logo-section" id="header-logo-section" style="display:none;" onclick="handleLogoClick()">
             <div class="logo-icon" id="logo-container">
                 <img id="logo-img" class="logo-img" src="logo.png" alt="Logo">
             </div>
             <div style="display: flex; flex-direction: column; justify-content: center;">
-                <h1 class="logo-title">Ceylanpınar Fen Lisesi</h1>
+                <h1 class="logo-title" id="header-title">Ceylanpınar Fen Lisesi</h1>
                 <p class="logo-subtitle" id="header-subtitle">Portal Hub</p>
             </div>
         </div>
@@ -1496,7 +1570,7 @@
                     </div>
 
                     <div class="selection-grid">
-                        <!-- Öğretmen Giriş Kartı -->
+                        <!-- Öğretmen Giriş Kartı (Icon on left, Symmetrical) -->
                         <div class="split-btn-card" onclick="openLoginModal()">
                             <div class="pane-color pane-color-teacher">
                                 <i data-lucide="user-cog" size="28"></i>
@@ -1507,8 +1581,8 @@
                             </div>
                         </div>
 
-                        <!-- Öğrenci Giriş Kartı -->
-                        <div class="split-btn-card" onclick="showStudentHub()">
+                        <!-- Öğrenci Giriş Kartı (Icon on left, Symmetrical) -->
+                        <div class="split-btn-card" onclick="navigate('student-hub')">
                             <div class="pane-color pane-color-student">
                                 <i data-lucide="graduation-cap" size="28"></i>
                             </div>
@@ -1523,9 +1597,10 @@
                 <!-- Alt Kısım: Duyurular & Haberler (İki Sütunlu) -->
                 <div class="portal-announcements-grid">
                     <!-- Sol Sütun: Haberler / Duyurular -->
-                    <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
+                    <div id="left-news-list" style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
                         <h3><i data-lucide="megaphone" size="20"></i> Haberler ve Duyurular</h3>
                         
+                        <!-- Static Fallback Items (will be overwritten if fetch succeeds) -->
                         <div class="news-card">
                             <span class="ribbon">Yeni</span>
                             <div class="news-icon-wrapper">
@@ -1551,7 +1626,7 @@
                     </div>
 
                     <!-- Sağ Sütun: Sınav ve Genel Duyurular -->
-                    <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
+                    <div id="right-news-list" style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
                         <h3><i data-lucide="award" size="20"></i> Sınav ve Gelişim Duyuruları</h3>
 
                         <div class="news-card">
@@ -1578,7 +1653,7 @@
                 </div>
                 <div class="portal-grid">
                     <!-- Sınav Analiz Kartı -->
-                    <div class="portal-card" onclick="showTeacherAnalysisView()">
+                    <div class="portal-card" onclick="navigate('teacher-analysis')">
                         <div class="card-icon-wrapper">
                             <i data-lucide="bar-chart-3" size="24"></i>
                         </div>
@@ -1667,7 +1742,8 @@
                 <div id="analysis-tab-karne" style="display: flex; flex-direction: column; gap: 2rem; width:100%;">
                     <!-- Arama Bölümü -->
                     <div style="display: flex; gap: 0.75rem; align-items: center; width: 100%; position: relative; z-index: 50;">
-                        <button class="btn btn-secondary" onclick="showTeacherHub()" style="padding: 0 1.25rem; border-radius: var(--radius-lg); height: 52px; display: inline-flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);" title="Geri Dön">
+                        <!-- Back button goes back in browser history -->
+                        <button class="btn btn-secondary" onclick="goBack('teacher-hub')" style="padding: 0 1.25rem; border-radius: var(--radius-lg); height: 52px; display: inline-flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);" title="Geri Dön">
                             <i data-lucide="arrow-left"></i> <span>Geri</span>
                         </button>
                         <div class="search-container" style="flex-grow: 1; position: relative;">
@@ -1834,7 +1910,7 @@
         <span id="toast-message">Başarıyla tamamlandı!</span>
     </div>
 
-    <!-- MOBILE BOTTOM NAVIGATION BAR (Only for Analysis View, Portal view is single-page) -->
+    <!-- MOBILE BOTTOM NAVIGATION BAR (Only for Analysis View) -->
     <div class="mobile-nav-bar" id="mobile-nav-analysis" style="display:none;">
         <button class="mobile-nav-item active" id="nav-analysis-karne" onclick="switchAnalysisTab('karne')">
             <i data-lucide="clipboard-list"></i>
@@ -1854,8 +1930,22 @@
         </button>
     </div>
 
+    <!-- Redesigned Footer (Modern Layout) -->
     <footer>
-        &copy; 2026 Ceylanpınar Fen Lisesi. Tüm Hakları Saklıdır.
+        <div class="footer-content">
+            <div class="footer-col">
+                <h4><i data-lucide="map-pin"></i> Adres</h4>
+                <p>Yenişehir Mah. Seyfullah Hacımütfüoğlu Cad. No: 5<br>Ceylanpınar / Şanlıurfa</p>
+            </div>
+            <div class="footer-col">
+                <h4><i data-lucide="phone"></i> Telefon</h4>
+                <p><a href="tel:04144713519" style="color: inherit; text-decoration: none;">0414 471 35 19</a></p>
+            </div>
+            <div class="footer-col">
+                <h4><i data-lucide="instagram"></i> Instagram</h4>
+                <p><a href="https://www.instagram.com/cfenlisesi/" target="_blank" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.25rem;">@cfenlisesi <i data-lucide="external-link" size="12"></i></a></p>
+            </div>
+        </div>
     </footer>
 
     <script>
@@ -1866,6 +1956,7 @@
         let examDatabase = [];
         let activeStudent = null;
         let progressChart = null;
+        let isNavigating = false; // History Router flag
 
         // Initialize App
         window.addEventListener('DOMContentLoaded', () => {
@@ -1874,7 +1965,8 @@
             initIndexedDB();
             initSearch();
             setupDragAndDrop();
-            checkSession();
+            initNewsFetcher(); // Start scraping news
+            initRouter();      // Initialize browser navigation
         });
 
         // Theme management
@@ -1904,16 +1996,296 @@
             lucide.createIcons({ attrs: { class: 'lucide' } });
         }
 
-        // Login Logic
-        function openLoginModal() {
-            document.getElementById('login-modal').classList.add('open');
-            document.getElementById('password-input').focus();
-            document.getElementById('login-error').style.display = 'none';
+        // e-Okul News Scraper/Proxy Parser
+        function initNewsFetcher() {
+            const targetUrl = 'https://ceylanpinarfenlisesi.meb.k12.tr';
+            const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
+
+            fetch(proxyUrl)
+                .then(response => {
+                    if (response.ok) return response.text();
+                    throw new Error('CORS proxy response was not ok.');
+                })
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+
+                    // Parse news items
+                    const news = [];
+                    const newsAnchors = doc.querySelectorAll('#haber_blok a');
+                    newsAnchors.forEach(a => {
+                        const href = a.getAttribute('href');
+                        const title = a.textContent.trim();
+                        if (href && href.startsWith('/icerikler/') && !title.toLowerCase().includes('devamı')) {
+                            news.push({
+                                title: title,
+                                url: targetUrl + href
+                            });
+                        }
+                    });
+
+                    // Parse announcement items
+                    const announcements = [];
+                    const duyuruAnchors = doc.querySelectorAll('#duyuru_blok a');
+                    duyuruAnchors.forEach(a => {
+                        const href = a.getAttribute('href');
+                        const title = a.textContent.trim();
+                        if (href && href.startsWith('/icerikler/') && !title.toLowerCase().includes('devamı')) {
+                            announcements.push({
+                                title: title,
+                                url: targetUrl + href
+                            });
+                        }
+                    });
+
+                    // Parse slider featured items
+                    const slider = [];
+                    const sliderAnchors = doc.querySelectorAll('#slider a');
+                    sliderAnchors.forEach(a => {
+                        const href = a.getAttribute('href');
+                        const span = a.querySelector('span');
+                        const title = span ? span.textContent.trim() : a.textContent.trim();
+                        if (href && href.startsWith('/icerikler/')) {
+                            slider.push({
+                                title: title,
+                                url: targetUrl + href
+                            });
+                        }
+                    });
+
+                    updateNewsColumns(news, announcements, slider);
+                })
+                .catch(err => {
+                    console.warn("Could not fetch live MEB news, using default static fallback:", err);
+                });
         }
 
-        function closeLoginModal() {
-            document.getElementById('login-modal').classList.remove('open');
-            document.getElementById('password-input').value = '';
+        function updateNewsColumns(news, announcements, slider) {
+            const leftColContainer = document.getElementById('left-news-list');
+            const rightColContainer = document.getElementById('right-news-list');
+
+            // Left Column items (Haberler)
+            let leftItems = [];
+            if (news.length > 0) {
+                leftItems = news.slice(0, 3);
+            } else if (slider.length > 0) {
+                leftItems = slider.slice(0, 2);
+            }
+
+            // Right Column items (Duyurular)
+            let rightItems = [];
+            if (announcements.length > 0) {
+                rightItems = announcements.slice(0, 3);
+            } else {
+                const remainingNews = news.slice(3);
+                if (remainingNews.length > 0) {
+                    rightItems = remainingNews.slice(0, 2);
+                } else {
+                    const remainingSlider = slider.filter(s => !leftItems.some(l => l.url === s.url));
+                    if (remainingSlider.length > 0) {
+                        rightItems = remainingSlider.slice(0, 2);
+                    }
+                }
+            }
+
+            // Render Left Column
+            if (leftItems.length > 0) {
+                // Keep heading
+                leftColContainer.innerHTML = '<h3><i data-lucide="megaphone" size="20"></i> Haberler ve Duyurular</h3>' + 
+                    leftItems.map((item, idx) => `
+                        <a href="${item.url}" target="_blank" class="news-card">
+                            ${idx === 0 ? '<span class="ribbon">Yeni</span>' : ''}
+                            <div class="news-icon-wrapper">
+                                <i data-lucide="${idx === 0 ? 'bell' : 'calendar'}" size="20"></i>
+                            </div>
+                            <div class="news-content">
+                                <h4>${item.title}</h4>
+                                <p>Ceylanpınar Fen Lisesi resmi haber duyurusu.</p>
+                            </div>
+                            <i data-lucide="chevron-right" class="news-arrow" size="16"></i>
+                        </a>
+                    `).join('');
+            }
+
+            // Render Right Column
+            if (rightItems.length > 0) {
+                // Keep heading
+                rightColContainer.innerHTML = '<h3><i data-lucide="award" size="20"></i> Sınav ve Gelişim Duyuruları</h3>' + 
+                    rightItems.map((item, idx) => `
+                        <a href="${item.url}" target="_blank" class="news-card">
+                            <div class="news-icon-wrapper">
+                                <i data-lucide="file-text" size="20"></i>
+                            </div>
+                            <div class="news-content">
+                                <h4>${item.title}</h4>
+                                <p>Ceylanpınar Fen Lisesi resmi sınav ve gelişim duyurusu.</p>
+                            </div>
+                            <i data-lucide="chevron-right" class="news-arrow" size="16"></i>
+                        </a>
+                    `).join('');
+            }
+
+            lucide.createIcons();
+        }
+
+        // Browser Navigation (HTML5 History API Router)
+        function initRouter() {
+            const currentHash = window.location.hash || '#home';
+            const stateName = currentHash.replace('#', '');
+            
+            // Register initial home state
+            window.history.replaceState({ state: stateName }, "", currentHash);
+            navigate(stateName, false);
+
+            window.addEventListener('popstate', (event) => {
+                const targetState = event.state && event.state.state ? event.state.state : 'home';
+                navigate(targetState, false);
+            });
+        }
+
+        function navigate(state, push = true) {
+            if (isNavigating) return;
+            isNavigating = true;
+
+            // Authorization guards
+            if ((state === 'teacher-hub' || state === 'teacher-analysis') && sessionStorage.getItem('teacher_logged_in') !== 'true') {
+                state = 'home';
+                push = false;
+                window.history.replaceState({ state: 'home' }, "", '#home');
+            }
+
+            // Execute switches
+            if (state === 'home') {
+                showSelectionScreenView();
+            } else if (state === 'student-hub') {
+                showStudentHubView();
+            } else if (state === 'teacher-hub') {
+                showTeacherHubView();
+            } else if (state === 'teacher-analysis') {
+                showTeacherAnalysisViewView();
+            }
+
+            if (push) {
+                window.history.pushState({ state: state }, "", '#' + state);
+            }
+
+            isNavigating = false;
+        }
+
+        function goBack(fallback) {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                navigate(fallback);
+            }
+        }
+
+        function handleLogoClick() {
+            if (sessionStorage.getItem('teacher_logged_in') === 'true') {
+                navigate('teacher-hub');
+            } else if (document.getElementById('student-hub').style.display === 'block') {
+                navigate('student-hub');
+            } else {
+                navigate('home');
+            }
+        }
+
+        // Password modal handlers
+        function verifyPassword() {
+            const passwordVal = document.getElementById('password-input').value;
+            if (passwordVal === 'ceylanpinar2014') {
+                sessionStorage.setItem('teacher_logged_in', 'true');
+                closeLoginModal();
+                navigate('teacher-hub');
+            } else {
+                document.getElementById('login-error').style.display = 'block';
+                document.getElementById('password-input').value = '';
+                document.getElementById('password-input').focus();
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('teacher_logged_in');
+            navigate('home');
+        }
+
+        // View Renderers
+        function showSelectionScreenView() {
+            document.body.classList.add('portal-mode');
+            document.getElementById('app-container').classList.add('no-sidebar');
+            
+            document.getElementById('teacher-hub').style.display = 'none';
+            document.getElementById('student-hub').style.display = 'none';
+            document.getElementById('teacher-analysis-view').style.display = 'none';
+            document.getElementById('selection-screen').style.display = 'flex';
+            
+            document.getElementById('logout-btn').style.display = 'none';
+            document.getElementById('header-logo-section').style.display = 'none'; // Hidden on home selection screen
+            
+            document.getElementById('mobile-nav-analysis').style.setProperty('display', 'none', 'important');
+        }
+
+        function showStudentHubView() {
+            document.body.classList.add('portal-mode');
+            document.getElementById('app-container').classList.add('no-sidebar');
+            
+            document.getElementById('selection-screen').style.display = 'none';
+            document.getElementById('teacher-hub').style.display = 'none';
+            document.getElementById('teacher-analysis-view').style.display = 'none';
+            document.getElementById('student-hub').style.display = 'block';
+            
+            document.getElementById('logout-btn').style.display = 'inline-flex';
+            document.getElementById('header-logo-section').style.display = 'flex'; // Visible
+            document.getElementById('header-title').innerText = 'Ceylanpınar Fen Lisesi';
+            document.getElementById('header-subtitle').innerText = 'Öğrenci Portalı';
+            
+            document.getElementById('mobile-nav-analysis').style.setProperty('display', 'none', 'important');
+        }
+
+        function showTeacherHubView() {
+            document.body.classList.add('portal-mode');
+            document.getElementById('app-container').classList.add('no-sidebar');
+            
+            document.getElementById('selection-screen').style.display = 'none';
+            document.getElementById('student-hub').style.display = 'none';
+            document.getElementById('teacher-analysis-view').style.display = 'none';
+            document.getElementById('teacher-hub').style.display = 'block';
+            
+            document.getElementById('logout-btn').style.display = 'inline-flex';
+            document.getElementById('header-logo-section').style.display = 'flex'; // Visible
+            document.getElementById('header-title').innerText = 'Ceylanpınar Fen Lisesi';
+            document.getElementById('header-subtitle').innerText = 'Öğretmen Portalı';
+            
+            document.getElementById('mobile-nav-analysis').style.setProperty('display', 'none', 'important');
+        }
+
+        function showTeacherAnalysisViewView() {
+            document.body.classList.remove('portal-mode');
+            document.getElementById('app-container').classList.remove('no-sidebar');
+            
+            document.getElementById('selection-screen').style.display = 'none';
+            document.getElementById('student-hub').style.display = 'none';
+            document.getElementById('teacher-hub').style.display = 'none';
+            document.getElementById('teacher-analysis-view').style.display = 'flex';
+            
+            document.getElementById('logout-btn').style.display = 'inline-flex';
+            document.getElementById('header-logo-section').style.display = 'flex'; // Visible
+            document.getElementById('header-title').innerText = 'Ceylanpınar Fen Lisesi';
+            document.getElementById('header-subtitle').innerText = 'Öğretmen Portalı';
+            
+            document.getElementById('mobile-nav-analysis').style.display = ''; // let CSS override (flex in mobile)
+            
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                switchAnalysisTab('karne');
+            } else {
+                document.getElementById('analysis-tab-karne').style.display = 'flex';
+                document.getElementById('analysis-tab-grafik').style.display = 'block';
+                document.getElementById('analysis-tab-istatistik').style.display = 'none';
+                document.getElementById('analysis-tab-ayarlar').style.display = 'none';
+            }
+            
+            refreshDashboard();
         }
 
         // e-Okul Mobile Bottom Nav Controller: Teacher Analysis View
@@ -1962,116 +2334,6 @@
                 }
             }
         });
-
-        function handlePasswordKeydown(event) {
-            if (event.key === 'Enter') {
-                verifyPassword();
-            }
-        }
-
-        function verifyPassword() {
-            const passwordVal = document.getElementById('password-input').value;
-            // Default password is set to ceylanpinar2014
-            if (passwordVal === 'ceylanpinar2014') {
-                sessionStorage.setItem('teacher_logged_in', 'true');
-                closeLoginModal();
-                showTeacherHub();
-            } else {
-                document.getElementById('login-error').style.display = 'block';
-                document.getElementById('password-input').value = '';
-                document.getElementById('password-input').focus();
-            }
-        }
-
-        // Screen Routing
-        function showSelectionScreen() {
-            document.body.classList.add('portal-mode');
-            document.getElementById('app-container').classList.add('no-sidebar');
-            document.getElementById('teacher-hub').style.display = 'none';
-            document.getElementById('student-hub').style.display = 'none';
-            document.getElementById('teacher-analysis-view').style.display = 'none';
-            document.getElementById('selection-screen').style.display = 'flex';
-            document.getElementById('logout-btn').style.display = 'none';
-            document.getElementById('header-subtitle').innerText = 'Portal Hub';
-            
-            // Mobile Nav bars
-            document.getElementById('mobile-nav-analysis').style.setProperty('display', 'none', 'important');
-        }
-
-        function showStudentHub() {
-            document.body.classList.add('portal-mode');
-            document.getElementById('app-container').classList.add('no-sidebar');
-            document.getElementById('selection-screen').style.display = 'none';
-            document.getElementById('teacher-hub').style.display = 'none';
-            document.getElementById('teacher-analysis-view').style.display = 'none';
-            document.getElementById('student-hub').style.display = 'block';
-            document.getElementById('logout-btn').style.display = 'inline-flex';
-            document.getElementById('header-subtitle').innerText = 'Öğrenci Portalı';
-            
-            document.getElementById('mobile-nav-analysis').style.setProperty('display', 'none', 'important');
-        }
-
-        function showTeacherHub() {
-            document.body.classList.add('portal-mode');
-            document.getElementById('app-container').classList.add('no-sidebar');
-            document.getElementById('selection-screen').style.display = 'none';
-            document.getElementById('student-hub').style.display = 'none';
-            document.getElementById('teacher-analysis-view').style.display = 'none';
-            document.getElementById('teacher-hub').style.display = 'block';
-            document.getElementById('logout-btn').style.display = 'inline-flex';
-            document.getElementById('header-subtitle').innerText = 'Öğrenci Portalı';
-            
-            document.getElementById('mobile-nav-analysis').style.setProperty('display', 'none', 'important');
-        }
-
-        function showTeacherAnalysisView() {
-            document.body.classList.remove('portal-mode');
-            document.getElementById('app-container').classList.remove('no-sidebar');
-            document.getElementById('selection-screen').style.display = 'none';
-            document.getElementById('student-hub').style.display = 'none';
-            document.getElementById('teacher-hub').style.display = 'none';
-            document.getElementById('teacher-analysis-view').style.display = 'flex';
-            document.getElementById('logout-btn').style.display = 'inline-flex';
-            document.getElementById('header-subtitle').innerText = 'Deneme Analiz Sistemi';
-            
-            document.getElementById('mobile-nav-analysis').style.display = ''; // let CSS override (flex in mobile, none in desktop)
-            
-            const isMobile = window.innerWidth <= 768;
-            if (isMobile) {
-                switchAnalysisTab('karne');
-            } else {
-                // On desktop, show karne & graphic, hide mobile-only tabs
-                document.getElementById('analysis-tab-karne').style.display = 'flex';
-                document.getElementById('analysis-tab-grafik').style.display = 'block';
-                document.getElementById('analysis-tab-istatistik').style.display = 'none';
-                document.getElementById('analysis-tab-ayarlar').style.display = 'none';
-            }
-            
-            refreshDashboard();
-        }
-
-        function handleLogoClick() {
-            if (sessionStorage.getItem('teacher_logged_in') === 'true') {
-                showTeacherHub();
-            } else if (document.getElementById('student-hub').style.display === 'block') {
-                showStudentHub();
-            } else {
-                showSelectionScreen();
-            }
-        }
-
-        function logout() {
-            sessionStorage.removeItem('teacher_logged_in');
-            showSelectionScreen();
-        }
-
-        function checkSession() {
-            if (sessionStorage.getItem('teacher_logged_in') === 'true') {
-                showTeacherHub();
-            } else {
-                showSelectionScreen();
-            }
-        }
 
         // IndexedDB Management
         function initIndexedDB() {
@@ -2174,37 +2436,6 @@
                 document.getElementById('welcome-panel-analysis').style.display = 'block';
                 document.getElementById('search-student').value = '';
             };
-        }
-
-        // Dashboard statistics
-        function refreshDashboard() {
-            const uniqueStudents = new Set();
-            const uniqueExams = new Set();
-            let totalNetSum = 0;
-            let totalNetCount = 0;
-
-            examDatabase.forEach(record => {
-                uniqueStudents.add(record.no);
-                uniqueExams.add(record.deneme);
-                if (record.subjects && record.subjects.toplam) {
-                    totalNetSum += record.subjects.toplam.n;
-                    totalNetCount++;
-                }
-            });
-
-            const totalStudentsCount = uniqueStudents.size;
-            const totalExamsCount = uniqueExams.size;
-            const schoolAvgNet = totalNetCount > 0 ? (totalNetSum / totalNetCount).toFixed(2) : "0.00";
-
-            // Update Desktop Stats
-            document.getElementById('stat-students').innerText = totalStudentsCount;
-            document.getElementById('stat-exams').innerText = totalExamsCount;
-            document.getElementById('stat-avg-net').innerText = schoolAvgNet;
-
-            // Update Mobile Stats
-            document.getElementById('stat-students-mobile').innerText = totalStudentsCount;
-            document.getElementById('stat-exams-mobile').innerText = totalExamsCount;
-            document.getElementById('stat-avg-net-mobile').innerText = schoolAvgNet;
         }
 
         // Search logic
@@ -2361,95 +2592,6 @@
             if (window.innerWidth <= 768) {
                 switchAnalysisTab('karne');
             }
-        }
-
-        function renderProgressChart(records) {
-            const canvasEl = document.getElementById('progressChart');
-            if(!canvasEl) return;
-            const ctx = canvasEl.getContext('2d');
-            if (progressChart) {
-                progressChart.destroy();
-            }
-
-            const labels = records.map(r => r.deneme.split(" ")[0]);
-            const studentNets = records.map(r => r.subjects.toplam.n);
-
-            const schoolAverages = records.map(r => {
-                const examName = r.deneme;
-                const examRecords = examDatabase.filter(rec => rec.deneme === examName);
-                if (examRecords.length === 0) return 0;
-                const netSum = examRecords.reduce((sum, rec) => sum + (rec.subjects.toplam.n || 0), 0);
-                return Number((netSum / examRecords.length).toFixed(2));
-            });
-
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const gridColor = isDark ? '#334155' : '#e2e8f0';
-            const textTextColor = isDark ? '#94a3b8' : '#64748b';
-
-            progressChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Öğrencinin Toplam Neti',
-                            data: studentNets,
-                            borderColor: '#6366f1',
-                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                            borderWidth: 3,
-                            tension: 0.3,
-                            fill: true,
-                            pointBackgroundColor: '#6366f1',
-                            pointRadius: 5
-                        },
-                        {
-                            label: 'Okul Sınav Ortalaması',
-                            data: schoolAverages,
-                            borderColor: '#ef4444',
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            tension: 0.1,
-                            fill: false,
-                            pointRadius: 0
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: textTextColor,
-                                font: {
-                                    family: 'Plus Jakarta Sans',
-                                    weight: '600'
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                color: gridColor
-                            },
-                            ticks: {
-                                color: textTextColor
-                            }
-                        },
-                        y: {
-                            grid: {
-                                color: gridColor
-                            },
-                            ticks: {
-                                color: textTextColor
-                            },
-                            min: 0,
-                            max: 120
-                        }
-                    }
-                }
-            });
         }
 
         // Excel Drag and Drop
