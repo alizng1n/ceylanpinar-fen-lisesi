@@ -197,7 +197,7 @@
             display: none;
         }
 
-        /* Sidebar */
+        /* Sidebar (Desktop Only) */
         aside {
             background: var(--bg-card);
             border-right: 1px solid var(--border-color);
@@ -323,13 +323,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1rem;
+            gap: 0.5rem;
         }
 
         .welcome-logo {
-            width: 100px;
-            height: 100px;
-            margin-bottom: 1rem;
+            width: 90px;
+            height: 90px;
+            margin-bottom: 0.5rem;
             filter: drop-shadow(0 8px 16px rgba(0,0,0,0.06));
         }
 
@@ -909,6 +909,59 @@
             border-left: 4px solid var(--success-color);
         }
 
+        /* Utilities */
+        .mobile-only {
+            display: none !important;
+        }
+
+        /* Mobile Bottom Nav Bar */
+        .mobile-nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 64px;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            display: none;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 999;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+            padding: 0 0.5rem;
+        }
+
+        .mobile-nav-item {
+            background: none;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 0.6875rem;
+            font-weight: 600;
+            gap: 0.25rem;
+            flex-grow: 1;
+            height: 100%;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .mobile-nav-item i {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.2s ease;
+        }
+
+        .mobile-nav-item:active i {
+            transform: scale(0.9);
+        }
+
+        .mobile-nav-item.active {
+            color: var(--accent-color);
+        }
+
         /* Print CSS Styling */
         @media print {
             body, html {
@@ -916,7 +969,7 @@
                 color: black !important;
             }
 
-            header, aside, .search-container, .btn, .header-actions, .theme-toggle, .dropzone, .sidebar-card, .toast, .portal-selection, .hub-section {
+            header, aside, .search-container, .btn, .header-actions, .theme-toggle, .dropzone, .sidebar-card, .toast, .portal-selection, .hub-section, .mobile-nav-bar {
                 display: none !important;
             }
 
@@ -1011,6 +1064,35 @@
         }
 
         @media (max-width: 768px) {
+            .mobile-only {
+                display: block !important;
+            }
+            
+            .mobile-flex-only {
+                display: flex !important;
+            }
+
+            .desktop-only {
+                display: none !important;
+            }
+
+            .mobile-nav-bar {
+                display: flex;
+            }
+
+            body {
+                padding-bottom: 64px; /* Room for bottom bar */
+            }
+
+            /* Hide Desktop Sidebar in Mobile view altogether */
+            aside {
+                display: none !important;
+            }
+
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+
             header {
                 padding: 0.75rem 1rem;
                 flex-direction: row;
@@ -1240,8 +1322,8 @@
     </header>
 
     <div class="app-container no-sidebar" id="app-container">
-        <!-- Sidebar (Only shown in Analysis View) -->
-        <aside>
+        <!-- Sidebar (Desktop Only - Hidden in Mobile View) -->
+        <aside class="desktop-only">
             <!-- Sınav Yükleme -->
             <div class="sidebar-card">
                 <h3><i data-lucide="file-plus"></i> Sınav İçe Aktar</h3>
@@ -1286,8 +1368,8 @@
         <main>
             <!-- 1. Seçim Ekranı -->
             <div class="portal-selection" id="selection-screen">
-                <!-- Sol Taraf: Giriş Alanları -->
-                <div style="display: flex; flex-direction: column; gap: 2rem; width: 100%;">
+                <!-- Sol Taraf: Giriş Alanları (Tab-1 in Mobile) -->
+                <div id="portal-tab-home" style="display: flex; flex-direction: column; gap: 2rem; width: 100%;">
                     <div class="portal-welcome">
                         <img class="welcome-logo" src="logo.png" alt="Okul Logosu">
                         <h2>Ceylanpınar Fen Lisesi</h2>
@@ -1315,8 +1397,8 @@
                     </div>
                 </div>
 
-                <!-- Sağ Taraf: Duyurular & Haberler -->
-                <div class="announcements-card">
+                <!-- Sağ Taraf: Duyurular & Haberler (Tab-2 in Mobile, Hidden in desktop if mobile-tab-announcements is selected) -->
+                <div id="portal-tab-announcements" class="announcements-card">
                     <h3><i data-lucide="megaphone" style="color:var(--accent-color);"></i> Duyurular & Haberler</h3>
                     <div class="announcements-list">
                         <div class="announcement-item">
@@ -1432,93 +1514,151 @@
 
             <!-- 4. Öğretmen Sınav Analiz Görünümü -->
             <div class="analysis-section" id="teacher-analysis-view">
-                <!-- Arama Bölümü -->
-                <div style="display: flex; gap: 0.75rem; align-items: center; width: 100%; position: relative; z-index: 50;">
-                    <button class="btn btn-secondary" onclick="showTeacherHub()" style="padding: 0 1.25rem; border-radius: var(--radius-lg); height: 52px; display: inline-flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);" title="Geri Dön">
-                        <i data-lucide="arrow-left"></i> <span>Geri</span>
-                    </button>
-                    <div class="search-container" style="flex-grow: 1; position: relative;">
-                        <div class="search-box-wrapper">
-                            <i data-lucide="search" class="search-icon"></i>
-                            <input type="text" class="search-input" id="search-student" placeholder="Öğrenci Adı veya Numarası ile Arayın..." autocomplete="off" style="height: 52px; border-radius: var(--radius-lg);">
-                        </div>
-                        <div class="search-results" id="search-results-list"></div>
-                    </div>
-                </div>
-
-                <!-- Rapor ve Karne Gösterimi -->
-                <div class="info-card" id="student-report-card" style="display:none;">
-                    <div class="info-card-header">
-                        <div class="student-details">
-                            <h2 id="report-student-name">MERYEM DAĞI</h2>
-                            <div class="student-meta">
-                                <span class="badge badge-accent" id="report-student-no">No: 136</span>
-                                <span class="badge" id="report-student-class">Sınıf: 12</span>
-                                <span class="badge" id="report-student-branch">Şube: A</span>
-                                <span class="badge" id="report-student-exam-count">Deneme Sayısı: 0</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-primary" onclick="window.print()">
-                            <i data-lucide="printer"></i> <span>Karne Yazdır / PDF Kaydet</span>
+                
+                <!-- MOBİL VE WEB ORTAK TABS -->
+                
+                <!-- TAB 1: KARNE DETAYLARI -->
+                <div id="analysis-tab-karne" style="display: flex; flex-direction: column; gap: 2rem; width:100%;">
+                    <!-- Arama Bölümü -->
+                    <div style="display: flex; gap: 0.75rem; align-items: center; width: 100%; position: relative; z-index: 50;">
+                        <button class="btn btn-secondary" onclick="showTeacherHub()" style="padding: 0 1.25rem; border-radius: var(--radius-lg); height: 52px; display: inline-flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);" title="Geri Dön">
+                            <i data-lucide="arrow-left"></i> <span>Geri</span>
                         </button>
+                        <div class="search-container" style="flex-grow: 1; position: relative;">
+                            <div class="search-box-wrapper">
+                                <i data-lucide="search" class="search-icon"></i>
+                                <input type="text" class="search-input" id="search-student" placeholder="Öğrenci Adı veya Numarası ile Arayın..." autocomplete="off" style="height: 52px; border-radius: var(--radius-lg);">
+                            </div>
+                            <div class="search-results" id="search-results-list"></div>
+                        </div>
                     </div>
 
-                    <!-- Sonuç Tablosu -->
-                    <div class="table-container">
-                        <table id="results-table">
-                            <thead>
-                                <tr>
-                                    <th rowspan="2" style="vertical-align: middle;">Deneme Sınav Adı</th>
-                                    <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Türkçe</th>
-                                    <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Sosyal</th>
-                                    <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Matematik</th>
-                                    <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Geometri</th>
-                                    <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Fizik</th>
-                                    <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Kimya</th>
-                                    <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Biyoloji</th>
-                                    <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Genel Toplam</th>
-                                    <th rowspan="2" style="vertical-align: middle; text-align:center;">Puan</th>
-                                    <th rowspan="2" style="vertical-align: middle; text-align:center;">Sıra</th>
-                                </tr>
-                                <tr class="subheader-row">
-                                    <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
-                                    <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
-                                    <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
-                                    <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
-                                    <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
-                                    <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
-                                    <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
-                                    <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
-                                </tr>
-                            </thead>
-                            <tbody id="results-table-body">
-                                <!-- JS ile doldurulacak -->
-                            </tbody>
-                        </table>
+                    <!-- Rapor ve Karne Gösterimi -->
+                    <div class="info-card" id="student-report-card" style="display:none;">
+                        <div class="info-card-header">
+                            <div class="student-details">
+                                <h2 id="report-student-name">MERYEM DAĞI</h2>
+                                <div class="student-meta">
+                                    <span class="badge badge-accent" id="report-student-no">No: 136</span>
+                                    <span class="badge" id="report-student-class">Sınıf: 12</span>
+                                    <span class="badge" id="report-student-branch">Şube: A</span>
+                                    <span class="badge" id="report-student-exam-count">Deneme Sayısı: 0</span>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" onclick="window.print()">
+                                <i data-lucide="printer"></i> <span>Karne Yazdır / PDF Kaydet</span>
+                            </button>
+                        </div>
+
+                        <!-- Sonuç Tablosu -->
+                        <div class="table-container">
+                            <table id="results-table">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2" style="vertical-align: middle;">Deneme Sınav Adı</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Türkçe</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Sosyal</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Matematik</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Geometri</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Fizik</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Kimya</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Biyoloji</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Genel Toplam</th>
+                                        <th rowspan="2" style="vertical-align: middle; text-align:center;">Puan</th>
+                                        <th rowspan="2" style="vertical-align: middle; text-align:center;">Sıra</th>
+                                    </tr>
+                                    <tr class="subheader-row">
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="results-table-body">
+                                    <!-- JS ile doldurulacak -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
-                    <!-- Grafik Alanı -->
-                    <div class="charts-container">
-                        <div class="chart-card">
-                            <h3>
-                                <span><i data-lucide="trending-up" style="display:inline; vertical-align:-3px; margin-right:4px;"></i> Net Gelişim ve Kıyaslama Grafiği</span>
-                                <span style="font-size:0.75rem; font-weight:normal; color:var(--text-secondary);">Mavi: Öğrenci Neti | Kırmızı: Okul Ortalaması</span>
-                            </h3>
-                            <div class="chart-wrapper">
-                                <canvas id="progressChart"></canvas>
+                    <!-- Hoş Geldiniz Paneli -->
+                    <div class="info-card" id="welcome-panel-analysis" style="text-align: center; padding: 4rem 2rem;">
+                        <i data-lucide="activity" size="64" style="color:var(--accent-color); margin: 0 auto 1.5rem auto;"></i>
+                        <h2 style="font-size: 1.75rem; font-weight:700; margin-bottom: 0.5rem;">Analiz Sistemine Hoş Geldiniz</h2>
+                        <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto 2rem auto; font-size:0.95rem;">
+                            Öğrenci karnelerini, sınav ortalamalarını ve net gelişim grafiklerini görmek için yukarıdaki arama kutusuna bir öğrencinin ismini veya numarasını yazarak arayınız.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- TAB 2: GRAFIK GELISIMI (Desktop shows this inside the report automatically) -->
+                <div id="analysis-tab-grafik" class="charts-container" style="width:100%;">
+                    <div class="chart-card">
+                        <h3>
+                            <span><i data-lucide="trending-up" style="display:inline; vertical-align:-3px; margin-right:4px;"></i> Net Gelişim Grafiği</span>
+                            <span style="font-size:0.75rem; font-weight:normal; color:var(--text-secondary);">Mavi: Öğrenci | Kırmızı: Okul Ortalaması</span>
+                        </h3>
+                        <div class="chart-wrapper">
+                            <canvas id="progressChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: ISTATISTIKLER (Mobile Only View, Desktop displays in sidebar) -->
+                <div id="analysis-tab-istatistik" class="mobile-only" style="width: 100%;">
+                    <div class="info-card">
+                        <h3 style="font-size:1.1rem; font-weight:700; border-bottom:1px solid var(--border-color); padding-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
+                            <i data-lucide="bar-chart-2" style="color:var(--accent-color);"></i> Okul Genel İstatistikleri
+                        </h3>
+                        <div class="stats-grid" style="grid-template-columns: 1fr; gap: 1rem; margin-top: 1rem;">
+                            <div class="stat-card-small">
+                                <span class="val" id="stat-students-mobile">0</span>
+                                <span class="lbl">Kayıtlı Öğrenci</span>
+                            </div>
+                            <div class="stat-card-small">
+                                <span class="val" id="stat-exams-mobile">0</span>
+                                <span class="lbl">Toplam Deneme</span>
+                            </div>
+                            <div class="stat-card-small">
+                                <span class="val" id="stat-avg-net-mobile">0.00</span>
+                                <span class="lbl">Okul Genel Net Ortalaması</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Hoş Geldiniz Paneli (Analiz Görünümü için) -->
-                <div class="info-card" id="welcome-panel-analysis" style="text-align: center; padding: 4rem 2rem;">
-                    <i data-lucide="activity" size="64" style="color:var(--accent-color); margin: 0 auto 1.5rem auto;"></i>
-                    <h2 style="font-size: 1.75rem; font-weight:700; margin-bottom: 0.5rem;">Analiz Sistemine Hoş Geldiniz</h2>
-                    <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto 2rem auto; font-size:0.95rem;">
-                        Öğrenci karnelerini, sınav ortalamalarını ve net gelişim grafiklerini görmek için yukarıdaki arama kutusuna bir öğrencinin ismini veya numarasını yazarak arayınız.
-                    </p>
+                <!-- TAB 4: YONETIM VE AYARLAR (Mobile Only View, Desktop displays in sidebar) -->
+                <div id="analysis-tab-ayarlar" class="mobile-only" style="width: 100%;">
+                    <div class="info-card" style="gap: 1.5rem;">
+                        <h3 style="font-size:1.1rem; font-weight:700; border-bottom:1px solid var(--border-color); padding-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
+                            <i data-lucide="settings" style="color:var(--accent-color);"></i> Veritabanı ve Sınav Yönetimi
+                        </h3>
+                        
+                        <!-- Sınav Yükleme Mobile -->
+                        <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                            <span style="font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Yeni Sınav İçe Aktar (.xlsx/.xlsm)</span>
+                            <div class="dropzone" onclick="document.getElementById('excel-file-input-mobile').click()">
+                                <i data-lucide="file-spreadsheet" size="28" style="color:var(--accent-color);"></i>
+                                <strong style="font-size:0.85rem;">Excel Dosyası Seçin</strong>
+                                <p style="font-size:0.7rem;">Sınav Excel'ini seçmek için buraya dokunun</p>
+                                <input type="file" id="excel-file-input-mobile" accept=".xlsx,.xlsm" onchange="handleExcelImport(event)">
+                            </div>
+                        </div>
+
+                        <!-- Veritabanı Sıfırlama Mobile -->
+                        <div style="display:flex; flex-direction:column; gap:0.75rem; border-top:1px solid var(--border-color); padding-top:1.5rem;">
+                            <span style="font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Sistem Sıfırlama</span>
+                            <button class="btn btn-secondary" style="width:100%; border-color:#ef4444; color:#ef4444; justify-content:center; height: 44px;" onclick="resetToDefault()">
+                                <i data-lucide="rotate-ccw"></i> Fabrika Ayarlarına Dön
+                            </button>
+                        </div>
+                    </div>
                 </div>
+
             </div>
         </main>
     </div>
@@ -1546,6 +1686,40 @@
     <div class="toast toast-success" id="status-toast">
         <i data-lucide="check-circle" size="18"></i>
         <span id="toast-message">Başarıyla tamamlandı!</span>
+    </div>
+
+    <!-- MOBILE BOTTOM NAVIGATION BARS (MEB e-Okul Mobil Style) -->
+    
+    <!-- 1. Portal Screen Bottom Bar (Ana Sayfa & Duyurular) -->
+    <div class="mobile-nav-bar" id="mobile-nav-portal">
+        <button class="mobile-nav-item active" id="nav-portal-home" onclick="switchPortalTab('home')">
+            <i data-lucide="home"></i>
+            <span>Girişler</span>
+        </button>
+        <button class="mobile-nav-item" id="nav-portal-announcements" onclick="switchPortalTab('announcements')">
+            <i data-lucide="megaphone"></i>
+            <span>Duyurular</span>
+        </button>
+    </div>
+
+    <!-- 2. Teacher Analysis Dashboard Bottom Bar (Karne, Grafik, İstatistik, Yönetim) -->
+    <div class="mobile-nav-bar" id="mobile-nav-analysis" style="display:none;">
+        <button class="mobile-nav-item active" id="nav-analysis-karne" onclick="switchAnalysisTab('karne')">
+            <i data-lucide="clipboard-list"></i>
+            <span>Karne</span>
+        </button>
+        <button class="mobile-nav-item" id="nav-analysis-grafik" onclick="switchAnalysisTab('grafik')">
+            <i data-lucide="trending-up"></i>
+            <span>Grafik</span>
+        </button>
+        <button class="mobile-nav-item" id="nav-analysis-istatistik" onclick="switchAnalysisTab('istatistik')">
+            <i data-lucide="bar-chart-2"></i>
+            <span>İstatistik</span>
+        </button>
+        <button class="mobile-nav-item" id="nav-analysis-ayarlar" onclick="switchAnalysisTab('ayarlar')">
+            <i data-lucide="settings"></i>
+            <span>Yönetim</span>
+        </button>
     </div>
 
     <footer>
@@ -1610,6 +1784,83 @@
             document.getElementById('password-input').value = '';
         }
 
+        // e-Okul Mobile Bottom Nav Controller: Portal Selection View
+        function switchPortalTab(tabName) {
+            document.querySelectorAll('#mobile-nav-portal .mobile-nav-item').forEach(item => item.classList.remove('active'));
+            
+            if (tabName === 'home') {
+                document.getElementById('nav-portal-home').classList.add('active');
+                document.getElementById('portal-tab-home').style.display = 'flex';
+                document.getElementById('portal-tab-announcements').style.setProperty('display', '', 'important'); // default desktop styling
+                // In mobile, we want to hide announcements if we are on home tab
+                if (window.innerWidth <= 768) {
+                    document.getElementById('portal-tab-announcements').style.setProperty('display', 'none', 'important');
+                }
+            } else if (tabName === 'announcements') {
+                document.getElementById('nav-portal-announcements').classList.add('active');
+                document.getElementById('portal-tab-home').style.setProperty('display', 'none', 'important');
+                document.getElementById('portal-tab-announcements').style.setProperty('display', 'flex', 'important');
+            }
+            lucide.createIcons();
+        }
+
+        // e-Okul Mobile Bottom Nav Controller: Teacher Analysis View
+        function switchAnalysisTab(tabName) {
+            document.querySelectorAll('#mobile-nav-analysis .mobile-nav-item').forEach(item => item.classList.remove('active'));
+            document.getElementById(`nav-analysis-${tabName}`).classList.add('active');
+
+            // Hide all sub-tabs
+            document.getElementById('analysis-tab-karne').style.setProperty('display', 'none', 'important');
+            document.getElementById('analysis-tab-grafik').style.setProperty('display', 'none', 'important');
+            document.getElementById('analysis-tab-istatistik').style.setProperty('display', 'none', 'important');
+            document.getElementById('analysis-tab-ayarlar').style.setProperty('display', 'none', 'important');
+
+            // Show selected sub-tab
+            if (tabName === 'karne') {
+                document.getElementById('analysis-tab-karne').style.setProperty('display', 'flex', 'important');
+            } else if (tabName === 'grafik') {
+                document.getElementById('analysis-tab-grafik').style.setProperty('display', 'flex', 'important');
+                if (activeStudent) {
+                    setTimeout(() => renderProgressChart(activeStudent), 50); // delay to let canvas layout settle
+                }
+            } else if (tabName === 'istatistik') {
+                document.getElementById('analysis-tab-istatistik').style.setProperty('display', 'block', 'important');
+            } else if (tabName === 'ayarlar') {
+                document.getElementById('analysis-tab-ayarlar').style.setProperty('display', 'block', 'important');
+            }
+            lucide.createIcons();
+        }
+
+        // Responsive resize handler to reset layout displaying rules
+        window.addEventListener('resize', () => {
+            const isMobile = window.innerWidth <= 768;
+            
+            // Adjust portal grid displays
+            if (!isMobile) {
+                document.getElementById('portal-tab-home').style.display = 'flex';
+                document.getElementById('portal-tab-announcements').style.display = 'flex';
+                
+                // On desktop, show all analysis tabs
+                document.getElementById('analysis-tab-karne').style.display = 'flex';
+                document.getElementById('analysis-tab-grafik').style.display = 'block';
+                document.getElementById('analysis-tab-istatistik').style.display = 'none';
+                document.getElementById('analysis-tab-ayarlar').style.display = 'none';
+            } else {
+                // If resized back to mobile, maintain active tabs
+                if (document.getElementById('selection-screen').style.display !== 'none') {
+                    const activePortalTab = document.querySelector('#mobile-nav-portal .mobile-nav-item.active').id;
+                    if (activePortalTab === 'nav-portal-home') {
+                        switchPortalTab('home');
+                    } else {
+                        switchPortalTab('announcements');
+                    }
+                } else if (document.getElementById('teacher-analysis-view').style.display !== 'none') {
+                    const activeAnalysisTab = document.querySelector('#mobile-nav-analysis .mobile-nav-item.active').id.replace('nav-analysis-', '');
+                    switchAnalysisTab(activeAnalysisTab);
+                }
+            }
+        });
+
         function handlePasswordKeydown(event) {
             if (event.key === 'Enter') {
                 verifyPassword();
@@ -1636,9 +1887,17 @@
             document.getElementById('teacher-hub').style.display = 'none';
             document.getElementById('student-hub').style.display = 'none';
             document.getElementById('teacher-analysis-view').style.display = 'none';
-            document.getElementById('selection-screen').style.display = 'flex';
+            document.getElementById('selection-screen').style.display = 'grid';
             document.getElementById('logout-btn').style.display = 'none';
             document.getElementById('header-subtitle').innerText = 'Portal Hub';
+            
+            // Mobile Nav bars
+            document.getElementById('mobile-nav-portal').style.display = ''; // let CSS override (flex in mobile, none in desktop)
+            document.getElementById('mobile-nav-analysis').style.setProperty('display', 'none', 'important');
+            
+            if (window.innerWidth <= 768) {
+                switchPortalTab('home');
+            }
         }
 
         function showStudentHub() {
@@ -1649,6 +1908,10 @@
             document.getElementById('student-hub').style.display = 'block';
             document.getElementById('logout-btn').style.display = 'inline-flex';
             document.getElementById('header-subtitle').innerText = 'Öğrenci Portalı';
+            
+            // Hide portal bottom bar since student hub has no tabs yet
+            document.getElementById('mobile-nav-portal').style.setProperty('display', 'none', 'important');
+            document.getElementById('mobile-nav-analysis').style.setProperty('display', 'none', 'important');
         }
 
         function showTeacherHub() {
@@ -1659,6 +1922,10 @@
             document.getElementById('teacher-hub').style.display = 'block';
             document.getElementById('logout-btn').style.display = 'inline-flex';
             document.getElementById('header-subtitle').innerText = 'Öğretmen Portalı';
+            
+            // Hide portal bottom bar
+            document.getElementById('mobile-nav-portal').style.setProperty('display', 'none', 'important');
+            document.getElementById('mobile-nav-analysis').style.setProperty('display', 'none', 'important');
         }
 
         function showTeacherAnalysisView() {
@@ -1669,11 +1936,26 @@
             document.getElementById('teacher-analysis-view').style.display = 'flex';
             document.getElementById('logout-btn').style.display = 'inline-flex';
             document.getElementById('header-subtitle').innerText = 'Deneme Analiz Sistemi';
+            
+            // Mobile Nav bars
+            document.getElementById('mobile-nav-portal').style.setProperty('display', 'none', 'important');
+            document.getElementById('mobile-nav-analysis').style.display = ''; // let CSS override (flex in mobile, none in desktop)
+            
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                switchAnalysisTab('karne');
+            } else {
+                // On desktop, show karne & graphic, hide mobile-only tabs
+                document.getElementById('analysis-tab-karne').style.display = 'flex';
+                document.getElementById('analysis-tab-grafik').style.display = 'block';
+                document.getElementById('analysis-tab-istatistik').style.display = 'none';
+                document.getElementById('analysis-tab-ayarlar').style.display = 'none';
+            }
+            
             refreshDashboard();
         }
 
         function handleLogoClick() {
-            // Take back to current parent section
             if (sessionStorage.getItem('teacher_logged_in') === 'true') {
                 showTeacherHub();
             } else if (document.getElementById('student-hub').style.display === 'block') {
@@ -1743,7 +2025,6 @@
             const transaction = db.transaction(["exams"], "readwrite");
             const objectStore = transaction.objectStore("exams");
             
-            // Add all default records
             DEFAULT_DATA.forEach(record => {
                 objectStore.add(record);
             });
@@ -1772,7 +2053,6 @@
             });
 
             transaction.oncomplete = () => {
-                // Reload
                 const reloadTransaction = db.transaction(["exams"], "readonly");
                 const reloadStore = reloadTransaction.objectStore("exams");
                 const request = reloadStore.getAll();
@@ -1817,9 +2097,19 @@
                 }
             });
 
-            document.getElementById('stat-students').innerText = uniqueStudents.size;
-            document.getElementById('stat-exams').innerText = uniqueExams.size;
-            document.getElementById('stat-avg-net').innerText = totalNetCount > 0 ? (totalNetSum / totalNetCount).toFixed(2) : "0.00";
+            const totalStudentsCount = uniqueStudents.size;
+            const totalExamsCount = uniqueExams.size;
+            const schoolAvgNet = totalNetCount > 0 ? (totalNetSum / totalNetCount).toFixed(2) : "0.00";
+
+            // Update Desktop Stats
+            document.getElementById('stat-students').innerText = totalStudentsCount;
+            document.getElementById('stat-exams').innerText = totalExamsCount;
+            document.getElementById('stat-avg-net').innerText = schoolAvgNet;
+
+            // Update Mobile Stats
+            document.getElementById('stat-students-mobile').innerText = totalStudentsCount;
+            document.getElementById('stat-exams-mobile').innerText = totalExamsCount;
+            document.getElementById('stat-avg-net-mobile').innerText = schoolAvgNet;
         }
 
         // Search logic
@@ -1963,18 +2253,26 @@
                 <td colspan="3"></td><td class="cell-net">${(sumNets.matematik / count).toFixed(2)}</td>
                 <td colspan="3"></td><td class="cell-net">${(sumNets.geometri / count).toFixed(2)}</td>
                 <td colspan="3"></td><td class="cell-net">${(sumNets.fizik / count).toFixed(2)}</td>
-                <td colspan="3"></td><td class="cell-net">${(sumNets.kimya / count).toFixed(2)}}</td>
+                <td colspan="3"></td><td class="cell-net">${(sumNets.kimya / count).toFixed(2)}</td>
                 <td colspan="3"></td><td class="cell-net">${(sumNets.biyoloji / count).toFixed(2)}</td>
                 <td colspan="3"></td><td class="cell-net">${(sumNets.toplam / count).toFixed(2)}</td>
                 <td colspan="2"></td>
             `;
             tbody.appendChild(avgRow);
 
+            // Redraw chart
             renderProgressChart(records);
+            
+            // If on mobile, switch to Karne tab to show results
+            if (window.innerWidth <= 768) {
+                switchAnalysisTab('karne');
+            }
         }
 
         function renderProgressChart(records) {
-            const ctx = document.getElementById('progressChart').getContext('2d');
+            const canvasEl = document.getElementById('progressChart');
+            if(!canvasEl) return;
+            const ctx = canvasEl.getContext('2d');
             if (progressChart) {
                 progressChart.destroy();
             }
