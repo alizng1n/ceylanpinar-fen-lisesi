@@ -984,12 +984,19 @@
         /* Responsive CSS Rules */
         @media (max-width: 1024px) {
             .app-container {
-                grid-template-columns: 1fr;
+                display: flex;
+                flex-direction: column;
+            }
+
+            main {
+                order: 1; /* Main content first on mobile */
             }
 
             aside {
+                order: 2; /* Sidebar (Stats, Settings) at the bottom on mobile */
                 border-right: none;
-                border-bottom: 1px solid var(--border-color);
+                border-top: 1px solid var(--border-color);
+                border-bottom: none;
                 flex-direction: row;
                 flex-wrap: wrap;
                 gap: 1rem;
@@ -1134,13 +1141,6 @@
     <div class="app-container no-sidebar" id="app-container">
         <!-- Sidebar (Only shown in Analysis View) -->
         <aside>
-            <!-- Portala Geri Dön Butonu -->
-            <div class="sidebar-card">
-                <button class="btn btn-secondary" style="width:100%;" onclick="showTeacherHub()" title="Öğretmen paneline geri döner">
-                    <i data-lucide="arrow-left"></i> Portala Geri Dön
-                </button>
-            </div>
-
             <!-- Sınav Yükleme -->
             <div class="sidebar-card">
                 <h3><i data-lucide="file-plus"></i> Sınav İçe Aktar</h3>
@@ -1307,12 +1307,17 @@
             <!-- 4. Öğretmen Sınav Analiz Görünümü -->
             <div class="analysis-section" id="teacher-analysis-view">
                 <!-- Arama Bölümü -->
-                <div class="search-container">
-                    <div class="search-box-wrapper">
-                        <i data-lucide="search" class="search-icon"></i>
-                        <input type="text" class="search-input" id="search-student" placeholder="Öğrenci Adı veya Numarası ile Arayın..." autocomplete="off">
+                <div style="display: flex; gap: 0.75rem; align-items: center; width: 100%; position: relative; z-index: 50;">
+                    <button class="btn btn-secondary" onclick="showTeacherHub()" style="padding: 0 1.25rem; border-radius: var(--radius-lg); height: 52px; display: inline-flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);" title="Geri Dön">
+                        <i data-lucide="arrow-left"></i> <span>Geri</span>
+                    </button>
+                    <div class="search-container" style="flex-grow: 1; position: relative;">
+                        <div class="search-box-wrapper">
+                            <i data-lucide="search" class="search-icon"></i>
+                            <input type="text" class="search-input" id="search-student" placeholder="Öğrenci Adı veya Numarası ile Arayın..." autocomplete="off" style="height: 52px; border-radius: var(--radius-lg);">
+                        </div>
+                        <div class="search-results" id="search-results-list"></div>
                     </div>
-                    <div class="search-results" id="search-results-list"></div>
                 </div>
 
                 <!-- Rapor ve Karne Gösterimi -->
