@@ -2339,18 +2339,7 @@
         }
 
         function handleLogoClick() {
-            let loggedIn = false;
-            try {
-                loggedIn = sessionStorage.getItem('teacher_logged_in') === 'true';
-            } catch(e) {}
-
-            if (loggedIn) {
-                navigate('teacher-hub');
-            } else if (document.getElementById('student-hub').style.display === 'block') {
-                navigate('student-hub');
-            } else {
-                navigate('home');
-            }
+            navigate('home');
         }
 
         // Password modal handlers
