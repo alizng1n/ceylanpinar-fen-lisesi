@@ -192,10 +192,12 @@
             line-height: 1.2;
         }
 
+        /* Fixed Alignment for Header Actions (Resolves theme btn movement) */
         .header-actions {
             display: flex;
             align-items: center;
             gap: 1rem;
+            margin-left: auto; /* Guarantees theme button stays pushed to the right when logo is hidden */
         }
 
         .btn {
@@ -1139,13 +1141,17 @@
             color: var(--accent-color);
         }
 
-        /* Modern Redesigned Footer (Addresses copyright text removal) */
+        /* Redesigned Footer (Legible colors under light theme) */
         footer {
-            background: var(--bg-card);
-            border-top: 1px solid var(--border-color);
+            background: transparent !important;
+            border-top: 1px solid rgba(15, 23, 42, 0.08) !important;
             padding: 2.5rem 2rem;
             width: 100%;
             margin-top: auto;
+        }
+
+        [data-theme="dark"] body.portal-mode footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
         }
 
         .footer-content {
@@ -1169,30 +1175,33 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: var(--text-primary);
+            color: #0f172a !important; /* Legible dark color in light mode */
         }
 
-        .footer-col p {
+        [data-theme="dark"] body.portal-mode .footer-col h4 {
+            color: #ffffff !important; /* White in dark mode */
+        }
+
+        [data-theme="dark"] .footer-col h4 {
+            color: #ffffff !important;
+        }
+
+        .footer-col p, .footer-col a {
             font-size: 0.85rem;
-            color: var(--text-secondary);
+            color: #475569 !important; /* Legible slate in light mode */
             line-height: 1.5;
             font-weight: 500;
+            text-decoration: none;
         }
 
-        body.portal-mode footer .footer-col h4 {
-            color: #ffffff !important;
-        }
-
-        [data-theme="dark"] body.portal-mode footer .footer-col h4 {
-            color: #ffffff !important;
-        }
-
-        body.portal-mode footer .footer-col p {
-            color: #475569 !important;
-        }
-
-        [data-theme="dark"] body.portal-mode footer .footer-col p {
+        [data-theme="dark"] body.portal-mode .footer-col p,
+        [data-theme="dark"] body.portal-mode .footer-col a {
             color: rgba(255, 255, 255, 0.75) !important;
+        }
+
+        [data-theme="dark"] .footer-col p,
+        [data-theme="dark"] .footer-col a {
+            color: #94a3b8 !important;
         }
 
         /* Print CSS Styling */
@@ -1687,7 +1696,7 @@
                         </div>
                         <div class="card-content">
                             <h3>Ders Programı & Nöbetler <span class="badge badge-disabled">Yakında</span></h3>
-                            <p>Haftalık ders programlarını, nöbet çizelgelerini ve öğretmen izin/yedek planlamalarını yönetin.</p>
+                            <p>Haftalık ders programlarını, nöbet çizelgelerini ve öğretmen izin/yedek planhamalarını yönetin.</p>
                         </div>
                         <div class="card-action" style="color: rgba(255,255,255,0.75);">
                             Kullanıma Kapalı <i data-lucide="lock" size="16"></i>
@@ -1996,17 +2005,20 @@
             lucide.createIcons({ attrs: { class: 'lucide' } });
         }
 
-        // e-Okul News Scraper/Proxy Parser
+        // e-Okul News Scraper/Proxy Parser (Uses JSON endpoint for stability)
         function initNewsFetcher() {
             const targetUrl = 'https://ceylanpinarfenlisesi.meb.k12.tr';
-            const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
+            const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
 
             fetch(proxyUrl)
                 .then(response => {
-                    if (response.ok) return response.text();
+                    if (response.ok) return response.json();
                     throw new Error('CORS proxy response was not ok.');
                 })
-                .then(html => {
+                .then(data => {
+                    const html = data.contents;
+                    if (!html) throw new Error('Proxy returned empty content.');
+                    
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
 
@@ -2090,7 +2102,6 @@
 
             // Render Left Column
             if (leftItems.length > 0) {
-                // Keep heading
                 leftColContainer.innerHTML = '<h3><i data-lucide="megaphone" size="20"></i> Haberler ve Duyurular</h3>' + 
                     leftItems.map((item, idx) => `
                         <a href="${item.url}" target="_blank" class="news-card">
@@ -2109,7 +2120,6 @@
 
             // Render Right Column
             if (rightItems.length > 0) {
-                // Keep heading
                 rightColContainer.innerHTML = '<h3><i data-lucide="award" size="20"></i> Sınav ve Gelişim Duyuruları</h3>' + 
                     rightItems.map((item, idx) => `
                         <a href="${item.url}" target="_blank" class="news-card">
@@ -2128,17 +2138,32 @@
             lucide.createIcons();
         }
 
-        // Browser Navigation (HTML5 History API Router)
+        // Browser Navigation (HTML5 History API Router - Protected)
         function initRouter() {
-            const currentHash = window.location.hash || '#home';
-            const stateName = currentHash.replace('#', '');
+            let currentHash = window.location.hash || '#home';
+            let stateName = currentHash.replace('#', '');
             
-            // Register initial home state
+            // Auto restore teacher session on initial page load / refresh
+            let loggedIn = false;
+            try {
+                loggedIn = sessionStorage.getItem('teacher_logged_in') === 'true';
+            } catch(e) {}
+
+            if (loggedIn && (stateName === 'home' || stateName === '')) {
+                stateName = 'teacher-hub';
+                currentHash = '#teacher-hub';
+            }
+
             window.history.replaceState({ state: stateName }, "", currentHash);
             navigate(stateName, false);
 
             window.addEventListener('popstate', (event) => {
-                const targetState = event.state && event.state.state ? event.state.state : 'home';
+                let targetState = 'home';
+                if (event.state && event.state.state) {
+                    targetState = event.state.state;
+                } else if (window.location.hash) {
+                    targetState = window.location.hash.replace('#', '');
+                }
                 navigate(targetState, false);
             });
         }
@@ -2147,29 +2172,38 @@
             if (isNavigating) return;
             isNavigating = true;
 
-            // Authorization guards
-            if ((state === 'teacher-hub' || state === 'teacher-analysis') && sessionStorage.getItem('teacher_logged_in') !== 'true') {
-                state = 'home';
-                push = false;
-                window.history.replaceState({ state: 'home' }, "", '#home');
-            }
+            try {
+                let loggedIn = false;
+                try {
+                    loggedIn = sessionStorage.getItem('teacher_logged_in') === 'true';
+                } catch(e) {}
 
-            // Execute switches
-            if (state === 'home') {
-                showSelectionScreenView();
-            } else if (state === 'student-hub') {
-                showStudentHubView();
-            } else if (state === 'teacher-hub') {
-                showTeacherHubView();
-            } else if (state === 'teacher-analysis') {
-                showTeacherAnalysisViewView();
-            }
+                // Authorization guards
+                if ((state === 'teacher-hub' || state === 'teacher-analysis') && !loggedIn) {
+                    state = 'home';
+                    push = false;
+                    window.history.replaceState({ state: 'home' }, "", '#home');
+                }
 
-            if (push) {
-                window.history.pushState({ state: state }, "", '#' + state);
-            }
+                // Execute switches
+                if (state === 'home') {
+                    showSelectionScreenView();
+                } else if (state === 'student-hub') {
+                    showStudentHubView();
+                } else if (state === 'teacher-hub') {
+                    showTeacherHubView();
+                } else if (state === 'teacher-analysis') {
+                    showTeacherAnalysisViewView();
+                }
 
-            isNavigating = false;
+                if (push) {
+                    window.history.pushState({ state: state }, "", '#' + state);
+                }
+            } catch (err) {
+                console.error("Router navigation exception:", err);
+            } finally {
+                isNavigating = false;
+            }
         }
 
         function goBack(fallback) {
@@ -2181,7 +2215,12 @@
         }
 
         function handleLogoClick() {
-            if (sessionStorage.getItem('teacher_logged_in') === 'true') {
+            let loggedIn = false;
+            try {
+                loggedIn = sessionStorage.getItem('teacher_logged_in') === 'true';
+            } catch(e) {}
+
+            if (loggedIn) {
                 navigate('teacher-hub');
             } else if (document.getElementById('student-hub').style.display === 'block') {
                 navigate('student-hub');
@@ -2194,7 +2233,11 @@
         function verifyPassword() {
             const passwordVal = document.getElementById('password-input').value;
             if (passwordVal === 'ceylanpinar2014') {
-                sessionStorage.setItem('teacher_logged_in', 'true');
+                try {
+                    sessionStorage.setItem('teacher_logged_in', 'true');
+                } catch (e) {
+                    console.error("Could not set sessionStorage item:", e);
+                }
                 closeLoginModal();
                 navigate('teacher-hub');
             } else {
@@ -2205,8 +2248,27 @@
         }
 
         function logout() {
-            sessionStorage.removeItem('teacher_logged_in');
+            try {
+                sessionStorage.removeItem('teacher_logged_in');
+            } catch (e) {}
             navigate('home');
+        }
+
+        function openLoginModal() {
+            document.getElementById('login-modal').classList.add('open');
+            document.getElementById('password-input').focus();
+            document.getElementById('login-error').style.display = 'none';
+        }
+
+        function closeLoginModal() {
+            document.getElementById('login-modal').classList.remove('open');
+            document.getElementById('password-input').value = '';
+        }
+
+        function handlePasswordKeydown(event) {
+            if (event.key === 'Enter') {
+                verifyPassword();
+            }
         }
 
         // View Renderers
@@ -2436,6 +2498,37 @@
                 document.getElementById('welcome-panel-analysis').style.display = 'block';
                 document.getElementById('search-student').value = '';
             };
+        }
+
+        // Dashboard statistics
+        function refreshDashboard() {
+            const uniqueStudents = new Set();
+            const uniqueExams = new Set();
+            let totalNetSum = 0;
+            let totalNetCount = 0;
+
+            examDatabase.forEach(record => {
+                uniqueStudents.add(record.no);
+                uniqueExams.add(record.deneme);
+                if (record.subjects && record.subjects.toplam) {
+                    totalNetSum += record.subjects.toplam.n;
+                    totalNetCount++;
+                }
+            });
+
+            const totalStudentsCount = uniqueStudents.size;
+            const totalExamsCount = uniqueExams.size;
+            const schoolAvgNet = totalNetCount > 0 ? (totalNetSum / totalNetCount).toFixed(2) : "0.00";
+
+            // Update Desktop Stats
+            document.getElementById('stat-students').innerText = totalStudentsCount;
+            document.getElementById('stat-exams').innerText = totalExamsCount;
+            document.getElementById('stat-avg-net').innerText = schoolAvgNet;
+
+            // Update Mobile Stats
+            document.getElementById('stat-students-mobile').innerText = totalStudentsCount;
+            document.getElementById('stat-exams-mobile').innerText = totalExamsCount;
+            document.getElementById('stat-avg-net-mobile').innerText = schoolAvgNet;
         }
 
         // Search logic
