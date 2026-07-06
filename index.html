@@ -1657,7 +1657,7 @@
         <!-- Sidebar (Desktop Only - Hidden in Mobile View) -->
         <aside class="desktop-only">
             <!-- Sınav Yükleme -->
-            <div class="sidebar-card">
+            <div class="sidebar-card" id="sidebar-upload-card">
                 <h3><i data-lucide="file-plus"></i> Sınav İçe Aktar</h3>
                 <div class="dropzone" id="excel-dropzone" onclick="document.getElementById('excel-file-input').click()">
                     <div class="dropzone-icon">
@@ -1679,7 +1679,7 @@
             </div>
 
             <!-- Veri Yönetimi -->
-            <div class="sidebar-card">
+            <div class="sidebar-card" id="sidebar-reset-card">
                 <h3><i data-lucide="settings"></i> Sistem Ayarları</h3>
                 <button class="btn btn-secondary" style="width:100%; border-color:#ef4444; color:#ef4444; height: 42px; justify-content: center;" onclick="resetToDefault()" title="Tüm verileri veritabanından kalıcı olarak siler">
                     <i data-lucide="trash-2"></i> Tümünü Temizle
@@ -1895,9 +1895,10 @@
                             <i data-lucide="arrow-left"></i> <span>Geri</span>
                         </button>
                         <div class="search-container" style="flex-grow: 1; position: relative;">
-                            <div class="search-box-wrapper">
+                            <div class="search-box-wrapper" style="position:relative;">
                                 <i data-lucide="search" class="search-icon"></i>
-                                <input type="text" class="search-input" id="search-student" placeholder="Öğrenci Adı veya Numarası ile Arayın..." autocomplete="off" style="height: 52px; border-radius: var(--radius-lg);">
+                                <input type="text" class="search-input" id="search-student" placeholder="Öğrenci Adı veya Numarası ile Arayın..." autocomplete="off" style="height: 52px; border-radius: var(--radius-lg); padding-right:40px;">
+                                <button class="clear-search-btn" id="clear-search-student" onclick="clearSearchInput('search-student')" style="display:none; position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:#ef4444; cursor:pointer; padding:0.25rem; align-items:center; justify-content:center; z-index: 5;"><i data-lucide="x-circle" size="18"></i></button>
                             </div>
                             <div class="search-results" id="search-results-list"></div>
                         </div>
@@ -1999,7 +2000,7 @@
                         </h3>
                         
                         <!-- Sınav Yükleme Mobile -->
-                        <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                        <div id="mobile-upload-section" style="display:flex; flex-direction:column; gap:0.75rem;">
                             <span style="font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Yeni Sınav İçe Aktar (.xlsx/.xlsm)</span>
                             <div class="dropzone" onclick="document.getElementById('excel-file-input-mobile').click()">
                                 <i data-lucide="file-spreadsheet" size="28" style="color:#1e3c72;"></i>
@@ -2010,7 +2011,7 @@
                         </div>
 
                         <!-- Veritabanı Sıfırlama Mobile -->
-                        <div style="display:flex; flex-direction:column; gap:0.75rem; border-top:1px solid var(--border-color); padding-top:1.5rem;">
+                        <div id="mobile-reset-section" style="display:flex; flex-direction:column; gap:0.75rem; border-top:1px solid var(--border-color); padding-top:1.5rem;">
                             <span style="font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Sistem Sıfırlama</span>
                             <button class="btn btn-secondary" style="width:100%; border-color:#ef4444; color:#ef4444; justify-content:center; height: 44px;" onclick="resetToDefault()" title="Tüm verileri siler">
                                 <i data-lucide="trash-2"></i> Tümünü Temizle
@@ -2067,9 +2068,10 @@
             <div style="display:flex; gap:0.75rem; margin-bottom:1rem; align-items:center;">
                 <div class="search-box-wrapper" style="flex:1; position:relative;">
                     <i data-lucide="search" class="search-icon"></i>
-                    <input type="text" id="school-search-input" class="search-input" placeholder="İsim, numara veya sınıf ile arayın..." oninput="renderSchoolTable()" style="height:44px; border-radius:var(--radius-lg);">
+                    <input type="text" id="school-search-input" class="search-input" placeholder="İsim, numara veya sınıf ile arayın..." oninput="handleSchoolSearchInput()" style="height:44px; border-radius:var(--radius-lg); padding-right:40px;">
+                    <button class="clear-search-btn" id="clear-school-search" onclick="clearSearchInput('school-search-input')" style="display:none; position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:#ef4444; cursor:pointer; padding:0.25rem; align-items:center; justify-content:center; z-index: 5;"><i data-lucide="x-circle" size="18"></i></button>
                 </div>
-                <button onclick="openSchoolModal(null)" style="padding:0 1.25rem; height:44px; border-radius:var(--radius-lg); background:var(--accent-gradient); color:#fff; border:none; font-weight:600; font-size:0.875rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.4rem; white-space:nowrap; box-shadow:var(--shadow-sm);">
+                <button id="school-add-btn" onclick="openSchoolModal(null)" style="padding:0 1.25rem; height:44px; border-radius:var(--radius-lg); background:var(--accent-gradient); color:#fff; border:none; font-weight:600; font-size:0.875rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.4rem; white-space:nowrap; box-shadow:var(--shadow-sm);">
                     <i data-lucide="plus" size="16"></i> Yeni Ekle
                 </button>
             </div>
@@ -2526,7 +2528,32 @@
             };
         }
 
-        function navigate(state, push = true) {
+                function applyRolePermissions() {
+            const role = sessionStorage.getItem('user_role') || 'student';
+            
+            const desktopUpload = document.getElementById('sidebar-upload-card');
+            const desktopReset = document.getElementById('sidebar-reset-card');
+            const mobileUpload = document.getElementById('mobile-upload-section');
+            const mobileReset = document.getElementById('mobile-reset-section');
+            const schoolAddBtn = document.getElementById('school-add-btn');
+            
+            if (role === 'admin') {
+                if (desktopUpload) desktopUpload.style.display = 'block';
+                if (desktopReset) desktopReset.style.display = 'block';
+                if (mobileUpload) mobileUpload.style.display = 'flex';
+                if (mobileReset) mobileReset.style.display = 'flex';
+                if (schoolAddBtn) schoolAddBtn.style.display = 'inline-flex';
+            } else {
+                // Öğretmen veya diğer durumlar için
+                if (desktopUpload) desktopUpload.style.display = 'none';
+                if (desktopReset) desktopReset.style.display = 'none';
+                if (mobileUpload) mobileUpload.style.display = 'none';
+                if (mobileReset) mobileReset.style.display = 'none';
+                if (schoolAddBtn) schoolAddBtn.style.display = 'none';
+            }
+        }
+
+function navigate(state, push = true) {
             if (isNavigating) return;
             isNavigating = true;
 
@@ -2556,6 +2583,8 @@
                     showSchoolManagementView();
                 }
 
+                applyRolePermissions();
+
                 if (push) {
                     window.history.pushState({ state: state }, "", '#' + state);
                 }
@@ -2579,14 +2608,46 @@
         }
 
         // Password modal handlers
-        function verifyPassword() {
-            const passwordVal = document.getElementById('password-input').value;
-            if (passwordVal === 'ceylanpinar2014') {
+                function clearSearchInput(inputId) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            input.value = '';
+            
+            const btnId = inputId === 'search-student' ? 'clear-search-student' : 'clear-school-search';
+            const btn = document.getElementById(btnId);
+            if (btn) btn.style.display = 'none';
+
+            if (inputId === 'search-student') {
+                document.getElementById('search-results-list').style.display = 'none';
+            } else if (inputId === 'school-search-input') {
+                renderSchoolTable();
+            }
+            input.focus();
+        }
+
+        function handleSchoolSearchInput() {
+            const input = document.getElementById('school-search-input');
+            const clearBtn = document.getElementById('clear-school-search');
+            if (clearBtn && input) {
+                clearBtn.style.display = input.value.trim().length > 0 ? 'inline-flex' : 'none';
+            }
+            renderSchoolTable();
+        }
+
+function verifyPassword() {
+            const passwordVal = document.getElementById('password-input').value.trim();
+            if (passwordVal === 'müdür2014') {
                 try {
                     sessionStorage.setItem('teacher_logged_in', 'true');
-                } catch (e) {
-                    console.error("Could not set sessionStorage item:", e);
-                }
+                    sessionStorage.setItem('user_role', 'admin');
+                } catch (e) {}
+                closeLoginModal();
+                navigate('teacher-hub');
+            } else if (passwordVal === 'ceylanpinar2014') {
+                try {
+                    sessionStorage.setItem('teacher_logged_in', 'true');
+                    sessionStorage.setItem('user_role', 'teacher');
+                } catch (e) {}
                 closeLoginModal();
                 navigate('teacher-hub');
             } else {
@@ -2599,6 +2660,7 @@
         function logout() {
             try {
                 sessionStorage.removeItem('teacher_logged_in');
+                sessionStorage.removeItem('user_role');
             } catch (e) {}
             navigate('home');
         }
@@ -3189,8 +3251,17 @@ function showSchoolManagementView() {
             const query = (document.getElementById('school-search-input')?.value || '').toLowerCase().trim();
             let records = (schoolData[currentSchoolTab] || []).slice();
 
+            const role = sessionStorage.getItem('user_role') || 'student';
+            const isAdmin = (role === 'admin');
+
             if (query) {
-                records = records.filter(r => Object.values(r).some(v => String(v || '').toLowerCase().includes(query)));
+                const lowercaseQuery = query.toLocaleLowerCase('tr-TR');
+                records = records.filter(r => {
+                    // Ad ve soyadı birleştirerek tam isimle aramayı destekle
+                    const fullName = ((r.ad || '') + ' ' + (r.soyad || '') + ' ' + (r.ad_soyad || '')).toLocaleLowerCase('tr-TR');
+                    const otherFields = Object.values(r).map(v => String(v || '').toLocaleLowerCase('tr-TR'));
+                    return fullName.includes(lowercaseQuery) || otherFields.some(f => f.includes(lowercaseQuery));
+                });
             }
 
             const tbody = document.getElementById('school-table-body');
@@ -3209,23 +3280,44 @@ function showSchoolManagementView() {
                 thead = '<tr style="background:var(--bg-page); border-bottom:2px solid var(--border-color);"><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">No</th><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">Ad Soyad</th><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">Sınıf</th><th style="padding:0.75rem 1rem; text-align:center; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">İşlem</th></tr>';
                 records.forEach(r => {
                     const rec = JSON.stringify(r).replace(/'/g, "&#39;");
-                    rows += `<tr style="border-bottom:1px solid var(--border-color); transition:background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''"><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.8rem;">${r.no||'-'}</td><td style="padding:0.7rem 1rem; font-weight:500; color:var(--text-primary);">${r.ad||''} ${r.soyad||''}</td><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.85rem;">${r.snf||'-'}</td><td style="padding:0.7rem 1rem; text-align:center;"><button onclick="openDocumentModal('${r.no||''}')" style="background:none; border:1px solid #cbd5e1; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#10b981; font-size:0.78rem; margin-right:0.25rem;">Belge Üret</button><button onclick="openSchoolModal('${r.no||''}')" style="background:none; border:1px solid #cbd5e1; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#3b82f6; font-size:0.78rem; margin-right:0.25rem;">Düzenle</button><button onclick="deleteSchoolRecord('${r.no||''}','ogrenci')" style="background:none; border:1px solid #fee2e2; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#ef4444; font-size:0.78rem;">Sil</button></td></tr>`;
+                    let actionButtons = `<button onclick="openDocumentModal('${r.no||''}')" style="background:none; border:1px solid #cbd5e1; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#10b981; font-size:0.78rem; margin-right:0.25rem;">Belge Üret</button>`;
+                    if (isAdmin) {
+                        actionButtons += `<button onclick="openSchoolModal('${r.no||''}')" style="background:none; border:1px solid #cbd5e1; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#3b82f6; font-size:0.78rem; margin-right:0.25rem;">Düzenle</button><button onclick="deleteSchoolRecord('${r.no||''}','ogrenci')" style="background:none; border:1px solid #fee2e2; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#ef4444; font-size:0.78rem;">Sil</button>`;
+                    }
+                    rows += `<tr style="border-bottom:1px solid var(--border-color); transition:background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''"><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.8rem;">${r.no||'-'}</td><td style="padding:0.7rem 1rem; font-weight:500; color:var(--text-primary);">${r.ad||''} ${r.soyad||''}</td><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.85rem;">${r.snf||'-'}</td><td style="padding:0.7rem 1rem; text-align:center;">${actionButtons}</td></tr>`;
                 });
             } else if (currentSchoolTab === 'ogretmen') {
                 thead = '<tr style="background:var(--bg-page); border-bottom:2px solid var(--border-color);"><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">ID</th><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">Ad Soyad</th><th style="padding:0.75rem 1rem; text-align:center; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">İşlem</th></tr>';
                 records.forEach(r => {
                     const rec = JSON.stringify(r).replace(/'/g, "&#39;");
-                    rows += `<tr style="border-bottom:1px solid var(--border-color); transition:background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''"><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.8rem;">${r.id||'-'}</td><td style="padding:0.7rem 1rem; font-weight:500; color:var(--text-primary);">${r.ad_soyad||''}</td><td style="padding:0.7rem 1rem; text-align:center;"><button onclick="openSchoolModal('${r.id||''}')" style="background:none; border:1px solid #cbd5e1; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#3b82f6; font-size:0.78rem; margin-right:0.25rem;">Düzenle</button><button onclick="deleteSchoolRecord('${r.id||''}','ogretmen')" style="background:none; border:1px solid #fee2e2; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#ef4444; font-size:0.78rem;">Sil</button></td></tr>`;
+                    let actionButtons = '';
+                    if (isAdmin) {
+                        actionButtons += `<button onclick="openSchoolModal('${r.id||''}')" style="background:none; border:1px solid #cbd5e1; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#3b82f6; font-size:0.78rem; margin-right:0.25rem;">Düzenle</button><button onclick="deleteSchoolRecord('${r.id||''}','ogretmen')" style="background:none; border:1px solid #fee2e2; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#ef4444; font-size:0.78rem;">Sil</button>`;
+                    } else {
+                        actionButtons += `<span style="color:var(--text-secondary); font-size:0.8rem;">Salt Okunur (Müdür Yetkisi)</span>`;
+                    }
+                    rows += `<tr style="border-bottom:1px solid var(--border-color); transition:background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''"><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.8rem;">${r.id||'-'}</td><td style="padding:0.7rem 1rem; font-weight:500; color:var(--text-primary);">${r.ad_soyad||''}</td><td style="padding:0.7rem 1rem; text-align:center;">${actionButtons}</td></tr>`;
                 });
             } else {
                 thead = '<tr style="background:var(--bg-page); border-bottom:2px solid var(--border-color);"><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">ID</th><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">Ad Soyad</th><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">Unvan</th><th style="padding:0.75rem 1rem; text-align:center; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">İşlem</th></tr>';
                 records.forEach(r => {
                     const rec = JSON.stringify(r).replace(/'/g, "&#39;");
-                    rows += `<tr style="border-bottom:1px solid var(--border-color); transition:background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''"><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.8rem;">${r.id||'-'}</td><td style="padding:0.7rem 1rem; font-weight:500; color:var(--text-primary);">${r.ad_soyad||''}</td><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.85rem;">${r.unvan||'-'}</td><td style="padding:0.7rem 1rem; text-align:center;"><button onclick="openSchoolModal('${r.id||''}')" style="background:none; border:1px solid #cbd5e1; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#3b82f6; font-size:0.78rem; margin-right:0.25rem;">Düzenle</button><button onclick="deleteSchoolRecord('${r.id||''}','idare')" style="background:none; border:1px solid #fee2e2; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#ef4444; font-size:0.78rem;">Sil</button></td></tr>`;
+                    let actionButtons = '';
+                    if (isAdmin) {
+                        actionButtons += `<button onclick="openSchoolModal('${r.id||''}')" style="background:none; border:1px solid #cbd5e1; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#3b82f6; font-size:0.78rem; margin-right:0.25rem;">Düzenle</button><button onclick="deleteSchoolRecord('${r.id||''}','idare')" style="background:none; border:1px solid #fee2e2; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#ef4444; font-size:0.78rem;">Sil</button>`;
+                    } else {
+                        actionButtons += `<span style="color:var(--text-secondary); font-size:0.8rem;">Salt Okunur (Müdür Yetkisi)</span>`;
+                    }
+                    rows += `<tr style="border-bottom:1px solid var(--border-color); transition:background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''"><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.8rem;">${r.id||'-'}</td><td style="padding:0.7rem 1rem; font-weight:500; color:var(--text-primary);">${r.ad_soyad||''}</td><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.85rem;">${r.unvan||'-'}</td><td style="padding:0.7rem 1rem; text-align:center;">${actionButtons}</td></tr>`;
                 });
             }
 
-            tbody.innerHTML = '<table style="width:100%; border-collapse:collapse; font-size:0.875rem;"><thead>' + thead + '</thead><tbody>' + rows + '</tbody></table>';
+            let tfoot = '';
+            if (isAdmin && records.length > 0) {
+                const colspan = (currentSchoolTab === 'ogrenci') ? 3 : 2;
+                tfoot = `<tfoot><tr style="background:var(--bg-page); border-top:2px solid var(--border-color);"><td colspan="${colspan}" style="padding:0.75rem 1rem; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">Toplam ${records.length} kayıt listelendi</td><td style="padding:0.75rem 1rem; text-align:center;"><button onclick="clearAllSchoolTabRecords()" style="background:none; border:1px solid #fee2e2; border-radius:6px; padding:0.25rem 0.65rem; cursor:pointer; color:#ef4444; font-size:0.78rem; font-weight:600; transition:all 0.15s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background=''">Tümünü Sil</button></td></tr></tfoot>`;
+            }
+            tbody.innerHTML = '<table style="width:100%; border-collapse:collapse; font-size:0.875rem;"><thead>' + thead + '</thead><tbody>' + rows + '</tbody>' + tfoot + '</table>';
             footer.innerText = records.length + ' kayıt gösteriliyor (toplam ' + schoolData[currentSchoolTab].length + ')';
             if (window.lucide) lucide.createIcons();
         }
@@ -3307,7 +3399,25 @@ function showSchoolManagementView() {
             showToast(schoolEditId ? 'Kayıt güncellendi!' : 'Yeni kayıt eklendi!');
         }
 
-        function deleteSchoolRecord(id, tab) {
+                function clearAllSchoolTabRecords() {
+            let tabLabel = "öğrencileri";
+            if (currentSchoolTab === 'ogretmen') tabLabel = "öğretmenleri";
+            if (currentSchoolTab === 'idare') tabLabel = "idarecileri";
+
+            if (!confirm(`Mevcut listedeki tüm ${tabLabel} silmek istediğinize emin misiniz?`)) return;
+            if (!schoolData) return;
+
+            schoolData[currentSchoolTab] = [];
+
+            document.getElementById('school-stat-ogrenci').innerText = schoolData.ogrenci.length;
+            document.getElementById('school-stat-ogretmen').innerText = schoolData.ogretmen.length;
+            document.getElementById('school-stat-idare').innerText = schoolData.idare.length;
+
+            renderSchoolTable();
+            showToast('Tüm kayıtlar silindi!');
+        }
+
+function deleteSchoolRecord(id, tab) {
             if (!confirm('Bu kaydı silmek istediğinizden emin misiniz?')) return;
             if (!schoolData) return;
             if (tab === 'ogrenci') {
@@ -3625,7 +3735,11 @@ function showSchoolManagementView() {
             const resultsList = document.getElementById('search-results-list');
 
             searchInput.addEventListener('input', () => {
-                const query = searchInput.value.toLowerCase().trim();
+                const query = searchInput.value.toLocaleLowerCase('tr-TR').trim();
+                const clearBtn = document.getElementById('clear-search-student');
+                if (clearBtn) {
+                    clearBtn.style.display = query.length > 0 ? 'inline-flex' : 'none';
+                }
                 if (query.length < 1) {
                     resultsList.style.display = 'none';
                     return;
@@ -3635,7 +3749,7 @@ function showSchoolManagementView() {
                 const addedIds = new Set();
 
                 examDatabase.forEach(r => {
-                    const matchesName = r.name.toLowerCase().includes(query);
+                    const matchesName = r.name.toLocaleLowerCase('tr-TR').includes(query);
                     const matchesNo = String(r.no).includes(query);
 
                     if ((matchesName || matchesNo) && !addedIds.has(r.no)) {
