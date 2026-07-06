@@ -2127,6 +2127,16 @@
                 <div id="doc-form-fields" style="display:flex; flex-direction:column; gap:1rem;">
                     <!-- Alanlar JS tarafindan doldurulacak -->
                 </div>
+
+                <!-- Öğrenci Belge Geçmişi (Sicil) -->
+                <div style="border-top:1px solid var(--border-color); padding-top:1rem; margin-top:0.5rem; display:flex; flex-direction:column; gap:0.5rem;">
+                    <label style="font-size:0.8rem; font-weight:700; color:var(--text-secondary); display:flex; align-items:center; gap:0.3rem;">
+                        <i data-lucide="history" size="14"></i> Öğrenci İşlem Geçmişi (Son Belgeler)
+                    </label>
+                    <div id="doc-student-history" style="max-height:140px; overflow-y:auto; display:flex; flex-direction:column; gap:0.4rem; padding-right:0.25rem;">
+                        <!-- JS tarafından geçmiş listelenecek -->
+                    </div>
+                </div>
             </div>
 
             <div style="display:flex; gap:0.75rem; margin-top:1.5rem; justify-content:flex-end;">
@@ -2768,7 +2778,35 @@ function verifyPassword() {
 
 
         // Belge Uretici Fonksiyonlari
-        function openDocumentModal(studentNo) {
+                function renderStudentHistory(student) {
+            const container = document.getElementById('doc-student-history');
+            if (!container) return;
+            
+            if (!student.history || student.history.length === 0) {
+                container.innerHTML = `
+                    <div style="background:rgba(16,185,129,0.06); border:1px dashed rgba(16,185,129,0.25); border-radius:8px; padding:0.6rem; text-align:center; color:#10b981; font-size:0.78rem; font-weight:500;">
+                        <i data-lucide="check-circle" size="14" style="vertical-align:middle; margin-right:0.2rem;"></i> Bu öğrenciye ait geçmiş belge bulunmamaktadır (Temiz Sicil)
+                    </div>
+                `;
+            } else {
+                let html = '';
+                student.history.forEach(item => {
+                    html += `
+                        <div style="background:var(--bg-page); border:1px solid var(--border-color); border-radius:6px; padding:0.5rem 0.75rem; font-size:0.76rem; display:flex; flex-direction:column; gap:0.15rem; text-align:left;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <strong style="color:var(--text-primary);">${item.tur}</strong>
+                                <span style="color:var(--text-secondary); font-size:0.7rem; font-weight:500;">${item.tarih}</span>
+                            </div>
+                            <span style="color:var(--text-secondary); line-height:1.2;">${item.detay}</span>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            }
+            if (window.lucide) lucide.createIcons();
+        }
+
+function openDocumentModal(studentNo) {
             const student = schoolData.ogrenci.find(s => String(s.no) === String(studentNo));
             if (!student) return;
             selectedDocStudent = student;
@@ -2784,6 +2822,7 @@ function verifyPassword() {
             
             document.getElementById('doc-type-select').value = 'izin';
             switchDocumentType();
+            renderStudentHistory(student);
             
             document.getElementById('document-modal').style.display = 'flex';
             if (window.lucide) lucide.createIcons();
@@ -2983,13 +3022,7 @@ function verifyPassword() {
             if (!selectedDocStudent) return;
             
             const docType = document.getElementById('doc-type-select').value;
-            const printArea = document.getElementById('print-section');
             const dateStr = document.getElementById('doc-current-date').innerText;
-            const nameStr = (selectedDocStudent.ad || '') + ' ' + (selectedDocStudent.soyad || '');
-            const noStr = selectedDocStudent.no || '-';
-            const classStr = selectedDocStudent.snf || '-';
-            
-            let docHTML = '';
             
             const formatTurkishDate = (dStr) => {
                 if (!dStr) return '';
@@ -2997,6 +3030,60 @@ function verifyPassword() {
                 if (parts.length === 3) return parts[2] + '/' + parts[1] + '/' + parts[0];
                 return dStr;
             };
+
+            // Geçmişe kaydetme mantığı
+            if (!selectedDocStudent.history) {
+                selectedDocStudent.history = [];
+            }
+            
+            let docTypeName = 'Resmi Belge';
+            let details = '';
+            
+            if (docType === 'izin') {
+                docTypeName = 'Mazeret İzni';
+                const basSaat = document.getElementById('df-izin-baslangic-saat')?.value || '';
+                const bitSaat = document.getElementById('df-izin-bitis-saat')?.value || '';
+                const mazeret = document.getElementById('df-izin-neden')?.value || '';
+                const izinAraligi = (basSaat === bitSaat || bitSaat === 'DERS SAATİ') ? basSaat : `${basSaat} - ${bitSaat}`;
+                details = `${izinAraligi} | Neden: ${mazeret}`;
+            } else if (docType === 'gec') {
+                docTypeName = 'Geç Kağıdı';
+                const mazeret = document.getElementById('df-gec-neden')?.value || '';
+                const dersSaat = document.getElementById('df-gec-ders-saat')?.value || '';
+                details = `${dersSaat} | Neden: ${mazeret}`;
+            } else if (docType === 'kabul') {
+                docTypeName = 'Derse Kabul';
+                const mazeret = document.getElementById('df-kabul-neden')?.value || '';
+                const dersSaat = document.getElementById('df-kabul-ders-saat')?.value || '';
+                details = `${dersSaat} | Neden: ${mazeret}`;
+            } else if (docType === 'cagri') {
+                docTypeName = 'Çağrı Pusulası';
+                const dersSaat = document.getElementById('df-cagri-ders-saat')?.value || '';
+                const ref = document.getElementById('df-cagri-ref')?.value || '';
+                details = `${dersSaat} | Çağıran: ${ref}`;
+            } else if (docType === 'veli-izin') {
+                docTypeName = 'Veli İzin Dilekçesi';
+                const basTarih = formatTurkishDate(document.getElementById('df-veli-izin-bas-tarih')?.value || '');
+                const bitTarih = formatTurkishDate(document.getElementById('df-veli-izin-bit-tarih')?.value || '');
+                const mazeret = document.getElementById('df-veli-izin-neden')?.value || '';
+                details = `${basTarih} - ${bitTarih} | Neden: ${mazeret}`;
+            } else if (docType === 'uyari') {
+                docTypeName = 'Yazılı Uyarı';
+                const davranis = document.getElementById('df-uyari-davranis')?.value || '';
+                details = `Sebep: ${davranis}`;
+            }
+            
+            selectedDocStudent.history.unshift({
+                tarih: dateStr,
+                tur: docTypeName,
+                detay: details
+            });
+            const printArea = document.getElementById('print-section');
+            const nameStr = (selectedDocStudent.ad || '') + ' ' + (selectedDocStudent.soyad || '');
+            const noStr = selectedDocStudent.no || '-';
+            const classStr = selectedDocStudent.snf || '-';
+            
+            let docHTML = '';
 
             // Varsayılan İdare/Okul Adı
             const schoolName = "CEYLANPINAR FEN LİSESİ MÜDÜRLÜĞÜ";
