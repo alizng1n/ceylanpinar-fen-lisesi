@@ -60,7 +60,7 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
-        body, header, aside, main, .sidebar-card, .info-card, .btn, .theme-toggle, input, select, .news-card, .portal-card, .split-btn-card, .modal-card, table, th, td, tr {
+        body, header, aside, main, .sidebar-card, .info-card, .btn, .theme-toggle, input, select, .news-card, .portal-card, .split-btn-card, .modal-card {
             transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
 
@@ -1630,6 +1630,13 @@
         .school-doc-signature-title {
             font-weight: bold;
             margin-bottom: 2rem;
+        }
+            .school-table-row {
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.15s ease;
+        }
+        .school-table-row:hover {
+            background-color: var(--bg-page) !important;
         }
     </style>
 </head>
@@ -3374,7 +3381,7 @@ function showSchoolManagementView() {
                     if (isAdmin) {
                         actionButtons += `<button onclick="openSchoolModal('${r.no||''}')" style="background:none; border:1px solid #cbd5e1; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#3b82f6; font-size:0.78rem; margin-right:0.25rem;">Düzenle</button><button onclick="deleteSchoolRecord('${r.no||''}','ogrenci')" style="background:none; border:1px solid #fee2e2; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#ef4444; font-size:0.78rem;">Sil</button>`;
                     }
-                    rows += `<tr style="border-bottom:1px solid var(--border-color); transition:background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''"><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.8rem;">${r.no||'-'}</td><td style="padding:0.7rem 1rem; font-weight:500; color:var(--text-primary);">${r.ad||''} ${r.soyad||''}</td><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.85rem;">${r.snf||'-'}</td><td style="padding:0.7rem 1rem; text-align:center;">${actionButtons}</td></tr>`;
+                    rows += `<tr class="school-table-row"><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.8rem;">${r.no||'-'}</td><td style="padding:0.7rem 1rem; font-weight:500; color:var(--text-primary);">${r.ad||''} ${r.soyad||''}</td><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.85rem;">${r.snf||'-'}</td><td style="padding:0.7rem 1rem; text-align:center;">${actionButtons}</td></tr>`;
                 });
             } else if (currentSchoolTab === 'ogretmen') {
                 thead = '<tr style="background:var(--bg-page); border-bottom:2px solid var(--border-color);"><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">ID</th><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">Ad Soyad</th><th style="padding:0.75rem 1rem; text-align:center; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">İşlem</th></tr>';
@@ -3386,7 +3393,7 @@ function showSchoolManagementView() {
                     } else {
                         actionButtons += `<span style="color:var(--text-secondary); font-size:0.8rem;">Salt Okunur (Müdür Yetkisi)</span>`;
                     }
-                    rows += `<tr style="border-bottom:1px solid var(--border-color); transition:background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''"><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.8rem;">${r.id||'-'}</td><td style="padding:0.7rem 1rem; font-weight:500; color:var(--text-primary);">${r.ad_soyad||''}</td><td style="padding:0.7rem 1rem; text-align:center;">${actionButtons}</td></tr>`;
+                    rows += `<tr class="school-table-row"><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.8rem;">${r.id||'-'}</td><td style="padding:0.7rem 1rem; font-weight:500; color:var(--text-primary);">${r.ad_soyad||''}</td><td style="padding:0.7rem 1rem; text-align:center;">${actionButtons}</td></tr>`;
                 });
             } else {
                 thead = '<tr style="background:var(--bg-page); border-bottom:2px solid var(--border-color);"><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">ID</th><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">Ad Soyad</th><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">Unvan</th><th style="padding:0.75rem 1rem; text-align:center; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">İşlem</th></tr>';
@@ -3398,7 +3405,7 @@ function showSchoolManagementView() {
                     } else {
                         actionButtons += `<span style="color:var(--text-secondary); font-size:0.8rem;">Salt Okunur (Müdür Yetkisi)</span>`;
                     }
-                    rows += `<tr style="border-bottom:1px solid var(--border-color); transition:background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''"><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.8rem;">${r.id||'-'}</td><td style="padding:0.7rem 1rem; font-weight:500; color:var(--text-primary);">${r.ad_soyad||''}</td><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.85rem;">${r.unvan||'-'}</td><td style="padding:0.7rem 1rem; text-align:center;">${actionButtons}</td></tr>`;
+                    rows += `<tr class="school-table-row"><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.8rem;">${r.id||'-'}</td><td style="padding:0.7rem 1rem; font-weight:500; color:var(--text-primary);">${r.ad_soyad||''}</td><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.85rem;">${r.unvan||'-'}</td><td style="padding:0.7rem 1rem; text-align:center;">${actionButtons}</td></tr>`;
                 });
             }
 
