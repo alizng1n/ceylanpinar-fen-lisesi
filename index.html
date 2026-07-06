@@ -3088,6 +3088,7 @@ function openDocumentModal(studentNo) {
                 tur: docTypeName,
                 detay: details
             });
+            persistSchoolData();
             const printArea = document.getElementById('print-section');
             const nameStr = (selectedDocStudent.ad || '') + ' ' + (selectedDocStudent.soyad || '');
             const noStr = selectedDocStudent.no || '-';
@@ -3298,6 +3299,15 @@ function openDocumentModal(studentNo) {
         }
 
 
+        function persistSchoolData() {
+            if (!schoolData) return;
+            try {
+                localStorage.setItem('cfl_school_db', JSON.stringify(schoolData));
+            } catch (e) {
+                console.error("Local storage save failed:", e);
+            }
+        }
+
 function showSchoolManagementView() {
             document.body.classList.remove('portal-mode');
             document.getElementById('app-container').classList.add('no-sidebar');
@@ -3315,7 +3325,16 @@ function showSchoolManagementView() {
             document.getElementById('mobile-nav-analysis').style.setProperty('display', 'none', 'important');
 
             if (!schoolData) {
-                schoolData = JSON.parse(JSON.stringify(DEFAULT_OKUL_DB));
+                try {
+                    const saved = localStorage.getItem('cfl_school_db');
+                    if (saved) {
+                        schoolData = JSON.parse(saved);
+                    } else {
+                        schoolData = JSON.parse(JSON.stringify(DEFAULT_OKUL_DB));
+                    }
+                } catch (e) {
+                    schoolData = JSON.parse(JSON.stringify(DEFAULT_OKUL_DB));
+                }
             }
 
             document.getElementById('school-stat-ogrenci').innerText = schoolData.ogrenci.length;
@@ -3459,7 +3478,10 @@ function showSchoolManagementView() {
                 if (!no || !ad || !soyad) { alert('No, Ad ve Soyad zorunludur!'); return; }
                 if (schoolEditId) {
                     const idx = schoolData.ogrenci.findIndex(r => String(r.no) === String(schoolEditId));
-                    if (idx >= 0) schoolData.ogrenci[idx] = {no, ad, soyad, snf};
+                    if (idx >= 0) {
+                        const existingHistory = schoolData.ogrenci[idx].history || [];
+                        schoolData.ogrenci[idx] = {no, ad, soyad, snf, history: existingHistory};
+                    }
                 } else {
                     if (schoolData.ogrenci.find(r => String(r.no) === String(no))) { alert('Bu numara zaten kayıtlı!'); return; }
                     schoolData.ogrenci.push({no, ad, soyad, snf});
@@ -3493,6 +3515,7 @@ function showSchoolManagementView() {
 
             closeSchoolModal();
             renderSchoolTable();
+            persistSchoolData();
             showToast(schoolEditId ? 'Kayıt güncellendi!' : 'Yeni kayıt eklendi!');
         }
 
@@ -3511,6 +3534,7 @@ function showSchoolManagementView() {
             document.getElementById('school-stat-idare').innerText = schoolData.idare.length;
 
             renderSchoolTable();
+            persistSchoolData();
             showToast('Tüm kayıtlar silindi!');
         }
 
@@ -3528,6 +3552,7 @@ function deleteSchoolRecord(id, tab) {
             document.getElementById('school-stat-ogretmen').innerText = schoolData.ogretmen.length;
             document.getElementById('school-stat-idare').innerText = schoolData.idare.length;
             renderSchoolTable();
+            persistSchoolData();
             showToast('Kayıt silindi!');
         }
 
