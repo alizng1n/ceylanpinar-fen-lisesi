@@ -2200,9 +2200,12 @@
 
                 <!-- Öğrenci Belge Geçmişi (Sicil) -->
                 <div id="doc-history-section" style="border-top:1px solid var(--border-color); padding-top:1rem; margin-top:0.5rem; display:flex; flex-direction:column; gap:0.5rem;">
-                    <label style="font-size:0.8rem; font-weight:700; color:var(--text-secondary); display:flex; align-items:center; gap:0.3rem;">
-                        <i data-lucide="history" size="14"></i> Öğrenci İşlem Geçmişi (Son Belgeler)
-                    </label>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <label style="font-size:0.8rem; font-weight:700; color:var(--text-secondary); display:flex; align-items:center; gap:0.3rem;">
+                            <i data-lucide="history" size="14"></i> Öğrenci İşlem Geçmişi (Son Belgeler)
+                        </label>
+                        <button id="btn-clear-all-history" onclick="clearAllHistory()" style="display:none; background:none; border:1px solid #fee2e2; border-radius:6px; padding:0.15rem 0.5rem; cursor:pointer; color:#ef4444; font-size:0.72rem; font-weight:600;">Tümünü Temizle</button>
+                    </div>
                     <div id="doc-student-history" style="display:flex; flex-direction:column; gap:0.4rem;">
                         <!-- JS tarafından geçmiş listelenecek -->
                     </div>
@@ -2946,28 +2949,54 @@ function renderStudentHistory(student) {
             const container = document.getElementById('doc-student-history');
             if (!container) return;
             
+            const clearAllBtn = document.getElementById('btn-clear-all-history');
+            
             if (!student.history || student.history.length === 0) {
                 container.innerHTML = `
                     <div style="background:rgba(16,185,129,0.06); border:1px dashed rgba(16,185,129,0.25); border-radius:8px; padding:0.6rem; text-align:center; color:#10b981; font-size:0.78rem; font-weight:500;">
                         <i data-lucide="check-circle" size="14" style="vertical-align:middle; margin-right:0.2rem;"></i> Bu öğrenciye ait geçmiş belge bulunmamaktadır (Temiz Sicil)
                     </div>
                 `;
+                if (clearAllBtn) clearAllBtn.style.display = 'none';
             } else {
                 let html = '';
-                student.history.forEach(item => {
+                student.history.forEach((item, idx) => {
+                    const deleteBtn = (sessionStorage.getItem('user_role') === 'admin')
+                        ? `<button onclick="deleteHistoryItem(${idx})" style="background:none; border:none; cursor:pointer; color:#ef4444; padding:0 0.2rem; font-size:0.78rem; line-height:1;" title="Bu kaydı sil">✕</button>`
+                        : '';
                     html += `
                         <div style="background:var(--bg-page); border:1px solid var(--border-color); border-radius:6px; padding:0.5rem 0.75rem; font-size:0.76rem; display:flex; flex-direction:column; gap:0.15rem; text-align:left;">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <strong style="color:var(--text-primary);">${item.tur}</strong>
-                                <span style="color:var(--text-secondary); font-size:0.7rem; font-weight:500;">${item.tarih}</span>
+                                <div style="display:flex; align-items:center; gap:0.4rem;">
+                                    <span style="color:var(--text-secondary); font-size:0.7rem; font-weight:500;">${item.tarih}</span>
+                                    ${deleteBtn}
+                                </div>
                             </div>
                             <span style="color:var(--text-secondary); line-height:1.2;">${item.detay}</span>
                         </div>
                     `;
                 });
                 container.innerHTML = html;
+                if (clearAllBtn) clearAllBtn.style.display = (sessionStorage.getItem('user_role') === 'admin') ? 'inline-block' : 'none';
             }
             if (window.lucide) lucide.createIcons();
+        }
+        
+        function deleteHistoryItem(index) {
+            if (!selectedDocStudent || !selectedDocStudent.history) return;
+            if (!confirm('Bu geçmiş kaydı silinsin mi?')) return;
+            selectedDocStudent.history.splice(index, 1);
+            persistSchoolData();
+            renderStudentHistory(selectedDocStudent);
+        }
+        
+        function clearAllHistory() {
+            if (!selectedDocStudent) return;
+            if (!confirm('Bu öğrenciye ait tüm geçmiş kayıtlar silinsin mi?')) return;
+            selectedDocStudent.history = [];
+            persistSchoolData();
+            renderStudentHistory(selectedDocStudent);
         }
 
 function openDocumentModal(studentNo) {
