@@ -3115,6 +3115,27 @@ function openDocumentModal(studentNo) {
                 `;
             } else if (docType === 'cagri') {
                 fields = `
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+                        <div>
+                            <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Ders Saati</label>
+                            <select id="df-cagri-ders-saat" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
+                                <option value="1.DERS SAATİ">1.DERS SAATİ</option>
+                                <option value="2.DERS SAATİ">2.DERS SAATİ</option>
+                                <option value="3.DERS SAATİ">3.DERS SAATİ</option>
+                                <option value="4.DERS SAATİ">4.DERS SAATİ</option>
+                                <option value="5.DERS SAATİ">5.DERS SAATİ</option>
+                                <option value="6.DERS SAATİ">6.DERS SAATİ</option>
+                                <option value="7.DERS SAATİ">7.DERS SAATİ</option>
+                                <option value="8.DERS SAATİ">8.DERS SAATİ</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Ders Öğretmeni</label>
+                            <select id="df-cagri-ogretmen" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
+                                ${ogretmenOptions}
+                            </select>
+                        </div>
+                    </div>
                     <div>
                         <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Çağrı Nedeni</label>
                         <select id="df-cagri-neden" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
@@ -3220,8 +3241,9 @@ function openDocumentModal(studentNo) {
             } else if (docType === 'cagri') {
                 docTypeName = 'Çağrı Pusulası';
                 const dersSaat = document.getElementById('df-cagri-ders-saat')?.value || '';
-                const ref = document.getElementById('df-cagri-ref')?.value || '';
-                details = `${dersSaat} | Çağıran: ${ref}`;
+                const ogretmen = document.getElementById('df-cagri-ogretmen')?.value || '';
+                const birim = document.getElementById('df-cagri-birim')?.value || '';
+                details = `${dersSaat} | Yer: ${birim} | Öğretmen: ${ogretmen}`;
             } else if (docType === 'veli-izin') {
                 docTypeName = 'Veli İzin Dilekçesi';
                 const basTarih = formatTurkishDate(document.getElementById('df-veli-izin-bas-tarih')?.value || '');
@@ -3352,27 +3374,33 @@ function openDocumentModal(studentNo) {
             } else if (docType === 'cagri') {
                 const birim = document.getElementById('df-cagri-birim').value;
                 const neden = document.getElementById('df-cagri-neden').value;
+                const dersSaat = document.getElementById('df-cagri-ders-saat').value;
+                const ogretmen = document.getElementById('df-cagri-ogretmen').value || 'Nöbetçi Öğretmen';
                 
                 docHTML = `
                     <div class="school-doc-paper">
-                        <div class="school-doc-header">
+                        <div class="school-doc-header" style="position:relative;">
                             <h2>${schoolName}</h2>
                             <p>ÇAĞRI PUSULASI</p>
+                            <span style="position:absolute; right:0; top:0.8rem; font-size:0.85rem; font-weight:bold; border-bottom:1px dotted #000;">${dateStr}</span>
                         </div>
-                        <div class="school-doc-title">ÇAĞRI BELGESİ</div>
-                        <div class="school-doc-body" style="line-height:1.8; font-size:0.88rem;">
+                        <div class="school-doc-body" style="line-height:1.8; font-size:0.88rem; margin-top:1.5rem;">
                             ADI SOYADI.....: <strong>${nameStr}</strong><br>
                             NUMARASI.......: <strong>${noStr}</strong><br>
-                            SINIF/ŞUBE.....: <strong>${classStr}</strong><br><br>
-                            YUKARIDA BİLGİLERİ YAZILI ÖĞRENCİNİN <strong>${neden}</strong> mazereti nedeniyle <strong>${birim}</strong> servisine göndermenizi rica ederim.
+                            SINIF/ŞUBE.....: <strong>${classStr}</strong><br>
+                            DERS SAATİ.....: <strong>${dersSaat}</strong><br>
+                            ÇAĞRILAN YER...: <strong>${birim}</strong><br>
+                            ÇAĞRI NEDENİ...: <strong>${neden}</strong><br><br>
+                            <strong>Sayın ${ogretmen}</strong><br>
+                            Yukarıda bilgileri yazılı öğrencinin tezkereyi aldıktan sonra derhal belirtilen birime gelmesini rica ederim.
                         </div>
-                        <div class="school-doc-footer">
-                            <div>
-                                <small>Tarih: ${dateStr}</small>
+                        <div class="school-doc-footer" style="display:flex; justify-content:space-between; margin-top:2.5rem; font-size:0.85rem;">
+                            <div style="text-align:left;">
                             </div>
-                            <div class="school-doc-signature">
-                                <div class="school-doc-signature-title">${mdr_unvan}</div>
-                                <div>${mdr_ad}</div>
+                            <div style="text-align:center; min-width:180px;">
+                                <br>
+                                <strong>${mdr_ad}</strong><br>
+                                ${mdr_unvan}
                             </div>
                         </div>
                     </div>
