@@ -3056,16 +3056,31 @@ function openDocumentModal(studentNo) {
                 `;
             } else if (docType === 'gec') {
                 fields = `
-                    <div>
-                        <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Geç Mazereti</label>
-                        <select id="df-gec-neden" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
-                            <option value="Servis Aracının Gecikmesi">Servis Aracının Gecikmesi</option>
-                            <option value="Öğrencinin Uykuda Kalması">Öğrencinin Uykuda Kalması</option>
-                            <option value="Ulaşım Aracı">Ulaşım Aracı</option>
-                            <option value="Öğrencinin Yurt Nöbeti">Öğrencinin Yurt Nöbeti</option>
-                            <option value="İklim Şartları">İklim Şartları</option>
-                            <option value="Diğer Sebepler">Diğer Sebepler</option>
-                        </select>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+                        <div>
+                            <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Ders Saati</label>
+                            <select id="df-gec-ders-saat" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
+                                <option value="1.DERS SAATİ">1.DERS SAATİ</option>
+                                <option value="2.DERS SAATİ">2.DERS SAATİ</option>
+                                <option value="3.DERS SAATİ">3.DERS SAATİ</option>
+                                <option value="4.DERS SAATİ">4.DERS SAATİ</option>
+                                <option value="5.DERS SAATİ">5.DERS SAATİ</option>
+                                <option value="6.DERS SAATİ">6.DERS SAATİ</option>
+                                <option value="7.DERS SAATİ">7.DERS SAATİ</option>
+                                <option value="8.DERS SAATİ">8.DERS SAATİ</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Geç Mazereti</label>
+                            <select id="df-gec-neden" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
+                                <option value="Servis Aracının Gecikmesi">Servis Aracının Gecikmesi</option>
+                                <option value="Öğrencinin Uykuda Kalması">Öğrencinin Uykuda Kalması</option>
+                                <option value="Ulaşım Aracı">Ulaşım Aracı</option>
+                                <option value="Öğrencinin Yurt Nöbeti">Öğrencinin Yurt Nöbeti</option>
+                                <option value="İklim Şartları">İklim Şartları</option>
+                                <option value="Diğer Sebepler">Diğer Sebepler</option>
+                            </select>
+                        </div>
                     </div>
                     <div>
                         <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Ders Öğretmeni</label>
@@ -3277,29 +3292,34 @@ function openDocumentModal(studentNo) {
             } else if (docType === 'gec') {
                 const mazeret = document.getElementById('df-gec-neden').value;
                 const ogretmen = document.getElementById('df-gec-ogretmen').value || 'Nöbetçi Öğretmen';
+                const dersSaati = document.getElementById('df-gec-ders-saat')?.value || '';
                 
                 docHTML = `
                     <div class="school-doc-paper">
-                        <div class="school-doc-header">
+                        <div class="school-doc-header" style="position:relative;">
                             <h2>${schoolName}</h2>
-                            <p>GEÇ KAĞIDI</p>
+                            <p>ÖĞRENCİ GEÇ KAĞIDI</p>
+                            <span style="position:absolute; right:0; top:0.8rem; font-size:0.85rem; font-weight:bold; border-bottom:1px dotted #000;">${dateStr}</span>
                         </div>
-                        <div class="school-doc-title">GEÇ MAZERET BELGESİ</div>
-                        <div class="school-doc-body" style="line-height:1.8; font-size:0.88rem;">
+                        <div class="school-doc-body" style="line-height:1.8; font-size:0.88rem; margin-top:1.5rem;">
                             ADI SOYADI.....: <strong>${nameStr}</strong><br>
                             NUMARASI.......: <strong>${noStr}</strong><br>
                             SINIF/ŞUBE.....: <strong>${classStr}</strong><br>
-                            GEÇ MAZERET....: <strong>${mazeret}</strong><br><br>
-                            Yukarıda bilgileri yazılı mazeretli olarak gecikmiş öğrencimizin derse kabülünü ve bu tezkerenin yoklama defterine / fişine konulmasını rica ederim.
+                            DERS SAATİ.....: <strong>${dersSaati}</strong><br>
+                            GECİKME SEBEBİ:<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<strong>${mazeret}</strong><br><br>
+                            <strong>Sayın ${ogretmen}</strong><br>
+                            Yukarıda Bilgileri yazılı Öğrenci mazeretli olarak gecikmiştir. Öğrencinin derse kabülünü ve bu tezkerenin yoklama defteri arasına konulmasını rica ederim.
                         </div>
-                        <div class="school-doc-footer">
-                            <div>
-                                <small>Tarih: ${dateStr}</small><br>
-                                <small>Saat: ${new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'})}</small>
+                        <div class="school-doc-footer" style="display:flex; justify-content:space-between; margin-top:2.5rem; font-size:0.85rem;">
+                            <div style="text-align:left;">
+                                Yoklama Fişine İşlendi.<br>
+                                Öğretmenin İmzası
                             </div>
-                            <div class="school-doc-signature">
-                                <div class="school-doc-signature-title">Nöbetçi Öğretmen</div>
-                                <div style="margin-top: 1rem; font-weight: bold;">${ogretmen}</div>
+                            <div style="text-align:center; min-width:180px;">
+                                <br>
+                                <strong>${mdr_ad}</strong><br>
+                                ${mdr_unvan}
                             </div>
                         </div>
                     </div>
