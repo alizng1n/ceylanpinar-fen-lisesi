@@ -2168,7 +2168,7 @@
                 </div>
 
                 <!-- Öğrenci Belge Geçmişi (Sicil) -->
-                <div style="border-top:1px solid var(--border-color); padding-top:1rem; margin-top:0.5rem; display:flex; flex-direction:column; gap:0.5rem;">
+                <div id="doc-history-section" style="border-top:1px solid var(--border-color); padding-top:1rem; margin-top:0.5rem; display:flex; flex-direction:column; gap:0.5rem;">
                     <label style="font-size:0.8rem; font-weight:700; color:var(--text-secondary); display:flex; align-items:center; gap:0.3rem;">
                         <i data-lucide="history" size="14"></i> Öğrenci İşlem Geçmişi (Son Belgeler)
                     </label>
@@ -2943,18 +2943,37 @@ function openDocumentModal(studentNo) {
             const student = schoolData.ogrenci.find(s => String(s.no) === String(studentNo));
             if (!student) return;
             selectedDocStudent = student;
-            document.getElementById('doc-stud-name').innerText = (student.ad || '') + ' ' + (student.soyad || '');
-            document.getElementById('doc-stud-no').innerText = student.no || '-';
-            document.getElementById('doc-stud-class').innerText = student.snf || '-';
             
+            const isAnonymous = String(student.no) === 'ADI';
+            if (isAnonymous) {
+                document.getElementById('doc-stud-name').innerText = "Boş Şablon (İsimsiz)";
+                document.getElementById('doc-stud-no').innerText = "........................";
+                document.getElementById('doc-stud-class').innerText = "........................";
+            } else {
+                document.getElementById('doc-stud-name').innerText = (student.ad || '') + ' ' + (student.soyad || '');
+                document.getElementById('doc-stud-no').innerText = student.no || '-';
+                document.getElementById('doc-stud-class').innerText = student.snf || '-';
+            }
+
             const today = new Date();
             const dateStr = today.getDate().toString().padStart(2, '0') + '/' + 
                             (today.getMonth() + 1).toString().padStart(2, '0') + '/' + 
                             today.getFullYear();
             document.getElementById('doc-current-date').innerText = dateStr;
-            
+
             document.getElementById('doc-type-select').value = 'izin';
             switchDocumentType();
+            
+            // Öğrenci Geçmişi Görünürlük Kontrolü
+            const historySection = document.getElementById('doc-history-section');
+            if (historySection) {
+                if (isAnonymous) {
+                    historySection.style.setProperty('display', 'none', 'important');
+                } else {
+                    historySection.style.setProperty('display', 'flex', 'important');
+                }
+            }
+            
             renderStudentHistory(student);
             
             // Onaylayan custom combobox'larını ilklendir ve varsayılan idareciyi ata
@@ -3223,59 +3242,74 @@ function openDocumentModal(studentNo) {
                 return dStr;
             };
 
-            // Geçmişe kaydetme mantığı
-            if (!selectedDocStudent.history) {
-                selectedDocStudent.history = [];
+            const isAnonymous = String(selectedDocStudent.no) === 'ADI';
+
+            // Geçmişe kaydetme mantığı (Sadece gerçek öğrenciler için)
+            if (!isAnonymous) {
+                if (!selectedDocStudent.history) {
+                    selectedDocStudent.history = [];
+                }
+                
+                let docTypeName = 'Resmi Belge';
+                let details = '';
+                
+                if (docType === 'izin') {
+                    docTypeName = 'Mazeret İzni';
+                    const basSaat = document.getElementById('df-izin-baslangic-saat')?.value || '';
+                    const bitSaat = document.getElementById('df-izin-bitis-saat')?.value || '';
+                    const mazeret = document.getElementById('df-izin-neden')?.value || '';
+                    const izinAraligi = (basSaat === bitSaat || bitSaat === 'DERS SAATİ') ? basSaat : `${basSaat} - ${bitSaat}`;
+                    details = `${izinAraligi} | Neden: ${mazeret}`;
+                } else if (docType === 'gec') {
+                    docTypeName = 'Geç Kağıdı';
+                    const mazeret = document.getElementById('df-gec-neden')?.value || '';
+                    const dersSaat = document.getElementById('df-gec-ders-saat')?.value || '';
+                    details = `${dersSaat} | Neden: ${mazeret}`;
+                } else if (docType === 'kabul') {
+                    docTypeName = 'Derse Kabul';
+                    const ogretmen = document.getElementById('df-kabul-ogretmen')?.value || '';
+                    const dersSaat = document.getElementById('df-kabul-saat')?.value || '';
+                    details = `${dersSaat} | Öğretmen: ${ogretmen}`;
+                } else if (docType === 'cagri') {
+                    docTypeName = 'Çağrı Pusulası';
+                    const dersSaat = document.getElementById('df-cagri-ders-saat')?.value || '';
+                    const ogretmen = document.getElementById('df-cagri-ogretmen')?.value || '';
+                    const birim = document.getElementById('df-cagri-birim')?.value || '';
+                    details = `${dersSaat} | Yer: ${birim} | Öğretmen: ${ogretmen}`;
+                } else if (docType === 'veli-izin') {
+                    docTypeName = 'Veli İzin Dilekçesi';
+                    const basTarih = formatTurkishDate(document.getElementById('df-veli-izin-bas-tarih')?.value || '');
+                    const bitTarih = formatTurkishDate(document.getElementById('df-veli-izin-bit-tarih')?.value || '');
+                    const mazeret = document.getElementById('df-veli-izin-neden')?.value || '';
+                    details = `${basTarih} - ${bitTarih} | Neden: ${mazeret}`;
+                } else if (docType === 'uyari') {
+                    docTypeName = 'Yazılı Uyarı';
+                    const davranis = document.getElementById('df-uyari-davranis')?.value || '';
+                    details = `Sebep: ${davranis}`;
+                }
+                
+                selectedDocStudent.history.unshift({
+                    tarih: dateStr,
+                    tur: docTypeName,
+                    detay: details
+                });
+                persistSchoolData();
             }
             
-            let docTypeName = 'Resmi Belge';
-            let details = '';
-            
-            if (docType === 'izin') {
-                docTypeName = 'Mazeret İzni';
-                const basSaat = document.getElementById('df-izin-baslangic-saat')?.value || '';
-                const bitSaat = document.getElementById('df-izin-bitis-saat')?.value || '';
-                const mazeret = document.getElementById('df-izin-neden')?.value || '';
-                const izinAraligi = (basSaat === bitSaat || bitSaat === 'DERS SAATİ') ? basSaat : `${basSaat} - ${bitSaat}`;
-                details = `${izinAraligi} | Neden: ${mazeret}`;
-            } else if (docType === 'gec') {
-                docTypeName = 'Geç Kağıdı';
-                const mazeret = document.getElementById('df-gec-neden')?.value || '';
-                const dersSaat = document.getElementById('df-gec-ders-saat')?.value || '';
-                details = `${dersSaat} | Neden: ${mazeret}`;
-            } else if (docType === 'kabul') {
-                docTypeName = 'Derse Kabul';
-                const ogretmen = document.getElementById('df-kabul-ogretmen')?.value || '';
-                const dersSaat = document.getElementById('df-kabul-saat')?.value || '';
-                details = `${dersSaat} | Öğretmen: ${ogretmen}`;
-            } else if (docType === 'cagri') {
-                docTypeName = 'Çağrı Pusulası';
-                const dersSaat = document.getElementById('df-cagri-ders-saat')?.value || '';
-                const ogretmen = document.getElementById('df-cagri-ogretmen')?.value || '';
-                const birim = document.getElementById('df-cagri-birim')?.value || '';
-                details = `${dersSaat} | Yer: ${birim} | Öğretmen: ${ogretmen}`;
-            } else if (docType === 'veli-izin') {
-                docTypeName = 'Veli İzin Dilekçesi';
-                const basTarih = formatTurkishDate(document.getElementById('df-veli-izin-bas-tarih')?.value || '');
-                const bitTarih = formatTurkishDate(document.getElementById('df-veli-izin-bit-tarih')?.value || '');
-                const mazeret = document.getElementById('df-veli-izin-neden')?.value || '';
-                details = `${basTarih} - ${bitTarih} | Neden: ${mazeret}`;
-            } else if (docType === 'uyari') {
-                docTypeName = 'Yazılı Uyarı';
-                const davranis = document.getElementById('df-uyari-davranis')?.value || '';
-                details = `Sebep: ${davranis}`;
-            }
-            
-            selectedDocStudent.history.unshift({
-                tarih: dateStr,
-                tur: docTypeName,
-                detay: details
-            });
-            persistSchoolData();
             const printArea = document.getElementById('print-section');
-            const nameStr = (selectedDocStudent.ad || '') + ' ' + (selectedDocStudent.soyad || '');
-            const noStr = selectedDocStudent.no || '-';
-            const classStr = selectedDocStudent.snf || '-';
+            let nameStr = '';
+            let noStr = '';
+            let classStr = '';
+            
+            if (isAnonymous) {
+                nameStr = '................................................';
+                noStr = '........................';
+                classStr = '........................';
+            } else {
+                nameStr = (selectedDocStudent.ad || '') + ' ' + (selectedDocStudent.soyad || '');
+                noStr = selectedDocStudent.no || '-';
+                classStr = selectedDocStudent.snf || '-';
+            }
             
             let docHTML = '';
 
