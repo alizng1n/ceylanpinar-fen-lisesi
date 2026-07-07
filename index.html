@@ -3706,8 +3706,11 @@ function showSchoolManagementView() {
                 thead = '<tr style="background:var(--bg-page); border-bottom:2px solid var(--border-color);"><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">No</th><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">Ad Soyad</th><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">Sınıf</th><th style="padding:0.75rem 1rem; text-align:center; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">İşlem</th></tr>';
                 records.forEach(r => {
                     const rec = JSON.stringify(r).replace(/'/g, "&#39;");
-                    let actionButtons = `<button onclick="openDocumentModal('${r.no||''}')" style="background:none; border:1px solid #cbd5e1; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#10b981; font-size:0.78rem; margin-right:0.25rem;">Belge Üret</button>`;
-                    if (isAdmin) {
+                    const isAnon = String(r.no) === 'ADI';
+                    const btnText = isAnon ? 'İsimsiz Belge Üret' : 'Belge Üret';
+                    const btnColor = isAnon ? '#f59e0b' : '#10b981';
+                    let actionButtons = `<button onclick="openDocumentModal('${r.no||''}')" style="background:none; border:1px solid #cbd5e1; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:${btnColor}; font-size:0.78rem; margin-right:0.25rem;">${btnText}</button>`;
+                    if (isAdmin && !isAnon) {
                         actionButtons += `<button onclick="openSchoolModal('${r.no||''}')" style="background:none; border:1px solid #cbd5e1; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#3b82f6; font-size:0.78rem; margin-right:0.25rem;">Düzenle</button><button onclick="deleteSchoolRecord('${r.no||''}','ogrenci')" style="background:none; border:1px solid #fee2e2; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#ef4444; font-size:0.78rem;">Sil</button>`;
                     }
                     rows += `<tr class="school-table-row"><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.8rem;">${r.no||'-'}</td><td style="padding:0.7rem 1rem; font-weight:500; color:var(--text-primary);">${r.ad||''} ${r.soyad||''}</td><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.85rem;">${r.snf||'-'}</td><td style="padding:0.7rem 1rem; text-align:center;">${actionButtons}</td></tr>`;
