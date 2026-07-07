@@ -2139,7 +2139,7 @@
                 </div>
 
                 <!-- Onaylayan Seçimi -->
-                <div style="border-top:1px solid var(--border-color); padding-top:1rem; margin-top:0.5rem; display:flex; flex-direction:column; gap:0.5rem;">
+                <div id="doc-approver-section" style="border-top:1px solid var(--border-color); padding-top:1rem; margin-top:0.5rem; display:flex; flex-direction:column; gap:0.5rem;">
                     <label style="font-size:0.8rem; font-weight:700; color:var(--text-secondary); display:flex; align-items:center; gap:0.3rem;">
                         <i data-lucide="user-check" size="14"></i> Onaylayan
                     </label>
@@ -3197,6 +3197,16 @@ function openDocumentModal(studentNo) {
             }
             
             container.innerHTML = fields;
+            
+            // Veli İzin Dilekçesi için Onaylayan bölümünü gizle, diğerleri için göster
+            const approverSection = document.getElementById('doc-approver-section');
+            if (approverSection) {
+                if (docType === 'veli-izin') {
+                    approverSection.style.setProperty('display', 'none', 'important');
+                } else {
+                    approverSection.style.setProperty('display', 'flex', 'important');
+                }
+            }
         }
 
 
@@ -3455,7 +3465,7 @@ function openDocumentModal(studentNo) {
                             <strong>ÖĞRENCİ BİLGİLERİ:</strong> <strong>${nameStr}</strong> (${noStr}) - Sınıf: <strong>${classStr}</strong><br>
                             <strong>YAZILI UYARI SEBEBİ:</strong> <u>${davranis}</u>
                         </div>
-                        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:0.5rem; text-align:center; font-size:0.72rem; margin-top:1.5rem;">
+                        <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:0.5rem; text-align:center; font-size:0.72rem; margin-top:1.5rem;">
                             <div>
                                 <strong>ÖĞRENCİ</strong><br><br><br>
                                 <span>${nameStr}</span>
@@ -3471,6 +3481,10 @@ function openDocumentModal(studentNo) {
                             <div>
                                 <strong>MÜDÜR YARDIMCISI</strong><br><br><br>
                                 <span>${mdr_yrd}</span>
+                            </div>
+                            <div>
+                                <strong>${mdr_unvan.toLocaleUpperCase('tr-TR')}</strong><br><br><br>
+                                <span>${mdr_ad}</span>
                             </div>
                         </div>
                     </div>
