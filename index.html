@@ -60,8 +60,9 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
-        body, header, aside, main, .sidebar-card, .info-card, .btn, .theme-toggle, input, select, .news-card, .portal-card, .split-btn-card, .modal-card {
-            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        /* Tema geçiş hızı ve performansı için animasyonlar optimize edilmiştir */
+        body {
+            transition: background-color 0.1s ease, color 0.1s ease;
         }
 
         body {
@@ -423,25 +424,27 @@
             font-size: 0.72rem;
             letter-spacing: 0.16em;
             font-weight: 700;
-            color: var(--accent-color);
+            color: #000000;
             margin-bottom: 0.1rem;
-            opacity: 0.9;
+            opacity: 1;
+        }
+
+        [data-theme="dark"] .portal-category {
+            color: #ffffff;
         }
 
         .portal-welcome h2 {
             font-size: 2.6rem;
             font-weight: 800;
             letter-spacing: -0.025em;
-            background: linear-gradient(135deg, var(--text-primary) 30%, #1d4ed8 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #000000;
             margin: 0;
         }
 
         [data-theme="dark"] .portal-welcome h2 {
-            background: linear-gradient(135deg, #ffffff 40%, #60a5fa 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #ffffff;
+            background: none;
+            -webkit-text-fill-color: initial;
         }
 
         .portal-welcome p {
@@ -1700,7 +1703,122 @@
             font-weight: bold;
             margin-bottom: 2rem;
         }
-            .school-table-row {
+            .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            border: none;
+            border-radius: 6px;
+            padding: 0.25rem 0.55rem;
+            font-size: 0.76rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Inter', sans-serif;
+            outline: none;
+        }
+        .btn-action svg {
+            width: 12px !important;
+            height: 12px !important;
+            stroke-width: 2.5px !important;
+        }
+        .btn-action:not(:last-child) {
+            margin-right: 0.35rem;
+        }
+        .btn-action:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+        .btn-action:active {
+            transform: translateY(0);
+        }
+
+        /* Belge Üret */
+        .btn-action-print {
+            background-color: rgba(16, 185, 129, 0.08);
+            color: #059669;
+        }
+        .btn-action-print:hover {
+            background-color: #10b981;
+            color: #ffffff;
+        }
+        [data-theme="dark"] .btn-action-print {
+            background-color: rgba(52, 211, 153, 0.15);
+            color: #34d399;
+        }
+        [data-theme="dark"] .btn-action-print:hover {
+            background-color: #34d399;
+            color: #0c0a09;
+        }
+
+        /* İsimsiz Belge Üret */
+        .btn-action-anon {
+            background-color: rgba(245, 158, 11, 0.08);
+            color: #d97706;
+        }
+        .btn-action-anon:hover {
+            background-color: #f59e0b;
+            color: #ffffff;
+        }
+        [data-theme="dark"] .btn-action-anon {
+            background-color: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+        }
+        [data-theme="dark"] .btn-action-anon:hover {
+            background-color: #fbbf24;
+            color: #0c0a09;
+        }
+
+        /* Düzenle */
+        .btn-action-edit {
+            background-color: rgba(59, 130, 246, 0.08);
+            color: #2563eb;
+        }
+        .btn-action-edit:hover {
+            background-color: #3b82f6;
+            color: #ffffff;
+        }
+        [data-theme="dark"] .btn-action-edit {
+            background-color: rgba(96, 165, 250, 0.15);
+            color: #60a5fa;
+        }
+        [data-theme="dark"] .btn-action-edit:hover {
+            background-color: #60a5fa;
+            color: #0c0a09;
+        }
+
+        /* Sil */
+        .btn-action-delete {
+            background-color: rgba(239, 68, 68, 0.08);
+            color: #dc2626;
+        }
+        .btn-action-delete:hover {
+            background-color: #ef4444;
+            color: #ffffff;
+        }
+        [data-theme="dark"] .btn-action-delete {
+            background-color: rgba(248, 113, 113, 0.15);
+            color: #f87171;
+        }
+        [data-theme="dark"] .btn-action-delete:hover {
+            background-color: #f87171;
+            color: #ffffff;
+        }
+
+        .disable-transitions,
+        .disable-transitions * {
+            transition: none !important;
+            animation: none !important;
+        }
+
+        .btn-action svg,
+        .btn-action .lucide {
+            width: 11px !important;
+            height: 11px !important;
+            stroke-width: 2.5px !important;
+        }
+
+        .school-table-row {
             border-bottom: 1px solid var(--border-color);
             transition: background-color 0.15s ease;
         }
@@ -2192,7 +2310,7 @@
                 <!-- Belge Turu Secimi -->
                 <div>
                     <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Belge Türü</label>
-                    <select id="doc-type-select" onchange="switchDocumentType()" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
+                    <select id="doc-type-select" onchange="switchDocumentType()" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; ">
                         <option value="izin">İZİN (İzin Tezkeresi)</option>
                         <option value="gec">GEÇ (Geç Kağıdı)</option>
                         <option value="kabul">DERSE KABUL (Derse Kabul Kağıdı)</option>
@@ -2394,6 +2512,9 @@
         }
 
         function toggleTheme() {
+            // Tema geçişinde binlerce elemanın transition yükünü kaldırmak için geçici olarak animasyonları kapatıyoruz
+            document.documentElement.classList.add('disable-transitions');
+
             const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
@@ -2401,6 +2522,11 @@
             if (activeStudent) {
                 renderProgressChart(activeStudent); // redraw chart with new colors
             }
+
+            // Render işlemi tamamlandıktan hemen sonra geçişleri geri açıyoruz (anlık geçiş sağlanmış olur)
+            setTimeout(() => {
+                document.documentElement.classList.remove('disable-transitions');
+            }, 30);
         }
 
         function updateThemeButtonIcon(theme) {
@@ -3132,7 +3258,7 @@ function openDocumentModal(studentNo) {
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
                         <div>
                             <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">İzin Başlangıç Saati</label>
-                            <select id="df-izin-baslangic-saat" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
+                            <select id="df-izin-baslangic-saat" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; ">
                                 <option value="1.DERS SAATİ">1.DERS SAATİ</option>
                                 <option value="2.DERS SAATİ">2.DERS SAATİ</option>
                                 <option value="3.DERS SAATİ">3.DERS SAATİ</option>
@@ -3146,7 +3272,7 @@ function openDocumentModal(studentNo) {
                         </div>
                         <div>
                             <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">İzin Bitiş Saati</label>
-                            <select id="df-izin-bitis-saat" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
+                            <select id="df-izin-bitis-saat" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; ">
                                 <option value="DERS SAATİ">DERS SAATİ</option>
                                 <option value="1.DERS SAATİ">1.DERS SAATİ</option>
                                 <option value="2.DERS SAATİ">2.DERS SAATİ</option>
@@ -3162,7 +3288,7 @@ function openDocumentModal(studentNo) {
                     </div>
                     <div>
                         <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">İzin Mazereti</label>
-                        <select id="df-izin-neden" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
+                        <select id="df-izin-neden" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; ">
                             <option value="Hastalık izni">Hastalık izni</option>
                             <option value="Ailesinin Taziyesi">Ailesinin Taziyesi</option>
                             <option value="Ailesinin Düğünü">Ailesinin Düğünü</option>
@@ -3178,7 +3304,7 @@ function openDocumentModal(studentNo) {
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
                         <div>
                             <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Ders Saati</label>
-                            <select id="df-gec-ders-saat" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
+                            <select id="df-gec-ders-saat" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; ">
                                 <option value="1.DERS SAATİ">1.DERS SAATİ</option>
                                 <option value="2.DERS SAATİ">2.DERS SAATİ</option>
                                 <option value="3.DERS SAATİ">3.DERS SAATİ</option>
@@ -3191,7 +3317,7 @@ function openDocumentModal(studentNo) {
                         </div>
                         <div>
                             <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Geç Mazereti</label>
-                            <select id="df-gec-neden" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
+                            <select id="df-gec-neden" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; ">
                                 <option value="Servis Aracının Gecikmesi">Servis Aracının Gecikmesi</option>
                                 <option value="Öğrencinin Uykuda Kalması">Öğrencinin Uykuda Kalması</option>
                                 <option value="Ulaşım Aracının Gecikmesi">Ulaşım Aracının Gecikmesi</option>
@@ -3203,7 +3329,7 @@ function openDocumentModal(studentNo) {
                     </div>
                     <div>
                         <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Ders Öğretmeni</label>
-                        <select id="df-gec-ogretmen" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
+                        <select id="df-gec-ogretmen" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; ">
                             ${ogretmenOptions}
                         </select>
                     </div>
@@ -3213,7 +3339,7 @@ function openDocumentModal(studentNo) {
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
                         <div>
                             <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Ders Saati</label>
-                            <select id="df-kabul-saat" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
+                            <select id="df-kabul-saat" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; ">
                                 <option value="1.DERS SAATİ">1.DERS SAATİ</option>
                                 <option value="2.DERS SAATİ">2.DERS SAATİ</option>
                                 <option value="3.DERS SAATİ">3.DERS SAATİ</option>
@@ -3226,7 +3352,7 @@ function openDocumentModal(studentNo) {
                         </div>
                         <div>
                             <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Ders Öğretmeni</label>
-                            <select id="df-kabul-ogretmen" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
+                            <select id="df-kabul-ogretmen" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; ">
                                 ${ogretmenOptions}
                             </select>
                         </div>
@@ -3237,7 +3363,7 @@ function openDocumentModal(studentNo) {
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
                         <div>
                             <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Ders Saati</label>
-                            <select id="df-cagri-ders-saat" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
+                            <select id="df-cagri-ders-saat" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; ">
                                 <option value="1.DERS SAATİ">1.DERS SAATİ</option>
                                 <option value="2.DERS SAATİ">2.DERS SAATİ</option>
                                 <option value="3.DERS SAATİ">3.DERS SAATİ</option>
@@ -3250,14 +3376,14 @@ function openDocumentModal(studentNo) {
                         </div>
                         <div>
                             <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Ders Öğretmeni</label>
-                            <select id="df-cagri-ogretmen" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
+                            <select id="df-cagri-ogretmen" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; ">
                                 ${ogretmenOptions}
                             </select>
                         </div>
                     </div>
                     <div>
                         <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Çağrı Nedeni</label>
-                        <select id="df-cagri-neden" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
+                        <select id="df-cagri-neden" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; ">
                             <option value="Öğrencinin Akademik Gelişim Değerlendirmesi">Öğrencinin Akademik Gelişim Değerlendirmesi</option>
                             <option value="Olumsuz Davranış ve Disiplin Görüşmesi">Olumsuz Davranış ve Disiplin Görüşmesi</option>
                             <option value="Devamsızlık Durumu Görüşmesi">Devamsızlık Durumu Görüşmesi</option>
@@ -3266,7 +3392,7 @@ function openDocumentModal(studentNo) {
                     </div>
                     <div>
                         <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">İlgili Birim / Yer</label>
-                        <select id="df-cagri-birim" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
+                        <select id="df-cagri-birim" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; ">
                             <option value="İdare / Rehberlik">İdare / Rehberlik</option>
                             <option value="Sınıf Rehber Öğretmeni">Sınıf Rehber Öğretmeni</option>
                             <option value="Okul Müdürlüğü">Okul Müdürlüğü</option>
@@ -3278,11 +3404,11 @@ function openDocumentModal(studentNo) {
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
                         <div>
                             <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Başlangıç Tarihi</label>
-                            <input type="date" id="df-veli-baslangic" class="input-field" value="${today}" style="color:#000;">
+                            <input type="date" id="df-veli-baslangic" class="input-field" value="${today}" style="">
                         </div>
                         <div>
                             <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Bitiş Tarihi</label>
-                            <input type="date" id="df-veli-bitis" class="input-field" value="${today}" style="color:#000;">
+                            <input type="date" id="df-veli-bitis" class="input-field" value="${today}" style="">
                         </div>
                     </div>
                 `;
@@ -3290,25 +3416,25 @@ function openDocumentModal(studentNo) {
                 fields = `
                     <div>
                         <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Uyarı Sebebi (Olumsuz Davranış)</label>
-                        <input type="text" id="df-uyari-davranis" class="input-field" placeholder="Örn: Sınıf içi kurallara uymamakta ısrar etme" style="color:#000;">
+                        <input type="text" id="df-uyari-davranis" class="input-field" placeholder="Örn: Sınıf içi kurallara uymamakta ısrar etme" style="">
                     </div>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
                         <div>
                             <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Sınıf Rehber Öğrt.</label>
-                            <select id="df-uyari-sinif-ref" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
+                            <select id="df-uyari-sinif-ref" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; ">
                                 ${ogretmenOptions}
                             </select>
                         </div>
                         <div>
                             <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Rehber Öğretmen</label>
-                            <select id="df-uyari-ref" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
+                            <select id="df-uyari-ref" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; ">
                                 ${ogretmenOptions}
                             </select>
                         </div>
                     </div>
                     <div>
                         <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Müdür Yardımcısı</label>
-                        <select id="df-uyari-mdr-yrd" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; color:#000;">
+                        <select id="df-uyari-mdr-yrd" class="input-field" style="width:100%; box-sizing:border-box; height:48px; padding:0.5rem 1rem; ">
                             ${idareOptions}
                         </select>
                     </div>
@@ -3793,11 +3919,12 @@ function showSchoolManagementView() {
                 records.forEach(r => {
                     const rec = JSON.stringify(r).replace(/'/g, "&#39;");
                     const isAnon = String(r.no) === 'ADI';
+                    const btnClass = isAnon ? 'btn-action btn-action-anon' : 'btn-action btn-action-print';
+                    const btnIcon = isAnon ? 'file-text' : 'printer';
                     const btnText = isAnon ? 'İsimsiz Belge Üret' : 'Belge Üret';
-                    const btnColor = isAnon ? '#f59e0b' : '#10b981';
-                    let actionButtons = `<button onclick="openDocumentModal('${r.no||''}')" style="background:none; border:1px solid #cbd5e1; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:${btnColor}; font-size:0.78rem; margin-right:0.25rem;">${btnText}</button>`;
+                    let actionButtons = `<button onclick="openDocumentModal('${r.no||''}')" class="${btnClass}"><i data-lucide="${btnIcon}" size="13"></i>${btnText}</button>`;
                     if (isAdmin && !isAnon) {
-                        actionButtons += `<button onclick="openSchoolModal('${r.no||''}')" style="background:none; border:1px solid #cbd5e1; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#3b82f6; font-size:0.78rem; margin-right:0.25rem;">Düzenle</button><button onclick="deleteSchoolRecord('${r.no||''}','ogrenci')" style="background:none; border:1px solid #fee2e2; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#ef4444; font-size:0.78rem;">Sil</button>`;
+                        actionButtons += `<button onclick="openSchoolModal('${r.no||''}')" class="btn-action btn-action-edit"><i data-lucide="edit-2" size="13"></i>Düzenle</button><button onclick="deleteSchoolRecord('${r.no||''}','ogrenci')" class="btn-action btn-action-delete"><i data-lucide="trash-2" size="13"></i>Sil</button>`;
                     }
                     rows += `<tr class="school-table-row"><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.8rem;">${r.no||'-'}</td><td style="padding:0.7rem 1rem; font-weight:500; color:var(--text-primary);">${r.ad||''} ${r.soyad||''}</td><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.85rem;">${r.snf||'-'}</td><td style="padding:0.7rem 1rem; text-align:center;">${actionButtons}</td></tr>`;
                 });
@@ -3807,7 +3934,7 @@ function showSchoolManagementView() {
                     const rec = JSON.stringify(r).replace(/'/g, "&#39;");
                     let actionButtons = '';
                     if (isAdmin) {
-                        actionButtons += `<button onclick="openSchoolModal('${r.id||''}')" style="background:none; border:1px solid #cbd5e1; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#3b82f6; font-size:0.78rem; margin-right:0.25rem;">Düzenle</button><button onclick="deleteSchoolRecord('${r.id||''}','ogretmen')" style="background:none; border:1px solid #fee2e2; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#ef4444; font-size:0.78rem;">Sil</button>`;
+                        actionButtons += `<button onclick="openSchoolModal('${r.id||''}')" class="btn-action btn-action-edit"><i data-lucide="edit-2" size="13"></i>Düzenle</button><button onclick="deleteSchoolRecord('${r.id||''}','ogretmen')" class="btn-action btn-action-delete"><i data-lucide="trash-2" size="13"></i>Sil</button>`;
                     } else {
                         actionButtons += '';
                     }
@@ -3819,7 +3946,7 @@ function showSchoolManagementView() {
                     const rec = JSON.stringify(r).replace(/'/g, "&#39;");
                     let actionButtons = '';
                     if (isAdmin) {
-                        actionButtons += `<button onclick="openSchoolModal('${r.id||''}')" style="background:none; border:1px solid #cbd5e1; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#3b82f6; font-size:0.78rem; margin-right:0.25rem;">Düzenle</button><button onclick="deleteSchoolRecord('${r.id||''}','idare')" style="background:none; border:1px solid #fee2e2; border-radius:6px; padding:0.2rem 0.55rem; cursor:pointer; color:#ef4444; font-size:0.78rem;">Sil</button>`;
+                        actionButtons += `<button onclick="openSchoolModal('${r.id||''}')" class="btn-action btn-action-edit"><i data-lucide="edit-2" size="13"></i>Düzenle</button><button onclick="deleteSchoolRecord('${r.id||''}','idare')" class="btn-action btn-action-delete"><i data-lucide="trash-2" size="13"></i>Sil</button>`;
                     } else {
                         actionButtons += '';
                     }
