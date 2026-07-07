@@ -2291,6 +2291,25 @@
             setupDragAndDrop();
             initNewsFetcher(); // Start scraping news
             initRouter();      // Initialize browser navigation
+            
+            // ESC tuşu ile modalları kapatma desteği
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    const docModal = document.getElementById('document-modal');
+                    const schoolModal = document.getElementById('school-modal');
+                    const loginModal = document.getElementById('login-modal');
+                    
+                    if (docModal && docModal.style.display !== 'none') {
+                        closeDocumentModal();
+                    }
+                    if (schoolModal && schoolModal.style.display !== 'none') {
+                        closeSchoolModal();
+                    }
+                    if (loginModal && loginModal.classList.contains('open')) {
+                        closeLoginModal();
+                    }
+                }
+            });
         });
 
         // Theme management
