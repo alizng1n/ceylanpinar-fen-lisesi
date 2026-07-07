@@ -3390,26 +3390,27 @@ function openDocumentModal(studentNo) {
                 
                 docHTML = `
                     <div class="school-doc-paper a6-paper">
-                        <div>
-                            <div class="school-doc-header" style="position:relative;">
-                                <h2>${schoolName}</h2>
-                                <p>ÖĞRENCİ GEÇ KAĞIDI</p>
-                                <span style="position:absolute; right:0; top:0.8rem; font-size:0.85rem; font-weight:bold; border-bottom:1px dotted #000;">${dateStr}</span>
-                            </div>
-                            <div class="school-doc-body" style="line-height:1.45; font-size:0.8rem; margin-top:0.8rem;">
-                                ADI SOYADI.....: <strong>${nameStr}</strong><br>
-                                NUMARASI.......: <strong>${noStr}</strong><br>
-                                SINIF/ŞUBE.....: <strong>${classStr}</strong><br>
-                                DERS SAATİ.....: <strong>${dersSaati}</strong><br>
-                                GECİKME SEBEBİ:<br>
-                                &nbsp;&nbsp;&nbsp;&nbsp;<strong>${mazeret}</strong><br><br>
-                                <strong>Sayın ${ogretmen}</strong><br>
-                                Yukarıda Bilgileri yazılı Öğrenci mazeretli olarak gecikmiştir. Öğrencinin derse kabülünü ve bu tezkerenin yoklama defteri arasına konulmasını rica ederim.
-                            </div>
+                        <div class="school-doc-header" style="border-bottom:2px double #000; padding-bottom:0.3rem; margin-bottom:0; text-align:center;">
+                            <h2 style="font-size:0.88rem; font-weight:bold; margin:0; text-transform:uppercase; white-space:nowrap;">${schoolName}</h2>
+                        </div>
+                        <div style="display:flex; justify-content:flex-end; font-size:0.8rem; font-weight:bold; margin:0; width:100%;">
+                            <span style="border-bottom:1px dotted #000; padding-bottom:2px; white-space:nowrap;">Tarih: ${dateStr}</span>
+                        </div>
+                        <div style="text-align:center; font-size:0.95rem; font-weight:bold; margin:0; text-transform:uppercase;">ÖĞRENCİ GEÇ KAĞIDI</div>
+                        <div class="school-doc-body" style="line-height:1.45; font-size:0.8rem; margin:0;">
+                            ADI SOYADI: <strong>${nameStr}</strong><br>
+                            NUMARASI: <strong>${noStr}</strong><br>
+                            SINIF/ŞUBE: <strong>${classStr}</strong><br>
+                            DERS SAATİ: <strong>${dersSaati}</strong><br><br>
+                            GECİKME SEBEBİ: <strong>${mazeret}</strong>
+                        </div>
+                        <div style="font-size:0.8rem; line-height:1.4; text-align:justify; margin:0;">
+                            <strong>Sayın ${ogretmen}</strong><br>
+                            Yukarıda bilgileri yazılı öğrenci mazeretli olarak gecikmiştir. Öğrencinin derse kabulünü ve bu tezkerenin yoklama defteri arasına konulmasını rica ederim.
                         </div>
                         <div class="school-doc-footer" style="display:flex; justify-content:space-between; margin-top:0; font-size:0.8rem;">
-                            <div style="text-align:left;">
-                                Yoklama Fişine İşlendi.<br>
+                            <div style="text-align:left; font-size:0.75rem; line-height:1.3; align-self:flex-end;">
+                                Yoklama fişine işlendi.<br>
                                 Öğretmenin İmzası
                             </div>
                             <div style="text-align:center; min-width:180px;">
@@ -3426,24 +3427,24 @@ function openDocumentModal(studentNo) {
                 
                 docHTML = `
                     <div class="school-doc-paper a6-paper">
-                        <div>
-                            <div class="school-doc-header" style="position:relative;">
-                                <h2>${schoolName}</h2>
-                                <p>DERSE KABUL KAĞIDI</p>
-                                <span style="position:absolute; right:0; top:0.8rem; font-size:0.85rem; font-weight:bold; border-bottom:1px dotted #000;">${dateStr}</span>
-                            </div>
-                            <div class="school-doc-body" style="line-height:1.45; font-size:0.8rem; margin-top:0.8rem;">
-                                ADI SOYADI.....: <strong>${nameStr}</strong><br>
-                                NUMARASI.......: <strong>${noStr}</strong><br>
-                                SINIF/ŞUBE.....: <strong>${classStr}</strong><br>
-                                DERS SAATİ.....: <strong>${dersSaat}</strong><br><br>
-                                <strong>Sayın ${ogretmen}</strong><br>
-                                Yukarıda bilgileri yazılı öğrencinin derse kabulünü ve bu tezkerenin yoklama defteri arasına konulmasını rica ederim.
-                            </div>
+                        <div class="school-doc-header" style="border-bottom:2px double #000; padding-bottom:0.3rem; margin-bottom:0; text-align:center;">
+                            <h2 style="font-size:0.88rem; font-weight:bold; margin:0; text-transform:uppercase; white-space:nowrap;">${schoolName}</h2>
                         </div>
-                        <div class="school-doc-footer" style="display:flex; justify-content:space-between; margin-top:0; font-size:0.8rem;">
-                            <div style="text-align:left;">
-                            </div>
+                        <div style="display:flex; justify-content:flex-end; font-size:0.8rem; font-weight:bold; margin:0; width:100%;">
+                            <span style="border-bottom:1px dotted #000; padding-bottom:2px; white-space:nowrap;">Tarih: ${dateStr}</span>
+                        </div>
+                        <div style="text-align:center; font-size:0.95rem; font-weight:bold; margin:0; text-transform:uppercase;">DERSE KABUL KAĞIDI</div>
+                        <div class="school-doc-body" style="line-height:1.45; font-size:0.8rem; margin:0;">
+                            ADI SOYADI: <strong>${nameStr}</strong><br>
+                            NUMARASI: <strong>${noStr}</strong><br>
+                            SINIF/ŞUBE: <strong>${classStr}</strong><br>
+                            DERS SAATİ: <strong>${dersSaat}</strong>
+                        </div>
+                        <div style="font-size:0.8rem; line-height:1.4; text-align:justify; margin:0;">
+                            <strong>Sayın ${ogretmen}</strong><br>
+                            Yukarıda bilgileri yazılı öğrencinin derse kabulünü ve bu tezkerenin yoklama defteri arasına konulmasını rica ederim.
+                        </div>
+                        <div class="school-doc-footer" style="display:flex; justify-content:flex-end; margin-top:0; font-size:0.8rem;">
                             <div style="text-align:center; min-width:180px;">
                                 <br>
                                 <strong>${mdr_ad}</strong><br>
@@ -3460,26 +3461,26 @@ function openDocumentModal(studentNo) {
                 
                 docHTML = `
                     <div class="school-doc-paper a6-paper">
-                        <div>
-                            <div class="school-doc-header" style="position:relative;">
-                                <h2>${schoolName}</h2>
-                                <p>ÇAĞRI PUSULASI</p>
-                                <span style="position:absolute; right:0; top:0.8rem; font-size:0.85rem; font-weight:bold; border-bottom:1px dotted #000;">${dateStr}</span>
-                            </div>
-                            <div class="school-doc-body" style="line-height:1.45; font-size:0.8rem; margin-top:0.8rem;">
-                                ADI SOYADI.....: <strong>${nameStr}</strong><br>
-                                NUMARASI.......: <strong>${noStr}</strong><br>
-                                SINIF/ŞUBE.....: <strong>${classStr}</strong><br>
-                                DERS SAATİ.....: <strong>${dersSaat}</strong><br>
-                                ÇAĞRILAN YER...: <strong>${birim}</strong><br>
-                                ÇAĞRI NEDENİ...: <strong>${neden}</strong><br><br>
-                                <strong>Sayın ${ogretmen}</strong><br>
-                                Yukarıda bilgileri yazılı öğrencinin tezkereyi aldıktan sonra derhal belirtilen birime gelmesini rica ederim.
-                            </div>
+                        <div class="school-doc-header" style="border-bottom:2px double #000; padding-bottom:0.3rem; margin-bottom:0; text-align:center;">
+                            <h2 style="font-size:0.88rem; font-weight:bold; margin:0; text-transform:uppercase; white-space:nowrap;">${schoolName}</h2>
                         </div>
-                        <div class="school-doc-footer" style="display:flex; justify-content:space-between; margin-top:0; font-size:0.8rem;">
-                            <div style="text-align:left;">
-                            </div>
+                        <div style="display:flex; justify-content:flex-end; font-size:0.8rem; font-weight:bold; margin:0; width:100%;">
+                            <span style="border-bottom:1px dotted #000; padding-bottom:2px; white-space:nowrap;">Tarih: ${dateStr}</span>
+                        </div>
+                        <div style="text-align:center; font-size:0.95rem; font-weight:bold; margin:0; text-transform:uppercase;">ÇAĞRI PUSULASI</div>
+                        <div class="school-doc-body" style="line-height:1.45; font-size:0.8rem; margin:0;">
+                            ADI SOYADI: <strong>${nameStr}</strong><br>
+                            NUMARASI: <strong>${noStr}</strong><br>
+                            SINIF/ŞUBE: <strong>${classStr}</strong><br>
+                            DERS SAATİ: <strong>${dersSaat}</strong><br><br>
+                            ÇAĞRILAN YER: <strong>${birim}</strong><br>
+                            ÇAĞRI NEDENİ: <strong>${neden}</strong>
+                        </div>
+                        <div style="font-size:0.8rem; line-height:1.4; text-align:justify; margin:0;">
+                            <strong>Sayın ${ogretmen}</strong><br>
+                            Yukarıda bilgileri yazılı öğrencinin tezkereyi aldıktan sonra derhal belirtilen birime gelmesini rica ederim.
+                        </div>
+                        <div class="school-doc-footer" style="display:flex; justify-content:flex-end; margin-top:0; font-size:0.8rem;">
                             <div style="text-align:center; min-width:180px;">
                                 <br>
                                 <strong>${mdr_ad}</strong><br>
