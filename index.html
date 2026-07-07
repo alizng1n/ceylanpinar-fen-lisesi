@@ -1539,28 +1539,38 @@
         }
 
         @media print {
-            body * {
-                visibility: hidden;
+            body > *:not(#print-section) {
+                display: none !important;
             }
             body {
                 background: #fff !important;
                 color: #000 !important;
             }
-            #print-section, #print-section * {
-                visibility: visible;
-            }
             #print-section {
                 display: block !important;
-                position: absolute;
-                left: 0;
-                top: 0;
+                position: relative;
                 width: 100%;
                 margin: 0;
                 padding: 0;
             }
             @page {
-                size: A5 landscape;
-                margin: 1cm;
+                size: A4 portrait;
+                margin: 0;
+            }
+            .school-doc-paper.a6-paper {
+                width: 105mm !important;
+                height: 148mm !important;
+                margin: 10mm !important;
+                border: 3px solid #000 !important;
+                box-sizing: border-box !important;
+                page-break-inside: avoid;
+            }
+            .school-doc-paper.a4-paper {
+                width: 210mm !important;
+                margin: 10mm !important;
+                border: none !important;
+                box-sizing: border-box !important;
+                page-break-inside: avoid;
             }
         }
 
@@ -1574,6 +1584,27 @@
             max-width: 600px;
             margin: 0 auto;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .school-doc-paper.a6-paper {
+            width: 105mm;
+            height: 148mm;
+            padding: 8mm 6mm;
+            border: 3px solid #000;
+            border-radius: 0;
+            box-shadow: none;
+            box-sizing: border-box;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .school-doc-paper.a4-paper {
+            width: 210mm;
+            max-width: 100%;
+            box-shadow: none;
+            border: none;
+            margin: 0;
+            box-sizing: border-box;
         }
         .school-doc-header {
             text-align: center;
@@ -3325,27 +3356,30 @@ function openDocumentModal(studentNo) {
                 const izinAraligi = (basSaat === bitSaat || bitSaat === 'DERS SAATİ') ? basSaat : `${basSaat} ile ${bitSaat}`;
                 
                 docHTML = `
-                    <div class="school-doc-paper">
-                        <div class="school-doc-header">
-                            <h2>${schoolName}</h2>
-                            <p>ÖĞRENCİ İZİN TEZKERESİ</p>
+                    <div class="school-doc-paper a6-paper">
+                        <div>
+                            <div class="school-doc-header" style="position:relative;">
+                                <h2>${schoolName}</h2>
+                                <p>ÖĞRENCİ İZİN TEZKERESİ</p>
+                                <span style="position:absolute; right:0; top:0.8rem; font-size:0.85rem; font-weight:bold; border-bottom:1px dotted #000;">${dateStr}</span>
+                            </div>
+                            <div class="school-doc-title">İZİN MAZERET BELGESİ</div>
+                            <div class="school-doc-body" style="line-height:1.45; font-size:0.8rem; margin-top:0.8rem;">
+                                ADI SOYADI.....: <strong>${nameStr}</strong><br>
+                                NUMARASI.......: <strong>${noStr}</strong><br>
+                                SINIF/ŞUBE.....: <strong>${classStr}</strong><br>
+                                İZİN MAZERET...: <strong>${mazeret}</strong><br><br>
+                                İzin Süresi: <strong>${izinAraligi}</strong> arasında Yukarıda Bilgileri yazılı öğrencinin mazereti uygun görüldüğünden belirtilen sürece izinli sayılması hususunda gereğini rica ederim.
+                            </div>
                         </div>
-                        <div class="school-doc-title">İZİN MAZERET BELGESİ</div>
-                        <div class="school-doc-body" style="line-height:1.8; font-size:0.88rem;">
-                            ADI SOYADI.....: <strong>${nameStr}</strong><br>
-                            NUMARASI.......: <strong>${noStr}</strong><br>
-                            SINIF/ŞUBE.....: <strong>${classStr}</strong><br>
-                            İZİN MAZERET...: <strong>${mazeret}</strong><br><br>
-                            İzin Süresi: <strong>${izinAraligi}</strong> arasında Yukarıda Bilgileri yazılı öğrencinin mazereti uygun görüldüğünden belirtilen sürece izinli sayılması hususunda gereğini rica ederim.
-                        </div>
-                        <div class="school-doc-footer">
-                            <div>
-                                <small>Tarih: ${dateStr}</small><br>
+                        <div class="school-doc-footer" style="display:flex; justify-content:space-between; margin-top:0; font-size:0.8rem;">
+                            <div style="text-align:left;">
                                 <small>Evrak No: CFL-IZN-${noStr}</small>
                             </div>
-                            <div class="school-doc-signature">
-                                <div class="school-doc-signature-title">${mdr_unvan}</div>
-                                <div>${mdr_ad}</div>
+                            <div style="text-align:center; min-width:180px;">
+                                <br>
+                                <strong>${mdr_ad}</strong><br>
+                                ${mdr_unvan}
                             </div>
                         </div>
                     </div>
@@ -3356,23 +3390,25 @@ function openDocumentModal(studentNo) {
                 const dersSaati = document.getElementById('df-gec-ders-saat')?.value || '';
                 
                 docHTML = `
-                    <div class="school-doc-paper">
-                        <div class="school-doc-header" style="position:relative;">
-                            <h2>${schoolName}</h2>
-                            <p>ÖĞRENCİ GEÇ KAĞIDI</p>
-                            <span style="position:absolute; right:0; top:0.8rem; font-size:0.85rem; font-weight:bold; border-bottom:1px dotted #000;">${dateStr}</span>
+                    <div class="school-doc-paper a6-paper">
+                        <div>
+                            <div class="school-doc-header" style="position:relative;">
+                                <h2>${schoolName}</h2>
+                                <p>ÖĞRENCİ GEÇ KAĞIDI</p>
+                                <span style="position:absolute; right:0; top:0.8rem; font-size:0.85rem; font-weight:bold; border-bottom:1px dotted #000;">${dateStr}</span>
+                            </div>
+                            <div class="school-doc-body" style="line-height:1.45; font-size:0.8rem; margin-top:0.8rem;">
+                                ADI SOYADI.....: <strong>${nameStr}</strong><br>
+                                NUMARASI.......: <strong>${noStr}</strong><br>
+                                SINIF/ŞUBE.....: <strong>${classStr}</strong><br>
+                                DERS SAATİ.....: <strong>${dersSaati}</strong><br>
+                                GECİKME SEBEBİ:<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;<strong>${mazeret}</strong><br><br>
+                                <strong>Sayın ${ogretmen}</strong><br>
+                                Yukarıda Bilgileri yazılı Öğrenci mazeretli olarak gecikmiştir. Öğrencinin derse kabülünü ve bu tezkerenin yoklama defteri arasına konulmasını rica ederim.
+                            </div>
                         </div>
-                        <div class="school-doc-body" style="line-height:1.8; font-size:0.88rem; margin-top:1.5rem;">
-                            ADI SOYADI.....: <strong>${nameStr}</strong><br>
-                            NUMARASI.......: <strong>${noStr}</strong><br>
-                            SINIF/ŞUBE.....: <strong>${classStr}</strong><br>
-                            DERS SAATİ.....: <strong>${dersSaati}</strong><br>
-                            GECİKME SEBEBİ:<br>
-                            &nbsp;&nbsp;&nbsp;&nbsp;<strong>${mazeret}</strong><br><br>
-                            <strong>Sayın ${ogretmen}</strong><br>
-                            Yukarıda Bilgileri yazılı Öğrenci mazeretli olarak gecikmiştir. Öğrencinin derse kabülünü ve bu tezkerenin yoklama defteri arasına konulmasını rica ederim.
-                        </div>
-                        <div class="school-doc-footer" style="display:flex; justify-content:space-between; margin-top:2.5rem; font-size:0.85rem;">
+                        <div class="school-doc-footer" style="display:flex; justify-content:space-between; margin-top:0; font-size:0.8rem;">
                             <div style="text-align:left;">
                                 Yoklama Fişine İşlendi.<br>
                                 Öğretmenin İmzası
@@ -3390,21 +3426,23 @@ function openDocumentModal(studentNo) {
                 const ogretmen = document.getElementById('df-kabul-ogretmen').value || 'Nöbetçi Öğretmen';
                 
                 docHTML = `
-                    <div class="school-doc-paper">
-                        <div class="school-doc-header" style="position:relative;">
-                            <h2>${schoolName}</h2>
-                            <p>DERSE KABUL KAĞIDI</p>
-                            <span style="position:absolute; right:0; top:0.8rem; font-size:0.85rem; font-weight:bold; border-bottom:1px dotted #000;">${dateStr}</span>
+                    <div class="school-doc-paper a6-paper">
+                        <div>
+                            <div class="school-doc-header" style="position:relative;">
+                                <h2>${schoolName}</h2>
+                                <p>DERSE KABUL KAĞIDI</p>
+                                <span style="position:absolute; right:0; top:0.8rem; font-size:0.85rem; font-weight:bold; border-bottom:1px dotted #000;">${dateStr}</span>
+                            </div>
+                            <div class="school-doc-body" style="line-height:1.45; font-size:0.8rem; margin-top:0.8rem;">
+                                ADI SOYADI.....: <strong>${nameStr}</strong><br>
+                                NUMARASI.......: <strong>${noStr}</strong><br>
+                                SINIF/ŞUBE.....: <strong>${classStr}</strong><br>
+                                DERS SAATİ.....: <strong>${dersSaat}</strong><br><br>
+                                <strong>Sayın ${ogretmen}</strong><br>
+                                Yukarıda bilgileri yazılı öğrencinin derse kabulünü ve bu tezkerenin yoklama defteri arasına konulmasını rica ederim.
+                            </div>
                         </div>
-                        <div class="school-doc-body" style="line-height:1.8; font-size:0.88rem; margin-top:1.5rem;">
-                            ADI SOYADI.....: <strong>${nameStr}</strong><br>
-                            NUMARASI.......: <strong>${noStr}</strong><br>
-                            SINIF/ŞUBE.....: <strong>${classStr}</strong><br>
-                            DERS SAATİ.....: <strong>${dersSaat}</strong><br><br>
-                            <strong>Sayın ${ogretmen}</strong><br>
-                            Yukarıda bilgileri yazılı öğrencinin derse kabulünü ve bu tezkerenin yoklama defteri arasına konulmasını rica ederim.
-                        </div>
-                        <div class="school-doc-footer" style="display:flex; justify-content:space-between; margin-top:2.5rem; font-size:0.85rem;">
+                        <div class="school-doc-footer" style="display:flex; justify-content:space-between; margin-top:0; font-size:0.8rem;">
                             <div style="text-align:left;">
                             </div>
                             <div style="text-align:center; min-width:180px;">
@@ -3422,23 +3460,25 @@ function openDocumentModal(studentNo) {
                 const ogretmen = document.getElementById('df-cagri-ogretmen').value || 'Nöbetçi Öğretmen';
                 
                 docHTML = `
-                    <div class="school-doc-paper">
-                        <div class="school-doc-header" style="position:relative;">
-                            <h2>${schoolName}</h2>
-                            <p>ÇAĞRI PUSULASI</p>
-                            <span style="position:absolute; right:0; top:0.8rem; font-size:0.85rem; font-weight:bold; border-bottom:1px dotted #000;">${dateStr}</span>
+                    <div class="school-doc-paper a6-paper">
+                        <div>
+                            <div class="school-doc-header" style="position:relative;">
+                                <h2>${schoolName}</h2>
+                                <p>ÇAĞRI PUSULASI</p>
+                                <span style="position:absolute; right:0; top:0.8rem; font-size:0.85rem; font-weight:bold; border-bottom:1px dotted #000;">${dateStr}</span>
+                            </div>
+                            <div class="school-doc-body" style="line-height:1.45; font-size:0.8rem; margin-top:0.8rem;">
+                                ADI SOYADI.....: <strong>${nameStr}</strong><br>
+                                NUMARASI.......: <strong>${noStr}</strong><br>
+                                SINIF/ŞUBE.....: <strong>${classStr}</strong><br>
+                                DERS SAATİ.....: <strong>${dersSaat}</strong><br>
+                                ÇAĞRILAN YER...: <strong>${birim}</strong><br>
+                                ÇAĞRI NEDENİ...: <strong>${neden}</strong><br><br>
+                                <strong>Sayın ${ogretmen}</strong><br>
+                                Yukarıda bilgileri yazılı öğrencinin tezkereyi aldıktan sonra derhal belirtilen birime gelmesini rica ederim.
+                            </div>
                         </div>
-                        <div class="school-doc-body" style="line-height:1.8; font-size:0.88rem; margin-top:1.5rem;">
-                            ADI SOYADI.....: <strong>${nameStr}</strong><br>
-                            NUMARASI.......: <strong>${noStr}</strong><br>
-                            SINIF/ŞUBE.....: <strong>${classStr}</strong><br>
-                            DERS SAATİ.....: <strong>${dersSaat}</strong><br>
-                            ÇAĞRILAN YER...: <strong>${birim}</strong><br>
-                            ÇAĞRI NEDENİ...: <strong>${neden}</strong><br><br>
-                            <strong>Sayın ${ogretmen}</strong><br>
-                            Yukarıda bilgileri yazılı öğrencinin tezkereyi aldıktan sonra derhal belirtilen birime gelmesini rica ederim.
-                        </div>
-                        <div class="school-doc-footer" style="display:flex; justify-content:space-between; margin-top:2.5rem; font-size:0.85rem;">
+                        <div class="school-doc-footer" style="display:flex; justify-content:space-between; margin-top:0; font-size:0.8rem;">
                             <div style="text-align:left;">
                             </div>
                             <div style="text-align:center; min-width:180px;">
@@ -3454,7 +3494,7 @@ function openDocumentModal(studentNo) {
                 const bit = formatTurkishDate(document.getElementById('df-veli-bitis').value);
                 
                 docHTML = `
-                    <div class="school-doc-paper" style="font-family:'Times New Roman', serif; max-width:650px;">
+                    <div class="school-doc-paper a4-paper" style="font-family:'Times New Roman', serif; max-width:650px;">
                         <div class="school-doc-header" style="border:none; margin-bottom:2rem;">
                             <h2>CEYLANPINAR FEN LİSESİ MÜDÜRLÜĞÜNE</h2>
                         </div>
@@ -3485,7 +3525,7 @@ function openDocumentModal(studentNo) {
                 const mdr_yrd = document.getElementById('df-uyari-mdr-yrd').value || 'Müdür Yardımcısı';
                 
                 docHTML = `
-                    <div class="school-doc-paper" style="max-width:700px; padding:1.25rem;">
+                    <div class="school-doc-paper a4-paper" style="max-width:700px; padding:1.25rem;">
                         <div class="school-doc-header" style="border:none; margin-bottom:0.75rem;">
                             <h2 style="font-size:0.9rem; margin-bottom:0.1rem;">T.C</h2>
                             <h2 style="font-size:0.95rem; margin-bottom:0.1rem;">CEYLANPINAR KAYMAKAMLIĞI</h2>
