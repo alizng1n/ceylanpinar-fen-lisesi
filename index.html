@@ -2138,6 +2138,35 @@
                     <!-- Alanlar JS tarafindan doldurulacak -->
                 </div>
 
+                <!-- Onaylayan Seçimi -->
+                <div style="border-top:1px solid var(--border-color); padding-top:1rem; margin-top:0.5rem; display:flex; flex-direction:column; gap:0.5rem;">
+                    <label style="font-size:0.8rem; font-weight:700; color:var(--text-secondary); display:flex; align-items:center; gap:0.3rem;">
+                        <i data-lucide="user-check" size="14"></i> Onaylayan
+                    </label>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+                        <div style="position:relative;">
+                            <label style="font-size:0.75rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.25rem;">Adı Soyadı</label>
+                            <div style="position:relative;">
+                                <input type="text" id="doc-approver-name" class="input-field" style="width:100%; box-sizing:border-box; height:40px; padding:0.5rem 2.2rem 0.5rem 0.5rem; font-size:0.85rem;" placeholder="İsim girin veya seçin" autocomplete="off">
+                                <button type="button" class="combobox-arrow" style="position:absolute; right:0; top:0; height:100%; width:32px; background:none; border:none; cursor:pointer; color:var(--text-secondary); display:flex; align-items:center; justify-content:center;">
+                                    <i data-lucide="chevron-down" size="16"></i>
+                                </button>
+                            </div>
+                            <ul id="approver-names-dropdown" style="display:none; position:absolute; left:0; right:0; top:102%; max-height:160px; overflow-y:auto; background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); z-index:10000; list-style:none; padding:0.25rem 0; margin:0;"></ul>
+                        </div>
+                        <div style="position:relative;">
+                            <label style="font-size:0.75rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.25rem;">Ünvanı</label>
+                            <div style="position:relative;">
+                                <input type="text" id="doc-approver-title" class="input-field" style="width:100%; box-sizing:border-box; height:40px; padding:0.5rem 2.2rem 0.5rem 0.5rem; font-size:0.85rem;" placeholder="Ünvan girin veya seçin" autocomplete="off">
+                                <button type="button" class="combobox-arrow" style="position:absolute; right:0; top:0; height:100%; width:32px; background:none; border:none; cursor:pointer; color:var(--text-secondary); display:flex; align-items:center; justify-content:center;">
+                                    <i data-lucide="chevron-down" size="16"></i>
+                                </button>
+                            </div>
+                            <ul id="approver-titles-dropdown" style="display:none; position:absolute; left:0; right:0; top:102%; max-height:160px; overflow-y:auto; background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); z-index:10000; list-style:none; padding:0.25rem 0; margin:0;"></ul>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Öğrenci Belge Geçmişi (Sicil) -->
                 <div style="border-top:1px solid var(--border-color); padding-top:1rem; margin-top:0.5rem; display:flex; flex-direction:column; gap:0.5rem;">
                     <label style="font-size:0.8rem; font-weight:700; color:var(--text-secondary); display:flex; align-items:center; gap:0.3rem;">
@@ -2788,7 +2817,82 @@ function verifyPassword() {
 
 
         // Belge Uretici Fonksiyonlari
-                function renderStudentHistory(student) {
+                        // Custom Autocomplete Combobox Lojiği
+        window.selectOption = function(inputId, dropdownId, val) {
+            const input = document.getElementById(inputId);
+            const dropdown = document.getElementById(dropdownId);
+            if (input) {
+                input.value = val;
+                input.dispatchEvent(new Event('input'));
+            }
+            if (dropdown) dropdown.style.display = 'none';
+        };
+
+        function initCustomCombobox(inputId, dropdownId, getOptionsFn) {
+            const input = document.getElementById(inputId);
+            const dropdown = document.getElementById(dropdownId);
+            if (!input || !dropdown) return;
+            
+            const container = input.parentElement; // gets parent relative div containing input and arrow
+            const arrowBtn = container.querySelector('.combobox-arrow');
+            if (!arrowBtn) return;
+            
+            function renderList(filterText = '') {
+                const options = getOptionsFn() || [];
+                const filtered = options.filter(opt => 
+                    opt.toLowerCase().includes(filterText.toLowerCase())
+                );
+                
+                if (filtered.length === 0) {
+                    dropdown.style.display = 'none';
+                    return;
+                }
+                
+                dropdown.innerHTML = filtered.map(opt => {
+                    const escapedOpt = opt.replace(/'/g, "'");
+                    return `
+                        <li class="combobox-item" style="padding:0.5rem 0.75rem; cursor:pointer; font-size:0.825rem; color:var(--text-primary); transition:background 0.15s;" 
+                            onmouseover="this.style.background='var(--bg-page)'" 
+                            onmouseout="this.style.background='none'"
+                            onclick="selectOption('${inputId}', '${dropdownId}', '${escapedOpt}')">
+                            ${opt}
+                        </li>
+                    `;
+                }).join('');
+                dropdown.style.display = 'block';
+            }
+            
+            function showAll() {
+                const isVisible = dropdown.style.display === 'block';
+                if (isVisible) {
+                    dropdown.style.display = 'none';
+                } else {
+                    renderList(''); // Boş filtre ile tümünü getir
+                }
+            }
+            
+            if (!input.dataset.comboboxBound) {
+                input.addEventListener('input', function() {
+                    renderList(this.value);
+                });
+                
+                arrowBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    showAll();
+                });
+                
+                // Dışarı tıklanınca kapat
+                document.addEventListener('click', function(e) {
+                    if (!container.parentElement.contains(e.target)) {
+                        dropdown.style.display = 'none';
+                    }
+                });
+                
+                input.dataset.comboboxBound = "true";
+            }
+        }
+
+function renderStudentHistory(student) {
             const container = document.getElementById('doc-student-history');
             if (!container) return;
             
@@ -2834,6 +2938,24 @@ function openDocumentModal(studentNo) {
             switchDocumentType();
             renderStudentHistory(student);
             
+            // Onaylayan custom combobox'larını ilklendir ve varsayılan idareciyi ata
+            if (schoolData && schoolData.idare) {
+                const getNames = () => [...new Set(schoolData.idare.map(adm => adm.ad_soyad).filter(Boolean))];
+                const getTitles = () => [...new Set(schoolData.idare.map(adm => adm.unvan).filter(Boolean))];
+                
+                initCustomCombobox('doc-approver-name', 'approver-names-dropdown', getNames);
+                initCustomCombobox('doc-approver-title', 'approver-titles-dropdown', getTitles);
+                
+                const defaultAdmin = schoolData.idare[0];
+                if (defaultAdmin) {
+                    document.getElementById('doc-approver-name').value = defaultAdmin.ad_soyad || '';
+                    document.getElementById('doc-approver-title').value = defaultAdmin.unvan || '';
+                } else {
+                    document.getElementById('doc-approver-name').value = '';
+                    document.getElementById('doc-approver-title').value = '';
+                }
+            }
+
             document.getElementById('document-modal').style.display = 'flex';
             if (window.lucide) lucide.createIcons();
         }
@@ -3098,8 +3220,8 @@ function openDocumentModal(studentNo) {
 
             // Varsayılan İdare/Okul Adı
             const schoolName = "CEYLANPINAR FEN LİSESİ MÜDÜRLÜĞÜ";
-            const mdr_ad = (schoolData && schoolData.idare && schoolData.idare[0]) ? schoolData.idare[0].ad_soyad : "Hüseyin ÇITIRKE";
-            const mdr_unvan = (schoolData && schoolData.idare && schoolData.idare[0]) ? schoolData.idare[0].unvan : "Okul Müdürü";
+            const mdr_ad = document.getElementById('doc-approver-name')?.value || ((schoolData && schoolData.idare && schoolData.idare[0]) ? schoolData.idare[0].ad_soyad : "Hüseyin ÇITIRKE");
+            const mdr_unvan = document.getElementById('doc-approver-title')?.value || ((schoolData && schoolData.idare && schoolData.idare[0]) ? schoolData.idare[0].unvan : "Okul Müdürü");
 
             if (docType === 'izin') {
                 const basSaat = document.getElementById('df-izin-baslangic-saat').value;
