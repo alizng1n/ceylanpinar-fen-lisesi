@@ -1241,6 +1241,22 @@
 
         /* Print CSS Styling */
         @media print {
+            body.print-karne > *:not(#karne-print-area) {
+                display: none !important;
+            }
+            #karne-print-area {
+                display: block !important;
+                position: fixed;
+                top: 0; left: 0;
+                width: 210mm;
+                min-height: 297mm;
+                background: #fff;
+                color: #000;
+                font-family: 'Inter', 'Outfit', sans-serif;
+                font-size: 9pt;
+                padding: 12mm;
+                box-sizing: border-box;
+            }
             body, html {
                 background: white !important;
                 color: black !important;
@@ -1539,7 +1555,7 @@
         }
 
         @media print {
-            body > *:not(#print-section) {
+            body.print-doc > *:not(#print-section) {
                 display: none !important;
             }
             body {
@@ -1957,7 +1973,7 @@
                                     <span class="badge" id="report-student-exam-count">Deneme Sayısı: 0</span>
                                 </div>
                             </div>
-                            <button class="btn btn-primary" onclick="window.print()">
+                            <button class="btn btn-primary" onclick="printKarne()">
                                 <i data-lucide="printer"></i> <span>Karne Yazdır / PDF Kaydet</span>
                             </button>
                         </div>
@@ -2223,6 +2239,8 @@
 
     <!-- Yazdirma Alani (Ekrandayken gizlidir) -->
     <div id="print-section"></div>
+    <!-- Karne Baskı Alanı -->
+    <div id="karne-print-area" style="display:none;"></div>
     <!-- Okul Yönetim Kayıt Modal -->
     <div id="school-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; align-items:center; justify-content:center; padding:1rem;">
         <div style="background:var(--bg-card); border-radius:var(--radius-lg); padding:1.5rem 0.5rem 1.5rem 1.5rem; width:100%; max-width:480px; box-shadow:0 20px 60px rgba(0,0,0,0.3); max-height:85vh; display:flex; flex-direction:column;">
@@ -3633,7 +3651,9 @@ function openDocumentModal(studentNo) {
             }
             
             printArea.innerHTML = docHTML;
+            document.body.classList.add('print-doc');
             window.print();
+            document.body.classList.remove('print-doc');
             closeDocumentModal();
         }
 
@@ -4353,7 +4373,94 @@ function deleteSchoolRecord(id, tab) {
             }
         }
 
-                function showToast(message, type = "success") {
+                function printKarne() {
+            // 1. Grafik görüntüsünü al
+            const chartCanvas = document.getElementById('progressChart');
+            const chartImg = chartCanvas ? chartCanvas.toDataURL('image/png') : null;
+
+            // 2. Sonuç tablosunu al
+            const tableEl = document.getElementById('results-table');
+            const tableHTML = tableEl ? tableEl.outerHTML : '<p>Tablo bulunamadı.</p>';
+
+            // 3. Öğrenci bilgilerini al
+            const studentName = document.getElementById('report-student-name')?.innerText || '-';
+            const studentNo   = document.getElementById('report-student-no')?.innerText || '-';
+            const studentClass = document.getElementById('report-student-class')?.innerText || '-';
+            const studentBranch = document.getElementById('report-student-branch')?.innerText || '-';
+            const examCount   = document.getElementById('report-student-exam-count')?.innerText || '-';
+
+            // 4. Öğrenci numarasını ayıkla (örn. "No: 136" -> "136")
+            const noMatch = studentNo.match(/\d+/);
+            const noStr = noMatch ? noMatch[0] : '';
+
+            // 5. Sicil kayıtlarını schoolData'dan çek
+            let historyHTML = '<p style="color:#6b7280; font-size:8pt;">Bu öğrenciye ait belge geçmişi bulunmamaktadır.</p>';
+            if (noStr && typeof schoolData !== 'undefined' && schoolData.ogrenci) {
+                const ogr = schoolData.ogrenci.find(s => String(s.no) === noStr);
+                if (ogr && ogr.history && ogr.history.length > 0) {
+                    historyHTML = '<table style="width:100%; border-collapse:collapse; font-size:8pt;">';
+                    historyHTML += '<thead><tr style="background:#f3f4f6;"><th style="padding:3px 6px; text-align:left; border:1px solid #d1d5db;">Belge Türü</th><th style="padding:3px 6px; text-align:left; border:1px solid #d1d5db;">Tarih</th><th style="padding:3px 6px; text-align:left; border:1px solid #d1d5db;">Detay</th></tr></thead><tbody>';
+                    ogr.history.forEach(h => {
+                        historyHTML += `<tr><td style="padding:3px 6px; border:1px solid #d1d5db;">${h.tur || '-'}</td><td style="padding:3px 6px; border:1px solid #d1d5db;">${h.tarih || '-'}</td><td style="padding:3px 6px; border:1px solid #d1d5db;">${h.detay || '-'}</td></tr>`;
+                    });
+                    historyHTML += '</tbody></table>';
+                }
+            }
+
+            // 6. Karne HTML'ini oluştur
+            const today = new Date();
+            const dateStr = today.getDate().toString().padStart(2,'0') + '/' + (today.getMonth()+1).toString().padStart(2,'0') + '/' + today.getFullYear();
+
+            const karneHTML = `
+                <div style="font-family:'Inter',sans-serif; color:#111;">
+                    <!-- Başlık -->
+                    <div style="text-align:center; border-bottom:2px solid #111; padding-bottom:6px; margin-bottom:10px;">
+                        <div style="font-size:10pt; font-weight:700; text-transform:uppercase; letter-spacing:1px;">CEYLANPINAR FEN LİSESİ</div>
+                        <div style="font-size:16pt; font-weight:800; margin:2px 0;">ÖĞRENCİ DENEME ANALİZ KARNESİ</div>
+                        <div style="font-size:8pt; color:#555;">Baskı Tarihi: ${dateStr}</div>
+                    </div>
+
+                    <!-- Öğrenci Bilgileri -->
+                    <div style="display:flex; justify-content:space-between; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px 12px; margin-bottom:12px; font-size:9pt;">
+                        <div><strong>Ad Soyad:</strong> ${studentName}</div>
+                        <div><strong>${studentNo}</strong></div>
+                        <div><strong>${studentClass}</strong></div>
+                        <div><strong>${studentBranch}</strong></div>
+                        <div><strong>${examCount}</strong></div>
+                    </div>
+
+                    <!-- Deneme Sonuçları Tablosu -->
+                    <div style="font-size:8pt; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; color:#374151;">📊 Deneme Sınav Sonuçları</div>
+                    <div style="overflow-x:auto; margin-bottom:14px; font-size:7.5pt;">
+                        ${tableHTML}
+                    </div>
+
+                    <!-- Net Gelişim Grafiği -->
+                    <div style="font-size:8pt; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; color:#374151;">📈 Net Gelişim Grafiği</div>
+                    ${chartImg ? `<img src="${chartImg}" style="width:100%; max-height:160px; object-fit:contain; border:1px solid #e2e8f0; border-radius:4px; margin-bottom:14px;" />` : '<p style="color:#6b7280; font-size:8pt; margin-bottom:14px;">Grafik bulunamadı.</p>'}
+
+                    <!-- Sicil Kaydı -->
+                    <div style="font-size:8pt; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; color:#374151;">📋 Öğrenci İşlem Geçmişi (Sicil)</div>
+                    ${historyHTML}
+                </div>
+            `;
+
+            const printArea = document.getElementById('karne-print-area');
+            printArea.innerHTML = karneHTML;
+            printArea.style.display = 'block';
+            document.body.classList.add('print-karne');
+
+            setTimeout(() => {
+                window.print();
+                setTimeout(() => {
+                    document.body.classList.remove('print-karne');
+                    printArea.style.display = 'none';
+                    printArea.innerHTML = '';
+                }, 500);
+            }, 300);
+        }
+
+        function showToast(message, type = "success") {
             const toast = document.getElementById('status-toast');
             if(!toast) return;
             const msgSpan = document.getElementById('toast-message');
