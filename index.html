@@ -2103,15 +2103,15 @@
 
     <!-- Belge Uretici Modali -->
     <div id="document-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; align-items:center; justify-content:center; padding:1rem;">
-        <div style="background:var(--bg-card); border-radius:var(--radius-lg); padding:1.5rem; width:100%; max-width:540px; box-shadow:0 20px 60px rgba(0,0,0,0.3); box-sizing:border-box; max-height:85vh; display:flex; flex-direction:column;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+        <div style="background:var(--bg-card); border-radius:var(--radius-lg); padding:1.5rem 0.5rem 1.5rem 1.5rem; width:100%; max-width:540px; box-shadow:0 20px 60px rgba(0,0,0,0.3); box-sizing:border-box; max-height:85vh; display:flex; flex-direction:column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; padding-right:1rem;">
                 <h3 style="margin:0; color:var(--text-primary); font-size:1.1rem; font-weight:700;">
                     <i data-lucide="printer" size="18" style="vertical-align:middle; margin-right:0.25rem;"></i> Resmi Belge Oluşturucu
                 </h3>
                 <button onclick="closeDocumentModal()" style="background:none; border:none; cursor:pointer; color:var(--text-secondary); padding:0.25rem;"><i data-lucide="x" size="20"></i></button>
             </div>
             
-            <div style="display:flex; flex-direction:column; gap:1rem; overflow-y:auto; flex:1; padding-right:0.25rem;">
+            <div style="display:flex; flex-direction:column; gap:1rem; overflow-y:auto; flex:1; padding-right:1rem;">
                 <!-- Ogrenci Karti Bilgisi -->
                 <div style="background:var(--bg-page); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:0.8rem 1rem; display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; font-size:0.85rem;">
                     <div><span style="color:var(--text-secondary); font-weight:500;">Öğrenci:</span> <strong id="doc-stud-name" style="color:var(--text-primary);"></strong></div>
@@ -2152,7 +2152,7 @@
                                     <i data-lucide="chevron-down" size="16"></i>
                                 </button>
                             </div>
-                            <ul id="approver-names-dropdown" style="display:none; position:absolute; left:0; right:0; top:102%; max-height:160px; overflow-y:auto; background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); z-index:10000; list-style:none; padding:0.25rem 0; margin:0;"></ul>
+                            <ul id="approver-names-dropdown" style="display:none; position:absolute; left:0; right:0; top:102%; background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); z-index:10000; list-style:none; padding:0.25rem 0; margin:0;"></ul>
                         </div>
                         <div style="position:relative;">
                             <label style="font-size:0.75rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.25rem;">Ünvanı</label>
@@ -2178,7 +2178,7 @@
                 </div>
             </div>
 
-            <div style="display:flex; gap:0.75rem; margin-top:1.5rem; justify-content:flex-end;">
+            <div style="display:flex; gap:0.75rem; margin-top:1.5rem; justify-content:flex-end; padding-right:1rem;">
                 <button onclick="closeDocumentModal()" style="padding:0.6rem 1.25rem; border-radius:var(--radius-lg); border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-primary); cursor:pointer; font-weight:600; font-size:0.875rem;">Kapat</button>
                 <button onclick="printDocument()" style="padding:0.6rem 1.25rem; border-radius:var(--radius-lg); background:var(--accent-gradient); color:#fff; border:none; cursor:pointer; font-weight:600; font-size:0.875rem; display:inline-flex; align-items:center; gap:0.4rem;">
                     <i data-lucide="printer" size="16"></i> Belgeyi Yazdır
@@ -2191,13 +2191,13 @@
     <div id="print-section"></div>
     <!-- Okul Yönetim Kayıt Modal -->
     <div id="school-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; align-items:center; justify-content:center; padding:1rem;">
-        <div style="background:var(--bg-card); border-radius:var(--radius-lg); padding:1.5rem; width:100%; max-width:480px; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+        <div style="background:var(--bg-card); border-radius:var(--radius-lg); padding:1.5rem 0.5rem 1.5rem 1.5rem; width:100%; max-width:480px; box-shadow:0 20px 60px rgba(0,0,0,0.3); max-height:85vh; display:flex; flex-direction:column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; padding-right:1rem;">
                 <h3 id="school-modal-title" style="margin:0; color:var(--text-primary); font-size:1.1rem;">Yeni Kayıt Ekle</h3>
                 <button onclick="closeSchoolModal()" style="background:none; border:none; cursor:pointer; color:var(--text-secondary); padding:0.25rem;"><i data-lucide="x" size="20"></i></button>
             </div>
-            <div id="school-modal-body" style="display:flex; flex-direction:column; gap:1rem;"></div>
-            <div style="display:flex; gap:0.75rem; margin-top:1.5rem; justify-content:flex-end;">
+            <div id="school-modal-body" style="display:flex; flex-direction:column; gap:1rem; overflow-y:auto; flex:1; padding-right:1rem;"></div>
+            <div style="display:flex; gap:0.75rem; margin-top:1.5rem; justify-content:flex-end; padding-right:1rem;">
                 <button onclick="closeSchoolModal()" style="padding:0.6rem 1.25rem; border-radius:var(--radius-lg); border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-primary); cursor:pointer; font-weight:600; font-size:0.875rem;">İptal</button>
                 <button onclick="saveSchoolRecord()" style="padding:0.6rem 1.25rem; border-radius:var(--radius-lg); background:var(--accent-gradient); color:#fff; border:none; cursor:pointer; font-weight:600; font-size:0.875rem;">Kaydet</button>
             </div>
