@@ -1257,6 +1257,28 @@
                 padding: 12mm;
                 box-sizing: border-box;
             }
+            #karne-print-area table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                margin-top: 10px !important;
+                margin-bottom: 10px !important;
+            }
+            #karne-print-area th, #karne-print-area td {
+                border: 1px solid #000 !important;
+                padding: 3px 2px !important;
+                font-size: 7.2pt !important;
+                text-align: center !important;
+                line-height: 1.1 !important;
+            }
+            #karne-print-area th {
+                background-color: #f3f4f6 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            #karne-print-area td:first-child {
+                text-align: left !important;
+                padding-left: 4px !important;
+            }
             body, html {
                 background: white !important;
                 color: black !important;
@@ -3667,6 +3689,21 @@ function openDocumentModal(studentNo) {
             }
         }
 
+        function loadSchoolData() {
+            if (!schoolData) {
+                try {
+                    const saved = localStorage.getItem('cfl_school_db');
+                    if (saved) {
+                        schoolData = JSON.parse(saved);
+                    } else {
+                        schoolData = JSON.parse(JSON.stringify(DEFAULT_OKUL_DB));
+                    }
+                } catch (e) {
+                    schoolData = JSON.parse(JSON.stringify(DEFAULT_OKUL_DB));
+                }
+            }
+        }
+
 function showSchoolManagementView() {
             document.body.classList.remove('portal-mode');
             document.getElementById('app-container').classList.add('no-sidebar');
@@ -4374,6 +4411,9 @@ function deleteSchoolRecord(id, tab) {
         }
 
                 function printKarne() {
+            // schoolData yüklenmemişse yükle
+            loadSchoolData();
+
             // 1. Grafik görüntüsünü al
             const chartCanvas = document.getElementById('progressChart');
             const chartImg = chartCanvas ? chartCanvas.toDataURL('image/png') : null;
@@ -4431,7 +4471,7 @@ function deleteSchoolRecord(id, tab) {
 
                     <!-- Deneme Sonuçları Tablosu -->
                     <div style="font-size:8pt; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; color:#374151;">📊 Deneme Sınav Sonuçları</div>
-                    <div style="overflow-x:auto; margin-bottom:14px; font-size:7.5pt;">
+                    <div style="width:100%; overflow:visible; margin-bottom:12px;">
                         ${tableHTML}
                     </div>
 
