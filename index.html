@@ -3519,46 +3519,84 @@ function openDocumentModal(studentNo) {
                     </div>
                 `;
             } else if (docType === 'uyari') {
-                const davranis = document.getElementById('df-uyari-davranis').value || 'Sınıf kurallarına uymama';
+                const davranis = document.getElementById('df-uyari-davranis').value || '';
                 const sinif_ref = document.getElementById('df-uyari-sinif-ref').value || 'Sınıf Rehber Öğretmeni';
                 const ref = document.getElementById('df-uyari-ref').value || 'Rehber Öğretmen';
                 const mdr_yrd = document.getElementById('df-uyari-mdr-yrd').value || 'Müdür Yardımcısı';
                 
                 docHTML = `
-                    <div class="school-doc-paper a4-paper" style="max-width:700px; padding:1.25rem;">
-                        <div class="school-doc-header" style="border:none; margin-bottom:0.75rem;">
-                            <h2 style="font-size:0.9rem; margin-bottom:0.1rem;">T.C</h2>
-                            <h2 style="font-size:0.95rem; margin-bottom:0.1rem;">CEYLANPINAR KAYMAKAMLIĞI</h2>
-                            <h2 style="font-size:0.95rem; border-bottom:1px solid #000; padding-bottom:0.4rem; margin-bottom:0.5rem;">CEYLANPINAR FEN LİSESİ MÜDÜRLÜĞÜ</h2>
-                            <p style="font-size:0.85rem; font-weight:bold; text-decoration:underline;">YAZILI UYARI BELGESİ</p>
+                    <div class="school-doc-paper a4-paper" style="display:flex; flex-direction:column; justify-content:space-between; height:260mm; padding:20mm; box-sizing:border-box;">
+                        <div style="display:flex; flex-direction:column; gap:1.25rem; font-family:'Inter', 'Outfit', sans-serif;">
+                            <!-- Header -->
+                            <div style="text-align:center; line-height:1.5; font-size:1.15rem; font-weight:bold; text-transform:uppercase;">
+                                T.C.<br>
+                                CEYLANPINAR KAYMAKAMLIĞI<br>
+                                CEYLANPINAR FEN LİSESİ
+                            </div>
+                            
+                            <!-- Title -->
+                            <div style="text-align:center; font-size:1.35rem; font-weight:bold; margin-top:1.2rem; margin-bottom:1.2rem; text-transform:uppercase;">
+                                YAZILI UYARI BELGESİ
+                            </div>
+                            
+                            <!-- Student Info -->
+                            <div style="font-size:1rem; line-height:1.8; margin-bottom:0.8rem;">
+                                ADI SOYADI: <strong>${nameStr}</strong><br>
+                                NUMARASI: <strong>${noStr}</strong><br>
+                                SINIF/ŞUBE: <strong>${classStr}</strong>
+                            </div>
+                            
+                            <!-- Paragraph 1 -->
+                            <div style="font-size:0.95rem; line-height:1.6; text-align:justify; text-indent:2rem;">
+                                Ortaöğretim Kurumları Yönetmeliğinin 157. Maddesinin 7. Fıkrasının a bendi gereği; yapılan toplantıda; Öğrencinin davranışlarında kusurlu olduğu, öğrenciden beklenen olumlu davranışın neler olabileceği anlatılmış, olumsuz davranışlarının devamı hâlinde kendisine uygulanabilecek yaptırımlar konusunda öğrenci yazılı olarak uyarılmıştır. Öğrencinin olumsuz davranışları sürdürmesi hâlinde velisinin okula davet edileceği, olumsuz davranışları ve uygulanabilecek yaptırımlar hakkında velisinin bilgilendirileceği belirtilmiştir.
+                            </div>
+                            
+                            <!-- Paragraph 2 -->
+                            <div style="font-size:0.95rem; line-height:1.6; text-align:justify; text-indent:2rem;">
+                                Öğrenciye; disiplin cezasını gerektiren davranış ve fiillerin niteliklerine göre;
+                            </div>
+                            
+                            <!-- Bullet list -->
+                            <div style="font-size:0.95rem; line-height:1.6; padding-left:4rem;">
+                                Kınama,<br>
+                                Okuldan kısa süreli uzaklaştırma,<br>
+                                Okul değiştirme,<br>
+                                Örgün eğitim dışına çıkarma,<br><br>
+                                Cezalarından birinin verilebileceği ayrıntılı olarak anlatılmıştır.
+                            </div>
+                            
+                            <!-- Paragraph 3 -->
+                            <div style="font-size:0.95rem; line-height:1.6; text-align:justify; text-indent:2rem;">
+                                Öğrenci, yapılan bu sözlü ve yazılı uyarıları dikkate alacağını, olumsuz davranışın tekrarı hâlinde kendisi hakkında yönetmelikte belirtilen gerekli disiplin işlemini kabul edeceğini taahhüt etmiştir.
+                            </div>
+                            
+                            <!-- Reason -->
+                            <div style="font-size:1rem; font-weight:bold; margin-top:0.8rem;">
+                                ÖĞRENCİNİN YAZILI UYARI SEBEBİ: <span style="font-weight:normal; text-decoration:underline;">${davranis}</span>
+                            </div>
                         </div>
-                        <div class="school-doc-body" style="font-size:0.75rem; line-height:1.45; text-align:justify; margin-bottom:1rem; text-indent:1.2rem;">
-                            Ortaöğretim Kurumları Yönetmeliğinin 157. Maddesinin 7. Fıkrasının a bendi gereği; yapılan toplantıda öğrencinin davranışlarında kusurlu olduğu, öğrenciden beklenen olumlu davranışların neler olabileceği anlatılmış, olumsuz davranışın devamı hâlinde kendisine uygulanabilecek yaptırımlar konusunda öğrenci yazılı olarak uyarılmıştır. Öğrencinin olumsuz davranışı sürdürmesi hâlinde velisinin okula davet edileceği, olumsuz davranış ve uygulanabilecek yaptırımlar hakkında velisinin bilgilendirileceği belirtilmiştir. Öğrenciye, disiplin cezası gerektiren davranış ve fiillerinin niteliklerine göre; ***Kınama, ***Okuldan kısa süreli uzaklaştırma, ***Okul değiştirme, ***Örgün eğitim dışına çıkarma cezalarından birinin verilebileceği ayrıca anlatılmıştır. Öğrenci, yapılan bu sözlü ve yazılı uyarıyı dikkate alacağını, tekrarı halinde kendisi hakkında yönetmelikçe belirtilen gerekli disiplin işlemini kabul edeceğini taahhüt etmiştir.
-                        </div>
-                        <div style="font-size:0.75rem; margin-bottom:1rem; border-top:1px solid #000; border-bottom:1px solid #000; padding:0.4rem 0;">
-                            <strong>ÖĞRENCİ BİLGİLERİ:</strong> <strong>${nameStr}</strong> (${noStr}) - Sınıf: <strong>${classStr}</strong><br>
-                            <strong>YAZILI UYARI SEBEBİ:</strong> <u>${davranis}</u>
-                        </div>
-                        <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:0.5rem; text-align:center; font-size:0.72rem; margin-top:1.5rem;">
+                        
+                        <!-- Footer Signatures (4 Columns with names above titles) -->
+                        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:0.5rem; text-align:center; font-size:0.82rem; margin-top:2rem; width:100%; font-family:'Inter', 'Outfit', sans-serif;">
                             <div>
-                                <strong>ÖĞRENCİ</strong><br><br><br>
-                                <span>${nameStr}</span>
+                                <br><br><br>
+                                <span>${sinif_ref}</span><br>
+                                <strong>SINIF REHBER ÖĞRT.</strong>
                             </div>
                             <div>
-                                <strong>SINIF REHBER ÖĞRT.</strong><br><br><br>
-                                <span>${sinif_ref}</span>
+                                <br><br><br>
+                                <span>${ref}</span><br>
+                                <strong>REHBER ÖĞRETMEN</strong>
                             </div>
                             <div>
-                                <strong>REHBER ÖĞRETMEN</strong><br><br><br>
-                                <span>${ref}</span>
+                                <br><br><br>
+                                <span>${mdr_yrd}</span><br>
+                                <strong>İLGİLİ MÜDÜR YRD.</strong>
                             </div>
                             <div>
-                                <strong>MÜDÜR YARDIMCISI</strong><br><br><br>
-                                <span>${mdr_yrd}</span>
-                            </div>
-                            <div>
-                                <strong>${mdr_unvan.toLocaleUpperCase('tr-TR')}</strong><br><br><br>
-                                <span>${mdr_ad}</span>
+                                <br><br><br>
+                                <span>${mdr_ad}</span><br>
+                                <strong>${mdr_unvan.toLocaleUpperCase('tr-TR')}</strong>
                             </div>
                         </div>
                     </div>
