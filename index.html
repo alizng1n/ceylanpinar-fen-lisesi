@@ -3474,6 +3474,14 @@ function openDocumentModal(studentNo) {
             const docType = document.getElementById('doc-type-select').value;
             const dateStr = document.getElementById('doc-current-date').innerText;
             
+            let docTypeName = 'Resmi Belge';
+            if (docType === 'izin') docTypeName = 'Mazeret İzni';
+            else if (docType === 'gec') docTypeName = 'Geç Kağıdı';
+            else if (docType === 'kabul') docTypeName = 'Derse Kabul';
+            else if (docType === 'cagri') docTypeName = 'Çağrı Pusulası';
+            else if (docType === 'veli-izin') docTypeName = 'Veli İzin Dilekçesi';
+            else if (docType === 'uyari') docTypeName = 'Yazılı Uyarı';
+            
             const formatTurkishDate = (dStr) => {
                 if (!dStr) return '';
                 const parts = dStr.split('-');
@@ -3489,11 +3497,9 @@ function openDocumentModal(studentNo) {
                     selectedDocStudent.history = [];
                 }
                 
-                let docTypeName = 'Resmi Belge';
                 let details = '';
                 
                 if (docType === 'izin') {
-                    docTypeName = 'Mazeret İzni';
                     const basSaat = document.getElementById('df-izin-baslangic-saat')?.value || '';
                     const bitSaat = document.getElementById('df-izin-bitis-saat')?.value || '';
                     const mazeret = document.getElementById('df-izin-neden')?.value || '';
@@ -3813,7 +3819,15 @@ function openDocumentModal(studentNo) {
             
             printArea.innerHTML = docHTML;
             document.body.classList.add('print-doc');
+            
+            const originalTitle = document.title;
+            const pdfStudentName = isAnonymous ? 'İsimsiz' : ((selectedDocStudent.ad || '') + ' ' + (selectedDocStudent.soyad || '')).trim();
+            const fileDateStr = dateStr.replace(/\//g, '.');
+            document.title = `${docTypeName} - ${pdfStudentName} - ${fileDateStr}`;
+            
             window.print();
+            
+            document.title = originalTitle;
             document.body.classList.remove('print-doc');
             closeDocumentModal();
         }
@@ -4633,12 +4647,17 @@ function deleteSchoolRecord(id, tab) {
             printArea.style.display = 'block';
             document.body.classList.add('print-karne');
 
+            const originalTitle = document.title;
+            const fileDateStr = dateStr.replace(/\//g, '.');
+            document.title = `Öğrenci Analizi - ${studentName.trim()} - ${fileDateStr}`;
+
             setTimeout(() => {
                 window.print();
                 setTimeout(() => {
                     document.body.classList.remove('print-karne');
                     printArea.style.display = 'none';
                     printArea.innerHTML = '';
+                    document.title = originalTitle;
                 }, 500);
             }, 300);
         }
