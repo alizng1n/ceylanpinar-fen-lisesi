@@ -2680,12 +2680,15 @@ def build_merged_app():
             }
 
             try { initTheme(); } catch (e) { console.error("Theme init error:", e); }
-            try { initIndexedDB(); } catch (e) { console.error("IndexedDB init error:", e); }
             try { initSearch(); } catch (e) { console.error("Search init error:", e); }
             try { setupDragAndDrop(); } catch (e) { console.error("DragAndDrop init error:", e); }
             try { initNewsFetcher(); } catch (e) { console.error("NewsFetcher init error:", e); }
             try { initSupabase(); } catch (e) { console.error("Supabase init error:", e); }
-            try { loadSchoolData(); } catch (e) { console.error("loadSchoolData init error:", e); }
+            try { 
+                loadSchoolData().then(() => {
+                    loadExamData();
+                });
+            } catch (e) { console.error("Data load init error:", e); }
             try { initRouter(); } catch (e) { console.error("Router init error:", e); }
             
             // ESC tuşu ile modalları kapatma desteği
@@ -3024,62 +3027,40 @@ def build_merged_app():
             }
         });
 
-        // IndexedDB Management
-        function initIndexedDB() {
-            const request = indexedDB.open('SchoolExamsDB', 1);
-
-            request.onerror = (event) => {
-                console.error("IndexedDB load error:", event);
-                showToast("Veritabanı yüklenemedi, veriler geçici bellekten okunuyor.", "warning");
-                examDatabase = DEFAULT_DATA;
-                refreshDashboard();
-            };
-
-            request.onsuccess = (event) => {
-                db = event.target.result;
-                loadRecordsFromDB();
-            };
-
-            request.onupgradeneeded = (event) => {
-                const database = event.target.result;
-                const objectStore = database.createObjectStore("exams", { keyPath: "id", autoIncrement: true });
-                objectStore.createIndex("no", "no", { unique: false });
-                objectStore.createIndex("name", "name", { unique: false });
-                objectStore.createIndex("deneme", "deneme", { unique: false });
-            };
-        }
-
-        function loadRecordsFromDB() {
-            const transaction = db.transaction(["exams"], "readonly");
-            const objectStore = transaction.objectStore("exams");
-            const request = objectStore.getAll();
-
-            request.onsuccess = (event) => {
-                const results = event.target.result;
-                if (results.length === 0) {
-                    console.log("Database is empty. Populating default records...");
-                    populateDefaultData();
-                } else {
-                    examDatabase = results;
-                    console.log(`Loaded ${results.length} records from IndexedDB`);
-                    refreshDashboard();
+        // Supabase Exam Data Loading
+        async function loadExamData() {
+            if (supabaseClient) {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('exam_results')
+                        .select('*')
+                        .order('id', { ascending: true });
+                    
+                    if (error) {
+                        console.error("Supabase loadExamData query error:", error);
+                        examDatabase = [];
+                    } else {
+                        examDatabase = (data || []).map(r => ({
+                            id: r.id,
+                            no: r.student_no,
+                            name: r.student_name,
+                            class: r.student_class,
+                            branch: r.student_branch,
+                            subjects: r.subjects,
+                            puan: r.puan,
+                            siralama: r.siralama,
+                            deneme: r.exam_name
+                        }));
+                        console.log(`Loaded ${examDatabase.length} records from Supabase!`);
+                    }
+                } catch (e) {
+                    console.error("Supabase loadExamData exception:", e);
+                    examDatabase = [];
                 }
-            };
-        }
-
-        function populateDefaultData() {
-            const transaction = db.transaction(["exams"], "readwrite");
-            const objectStore = transaction.objectStore("exams");
-            
-            DEFAULT_DATA.forEach(record => {
-                objectStore.add(record);
-            });
-
-            transaction.oncomplete = () => {
-                console.log("Default records written to IndexedDB.");
-                examDatabase = DEFAULT_DATA;
-                refreshDashboard();
-            };
+            } else {
+                examDatabase = [];
+            }
+            refreshDashboard();
         }
 
                 function applyRolePermissions() {
@@ -4792,48 +4773,92 @@ function showSchoolManagementView() {
             reader.readAsArrayBuffer(file);
         }
 
-        function saveRecordsToDB(newRecords, message = "Veritabanı güncellendi") {
-            if (!db) {
-                examDatabase = [...examDatabase, ...newRecords];
-                refreshDashboard();
-                showToast(message);
+        async function saveRecordsToDB(newRecords, message = "Veritabanı güncellendi") {
+            if (!supabaseClient) {
+                showToast("Bulut bağlantısı yok! Kayıt eklenemedi.", "error");
                 return;
             }
 
-            const transaction = db.transaction(["exams"], "readwrite");
-            const objectStore = transaction.objectStore("exams");
+            const examName = newRecords[0]?.deneme || "Bilinmeyen Sınav";
 
-            newRecords.forEach(record => {
-                objectStore.add(record);
-            });
-
-            transaction.oncomplete = () => {
-                const reloadTransaction = db.transaction(["exams"], "readonly");
-                const reloadStore = reloadTransaction.objectStore("exams");
-                const request = reloadStore.getAll();
+            try {
+                // 1. Sınavlar tablosuna eklemeyi deneyelim
+                const { error: errExam } = await supabaseClient
+                    .from('exams')
+                    .upsert({ name: examName }, { onConflict: 'name' });
                 
-                request.onsuccess = (event) => {
-                    examDatabase = event.target.result;
-                    refreshDashboard();
-                    showToast(message);
-                };
-            };
+                // 2. Şimdi bu sınava ait eski kayıtlar varsa onları silelim (tekrar yükleme desteği için)
+                await supabaseClient
+                    .from('exam_results')
+                    .delete()
+                    .eq('exam_name', examName);
+
+                // 3. Öğrencileri toplu olarak exam_results tablosuna ekleyelim
+                const recordsToInsert = newRecords.map(r => ({
+                    exam_name: examName,
+                    student_no: parseInt(r.no, 10) || null,
+                    student_name: r.name,
+                    student_class: r.class,
+                    student_branch: r.branch,
+                    subjects: r.subjects,
+                    puan: parseFloat(r.puan) || 0,
+                    siralama: parseInt(r.siralama, 10) || 0
+                }));
+
+                // 100'erli paketler halinde toplu ekleme yapalım
+                const chunkSize = 100;
+                for (let i = 0; i < recordsToInsert.length; i += chunkSize) {
+                    const chunk = recordsToInsert.slice(i, i + chunkSize);
+                    const { error: errInsert } = await supabaseClient
+                        .from('exam_results')
+                        .insert(chunk);
+                    
+                    if (errInsert) {
+                        console.error("Supabase bulk insert error:", errInsert);
+                        showToast("Hata: Sınav verileri kaydedilirken sorun oluştu.", "error");
+                        return;
+                    }
+                }
+
+                showToast(message);
+                await loadExamData();
+
+            } catch (e) {
+                console.error("saveRecordsToDB exception:", e);
+                showToast("Bulut veritabanına bağlanırken hata oluştu.", "error");
+            }
         }
 
-        function resetToDefault() {
+        async function resetToDefault() {
+            if (!supabaseClient) {
+                showToast("Bulut bağlantısı yok! İşlem gerçekleştirilemedi.", "error");
+                return;
+            }
+
             if (!confirm("Tüm sınav verilerini veritabanından kalıcı olarak silmek ve sistemi sıfırlamak istediğinize emin misiniz?")) return;
 
-            const transaction = db.transaction(["exams"], "readwrite");
-            const objectStore = transaction.objectStore("exams");
-            
-            const clearRequest = objectStore.clear();
-            clearRequest.onsuccess = () => {
-                populateDefaultData();
-                activeStudent = null;
-                document.getElementById('student-report-card').style.display = 'none';
-                document.getElementById('welcome-panel-analysis').style.display = 'block';
-                document.getElementById('search-student').value = '';
-            };
+            try {
+                // Sınavlar tablosundaki tüm satırları silelim. Cascade silme sayesinde exam_results tablosundaki sonuçlar da otomatik silinecektir!
+                const { error } = await supabaseClient
+                    .from('exams')
+                    .delete()
+                    .neq('id', 0); // Hepsini silsin
+                
+                if (error) {
+                    console.error("Supabase clear error:", error);
+                    showToast("Veriler silinirken hata oluştu.", "error");
+                } else {
+                    showToast("Tüm sınav verileri buluttan kalıcı olarak silindi.");
+                    activeStudent = null;
+                    document.getElementById('student-report-card').style.display = 'none';
+                    document.getElementById('welcome-panel-analysis').style.display = 'block';
+                    document.getElementById('search-student').value = '';
+                    await loadExamData();
+                }
+            } catch (e) {
+                console.error("clear error exception:", e);
+                showToast("Veritabanına bağlanırken hata oluştu.", "error");
+            }
         }
 
         // Dashboard statistics
