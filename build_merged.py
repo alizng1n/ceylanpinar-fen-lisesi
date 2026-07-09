@@ -3472,7 +3472,18 @@ function renderStudentHistory(student) {
         }
 
 function openDocumentModal(studentNo) {
-            const student = schoolData.ogrenci.find(s => String(s.no) === String(studentNo));
+            let student = null;
+            if (String(studentNo) === 'ADI') {
+                student = {
+                    no: 'ADI',
+                    ad: 'İsimsiz',
+                    soyad: 'Belge',
+                    snf: '',
+                    sube: ''
+                };
+            } else {
+                student = schoolData.ogrenci.find(s => String(s.no) === String(studentNo));
+            }
             if (!student) return;
             selectedDocStudent = student;
             
@@ -3484,7 +3495,9 @@ function openDocumentModal(studentNo) {
             } else {
                 document.getElementById('doc-stud-name').innerText = (student.ad || '') + ' ' + (student.soyad || '');
                 document.getElementById('doc-stud-no').innerText = student.no || '-';
-                document.getElementById('doc-stud-class').innerText = student.snf || '-';
+                
+                const displayClass = student.snf ? (student.snf + (student.sube ? '/' + student.sube : '')) : '-';
+                document.getElementById('doc-stud-class').innerText = displayClass;
             }
 
             const today = new Date();
@@ -3846,7 +3859,8 @@ function openDocumentModal(studentNo) {
             } else {
                 nameStr = (selectedDocStudent.ad || '') + ' ' + (selectedDocStudent.soyad || '');
                 noStr = selectedDocStudent.no || '-';
-                classStr = selectedDocStudent.snf || '-';
+                
+                classStr = selectedDocStudent.snf ? (selectedDocStudent.snf + (selectedDocStudent.sube ? '/' + selectedDocStudent.sube : '')) : '-';
             }
             
             let docHTML = '';
