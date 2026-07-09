@@ -4161,18 +4161,29 @@ function showSchoolManagementView() {
             let thead = '', rows = '';
 
             if (currentSchoolTab === 'ogrenci') {
-                thead = '<tr style="background:var(--bg-page); border-bottom:2px solid var(--border-color);"><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">No</th><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">Ad Soyad</th><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">Sınıf</th><th style="padding:0.75rem 1rem; text-align:center; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">İşlem</th></tr>';
+                thead = '<tr style="background:var(--bg-page); border-bottom:2px solid var(--border-color);"><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">No</th><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">Ad Soyad</th><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">Sınıf/Şube</th><th style="padding:0.75rem 1rem; text-align:center; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">İşlem</th></tr>';
+                
+                // İsimsiz Belge Üretme Satırını En Üste Sabitleyelim
+                const anonBtnClass = 'btn-action btn-action-anon';
+                const anonActionButtons = `<button onclick="openDocumentModal('ADI')" class="${anonBtnClass}"><i data-lucide="file-text" size="13"></i>İsimsiz Belge Üret</button>`;
+                rows += `<tr class="school-table-row" style="background:rgba(239, 68, 68, 0.03); border-bottom:1px solid var(--border-color);"><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.8rem;">-</td><td style="padding:0.7rem 1rem; font-weight:600; color:var(--text-primary);">İSİMSİZ BELGE ÜRETİMİ</td><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.85rem;">-</td><td style="padding:0.7rem 1rem; text-align:center;">${anonActionButtons}</td></tr>`;
+
                 records.forEach(r => {
-                    const rec = JSON.stringify(r).replace(/'/g, "&#39;");
-                    const isAnon = String(r.no) === 'ADI';
-                    const btnClass = isAnon ? 'btn-action btn-action-anon' : 'btn-action btn-action-print';
-                    const btnIcon = isAnon ? 'file-text' : 'printer';
-                    const btnText = isAnon ? 'İsimsiz Belge Üret' : 'Belge Üret';
+                    // Veritabanındaki eski "ADI" satırını (varsa) atlayalım
+                    if (String(r.no) === 'ADI') return;
+                    
+                    const btnClass = 'btn-action btn-action-print';
+                    const btnIcon = 'printer';
+                    const btnText = 'Belge Üret';
                     let actionButtons = `<button onclick="openDocumentModal('${r.no||''}')" class="${btnClass}"><i data-lucide="${btnIcon}" size="13"></i>${btnText}</button>`;
-                    if (isAdmin && !isAnon) {
+                    if (isAdmin) {
                         actionButtons += `<button onclick="openSchoolModal('${r.no||''}')" class="btn-action btn-action-edit"><i data-lucide="edit-2" size="13"></i>Düzenle</button><button onclick="deleteSchoolRecord('${r.no||''}','ogrenci')" class="btn-action btn-action-delete"><i data-lucide="trash-2" size="13"></i>Sil</button>`;
                     }
-                    rows += `<tr class="school-table-row"><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.8rem;">${r.no||'-'}</td><td style="padding:0.7rem 1rem; font-weight:500; color:var(--text-primary);">${r.ad||''} ${r.soyad||''}</td><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.85rem;">${r.snf||'-'}</td><td style="padding:0.7rem 1rem; text-align:center;">${actionButtons}</td></tr>`;
+                    
+                    // Sınıf ve Şube bilgilerini birleştirelim
+                    const displayClass = r.snf ? (r.snf + (r.sube ? '/' + r.sube : '')) : '-';
+                    
+                    rows += `<tr class="school-table-row"><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.8rem;">${r.no||'-'}</td><td style="padding:0.7rem 1rem; font-weight:500; color:var(--text-primary);">${r.ad||''} ${r.soyad||''}</td><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.85rem;">${displayClass}</td><td style="padding:0.7rem 1rem; text-align:center;">${actionButtons}</td></tr>`;
                 });
             } else if (currentSchoolTab === 'ogretmen') {
                 thead = '<tr style="background:var(--bg-page); border-bottom:2px solid var(--border-color);"><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">ID</th><th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">Ad Soyad</th><th style="padding:0.75rem 1rem; text-align:center; font-weight:600; color:var(--text-secondary); font-size:0.8rem;">İşlem</th></tr>';
