@@ -3774,7 +3774,7 @@ function openDocumentModal(studentNo) {
         }
 
 
-        function printDocument() {
+        async function printDocument() {
             if (!selectedDocStudent) return;
             
             const docType = document.getElementById('doc-type-select').value;
@@ -3844,6 +3844,20 @@ function openDocumentModal(studentNo) {
                     tur: docTypeName,
                     detay: details
                 });
+
+                if (supabaseClient) {
+                    try {
+                        await supabaseClient.from('document_history').insert({
+                            student_no: parseInt(selectedDocStudent.no, 10),
+                            tarih: dateStr,
+                            tur: docTypeName,
+                            detay: details
+                        });
+                    } catch (err) {
+                        console.error("Supabase print log insert failed:", err);
+                    }
+                }
+                
                 persistSchoolData();
             }
             
