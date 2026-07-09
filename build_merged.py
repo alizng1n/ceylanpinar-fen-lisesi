@@ -4437,9 +4437,9 @@ function showSchoolManagementView() {
                 
                 if (supabaseClient) {
                     if (schoolEditId) {
-                        await supabaseClient.from('staff').update({ ad_soyad, unvan }).eq('id', schoolEditId);
+                        await supabaseClient.from('staff').update({ ad_soyad, unvan }).eq('id', schoolEditId).eq('role', currentSchoolTab);
                     } else {
-                        await supabaseClient.from('staff').insert({ ad_soyad, unvan, role: 'idare' });
+                        await supabaseClient.from('staff').insert({ ad_soyad, unvan, role: currentSchoolTab });
                     }
                 } else {
                     // Local fallback
@@ -4515,7 +4515,7 @@ function showSchoolManagementView() {
                                     await supabaseClient.from('document_history').delete().eq('student_no', id);
                                     await supabaseClient.from('students').delete().eq('no', id);
                                 } else {
-                                    await supabaseClient.from('staff').delete().eq('id', id);
+                                    await supabaseClient.from('staff').delete().eq('id', id).eq('role', tab);
                                 }
                             } else {
                                 // Local fallback
