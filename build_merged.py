@@ -46,15 +46,8 @@ def build_merged_app():
         
     records_js_str = json.dumps(database_records, ensure_ascii=False)
 
-    # Okul Yonetim Sistemi veritabani
-    okul_json_path = r"C:\Users\Acer\.gemini\antigravity\brain\6f72dc90-862c-4327-a3db-43ee1f05bf95\scratch\okul_database.json"
-    print(f"Reading School DB from: {okul_json_path}")
-    if not os.path.exists(okul_json_path):
-        print("School DB not found! Using empty object.")
-        okul_records = {"OkulAd": "CEYLANPINAR FEN LISESI", "idare": [], "ogretmen": [], "ogrenci": []}
-    else:
-        with open(okul_json_path, 'r', encoding='utf-8') as f:
-            okul_records = json.load(f)
+    # Okul Yonetim Sistemi veritabani (Cloud-Only yapısı için boş başlatılır, veriler sadece Supabase'den çekilir)
+    okul_records = {"OkulAd": "CEYLANPINAR FEN LİSESİ", "idare": [], "ogretmen": [], "ogrenci": []}
     okul_js_str = json.dumps(okul_records, ensure_ascii=False)
 
     live_news = fetch_live_news_python()
@@ -2691,9 +2684,9 @@ def build_merged_app():
             try { initSearch(); } catch (e) { console.error("Search init error:", e); }
             try { setupDragAndDrop(); } catch (e) { console.error("DragAndDrop init error:", e); }
             try { initNewsFetcher(); } catch (e) { console.error("NewsFetcher init error:", e); }
-            try { initRouter(); } catch (e) { console.error("Router init error:", e); }
             try { initSupabase(); } catch (e) { console.error("Supabase init error:", e); }
             try { loadSchoolData(); } catch (e) { console.error("loadSchoolData init error:", e); }
+            try { initRouter(); } catch (e) { console.error("Router init error:", e); }
             
             // ESC tuşu ile modalları kapatma desteği
             document.addEventListener('keydown', (event) => {
@@ -2790,11 +2783,11 @@ def build_merged_app():
                 dot.style.background = '#10b981';
                 dot.style.boxShadow = '0 0 6px #10b981';
             } else {
-                badge.style.background = 'rgba(245,158,11,0.08)';
-                badge.style.borderColor = 'rgba(245,158,11,0.2)';
-                badge.title = 'Yerel Mod (Çevrimdışı Depolama)';
-                dot.style.background = '#f59e0b';
-                dot.style.boxShadow = '0 0 6px #f59e0b';
+                badge.style.background = 'rgba(239,68,68,0.08)';
+                badge.style.borderColor = 'rgba(239,68,68,0.2)';
+                badge.title = 'Bağlantı Yok (Çevrimdışı)';
+                dot.style.background = '#ef4444';
+                dot.style.boxShadow = '0 0 6px #ef4444';
             }
         }
 
@@ -4155,21 +4148,17 @@ function openDocumentModal(studentNo) {
 
 
         function persistSchoolData() {
-            if (!schoolData) return;
-            // Supabase devredeyken bu fonksiyonu asenkron tekil işlemler yönettiğinden local storage'ı yedek olarak güncelliyoruz
-            try {
-                localStorage.setItem('cfl_school_db', JSON.stringify(schoolData));
-            } catch (e) {
-                console.error("Local storage save failed:", e);
-            }
+            // Cloud-only yapıda yerel depolama kullanılmaz
         }
 
+        let isLoadedFromCloud = false;
+
         async function loadSchoolData(forceReload = false) {
-            if (schoolData && !forceReload) return;
+            if (isLoadedFromCloud && !forceReload) return;
 
             if (supabaseClient) {
                 try {
-                    // 5 saniyelik zaman aşımı tanımlayalım (silence network drop durumlarına karşı)
+                    // 15 saniyelik zaman aşımı tanımlayalım
                     const timeoutPromise = new Promise((_, reject) => 
                         setTimeout(() => reject(new Error("Supabase bağlantı zaman aşımı")), 15000)
                     );
@@ -4214,28 +4203,27 @@ function openDocumentModal(studentNo) {
                             }))
                         };
                         updateDbStatusBadge(true);
+                        isLoadedFromCloud = true;
                         console.log("School data loaded successfully from Supabase!");
                         return;
                     } else {
-                        console.error("Supabase load query errors, falling back to LocalStorage:", errOgr, errStaff, errHist);
+                        console.error("Supabase load query errors:", errOgr, errStaff, errHist);
                     }
                 } catch(e) {
-                    console.error("Supabase load exception, falling back:", e);
+                    console.error("Supabase load exception:", e);
                 }
             }
 
-            // LocalStorage Fallback (Yerel yedek veya varsayılan veritabanı)
+            // Bağlantı başarısız veya bulunamadı ise kırmızı ışık yak
             updateDbStatusBadge(false);
-            try {
-                const saved = localStorage.getItem('cfl_school_db');
-                if (saved) {
-                    schoolData = JSON.parse(saved);
-                } else {
-                    schoolData = JSON.parse(JSON.stringify(DEFAULT_OKUL_DB));
-                }
-            } catch (e) {
-                schoolData = JSON.parse(JSON.stringify(DEFAULT_OKUL_DB));
-            }
+            
+            // Çevrimdışı / Bağlantı kesildi modunda boş nesnelerle başlatıp arayüzün patlamasını önleyelim
+            schoolData = {
+                ogrenci: [],
+                ogretmen: [],
+                idare: []
+            };
+            isLoadedFromCloud = false;
         }
 
 function showSchoolManagementView() {
@@ -4410,6 +4398,7 @@ function showSchoolManagementView() {
         }
 
         async function saveSchoolRecord() {
+            if (!supabaseClient) { alert('Bulut bağlantısı yok! İşlem gerçekleştirilemedi.'); return; }
             if (!schoolData) return;
 
             if (currentSchoolTab === 'ogrenci') {
@@ -4504,8 +4493,9 @@ function showSchoolManagementView() {
             showToast(schoolEditId ? 'Kayıt güncellendi!' : 'Yeni kayıt eklendi!');
         }
 
-                function clearAllSchoolTabRecords() {
-                            let tabLabel = "öğrencileri";
+        function clearAllSchoolTabRecords() {
+            if (!supabaseClient) { alert('Bulut bağlantısı yok! İşlem gerçekleştirilemedi.'); return; }
+            let tabLabel = "öğrencileri";
                             if (currentSchoolTab === 'ogretmen') tabLabel = "öğretmenleri";
                             if (currentSchoolTab === 'idare') tabLabel = "idarecileri";
 
@@ -4546,6 +4536,7 @@ function showSchoolManagementView() {
                         }
 
                         async function deleteSchoolRecord(id, tab) {
+                            if (!supabaseClient) { alert('Bulut bağlantısı yok! İşlem gerçekleştirilemedi.'); return; }
                             if (!confirm('Bu kaydı silmek istediğinizden emin misiniz?')) return;
                             if (!schoolData) return;
 
