@@ -2605,6 +2605,18 @@ def build_merged_app():
                 <p style="margin:0.25rem 0 0 0; font-size:0.75rem; color:var(--text-secondary);">TYT Sonuç dosyasını (xlsx/xlsm/xls) seçin</p>
             </div>
 
+            <!-- Yükleme Başarı Durumu Geri Bildirimi -->
+            <div id="exam-excel-success-area" style="display:none; border:2px solid #10b981; background:rgba(16,185,129,0.05); border-radius:var(--radius-lg); padding:2rem; text-align:center; margin-bottom:1.5rem; flex-direction:column; align-items:center; justify-content:center; gap:0.5rem; box-sizing:border-box;">
+                <div style="background:rgba(16,185,129,0.1); padding:0.75rem; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#10b981;">
+                    <i data-lucide="check-circle" style="width:36px; height:36px;"></i>
+                </div>
+                <p id="exam-excel-success-filename" style="margin:0; font-size:0.9rem; font-weight:700; color:var(--text-primary); word-break:break-all;">[Dosya_Adi.xlsx]</p>
+                <p style="margin:0; font-size:0.8rem; color:#10b981; font-weight:600;">aktarıma hazır.</p>
+                <button onclick="clearExamExcelFile()" style="margin-top:0.5rem; background:none; border:none; color:var(--text-secondary); text-decoration:underline; font-size:0.78rem; cursor:pointer; font-weight:600; display:inline-flex; align-items:center; gap:0.25rem;">
+                    <i data-lucide="trash-2" size="14"></i> Başka bir dosya seç
+                </button>
+            </div>
+
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div id="exam-import-status" style="font-size:0.8rem; color:var(--text-secondary);">Dosya bekleniyor...</div>
                 <div style="display:flex; gap:0.75rem;">
@@ -2690,6 +2702,18 @@ def build_merged_app():
                 <i data-lucide="upload-cloud" style="width:36px; height:36px; color:#10b981; margin-bottom:0.5rem;"></i>
                 <p style="margin:0; font-size:0.85rem; font-weight:600; color:var(--text-primary);">Excel Dosyası Seç veya Buraya Sürükle</p>
                 <p style="margin:0.25rem 0 0 0; font-size:0.75rem; color:var(--text-secondary);">.xlsx, .xlsm veya .xls formatında</p>
+            </div>
+
+            <!-- Yükleme Başarı Durumu Geri Bildirimi -->
+            <div id="student-excel-success-area" style="display:none; border:2px solid #10b981; background:rgba(16,185,129,0.05); border-radius:var(--radius-lg); padding:2rem; text-align:center; margin-bottom:1.5rem; flex-direction:column; align-items:center; justify-content:center; gap:0.5rem; box-sizing:border-box;">
+                <div style="background:rgba(16,185,129,0.1); padding:0.75rem; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#10b981;">
+                    <i data-lucide="check-circle" style="width:36px; height:36px;"></i>
+                </div>
+                <p id="student-excel-success-filename" style="margin:0; font-size:0.9rem; font-weight:700; color:var(--text-primary); word-break:break-all;">[Dosya_Adi.xlsx]</p>
+                <p style="margin:0; font-size:0.8rem; color:#10b981; font-weight:600;">aktarıma hazır.</p>
+                <button onclick="clearStudentExcelFile()" style="margin-top:0.5rem; background:none; border:none; color:var(--text-secondary); text-decoration:underline; font-size:0.78rem; cursor:pointer; font-weight:600; display:inline-flex; align-items:center; gap:0.25rem;">
+                    <i data-lucide="trash-2" size="14"></i> Başka bir dosya seç
+                </button>
             </div>
 
             <!-- Yükleme Sonrası Önizleme Alanı -->
@@ -4877,6 +4901,33 @@ function showSchoolManagementView() {
                     }
                 });
             }
+
+            const examDropzone = document.getElementById('exam-excel-dropzone');
+            if(examDropzone) {
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    examDropzone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        examDropzone.classList.add('dragover');
+                    }, false);
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    examDropzone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        examDropzone.classList.remove('dragover');
+                    }, false);
+                });
+
+                examDropzone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    examDropzone.classList.remove('dragover');
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+                    if (files.length > 0) {
+                        parseExamExcel(files[0]);
+                    }
+                });
+            }
         }
 
         function handleExcelImport(event) {
@@ -5013,6 +5064,11 @@ function showSchoolManagementView() {
         let parsedStudentsToImport = [];
 
         function openStudentImportModal() {
+            clearStudentExcelFile();
+            document.getElementById('student-import-modal').style.display = 'flex';
+        }
+
+        function clearStudentExcelFile() {
             parsedStudentsToImport = [];
             const previewSection = document.getElementById('student-import-preview-section');
             const previewBody = document.getElementById('student-import-preview-body');
@@ -5029,7 +5085,10 @@ function showSchoolManagementView() {
                 startBtn.style.opacity = '0.5';
             }
 
-            document.getElementById('student-import-modal').style.display = 'flex';
+            const dropzone = document.getElementById('student-excel-dropzone');
+            const successArea = document.getElementById('student-excel-success-area');
+            if (dropzone) dropzone.style.display = 'block';
+            if (successArea) successArea.style.display = 'none';
         }
 
         function closeStudentImportModal() {
@@ -5113,6 +5172,14 @@ function showSchoolManagementView() {
                         document.getElementById('student-import-preview-section').style.display = 'block';
                         if (statusDiv) statusDiv.innerText = `${parsedStudentsToImport.length} öğrenci yüklendi, aktarıma hazır.`;
                         
+                        const dropzone = document.getElementById('student-excel-dropzone');
+                        const successArea = document.getElementById('student-excel-success-area');
+                        const filenameText = document.getElementById('student-excel-success-filename');
+                        if (dropzone) dropzone.style.display = 'none';
+                        if (successArea) successArea.style.display = 'flex';
+                        if (filenameText) filenameText.innerText = file.name;
+                        lucide.createIcons();
+
                         const startBtn = document.getElementById('btn-start-student-import');
                         if (startBtn) {
                             startBtn.disabled = false;
@@ -5236,6 +5303,11 @@ function showSchoolManagementView() {
         let parsedExamName = "";
 
         function openExamImportModal() {
+            clearExamExcelFile();
+            document.getElementById('exam-import-modal').style.display = 'flex';
+        }
+
+        function clearExamExcelFile() {
             parsedExamRecordsToImport = [];
             parsedExamName = "";
             const statusDiv = document.getElementById('exam-import-status');
@@ -5253,7 +5325,10 @@ function showSchoolManagementView() {
             if (rulesContent) rulesContent.style.display = 'none';
             if (rulesToggleText) rulesToggleText.innerText = 'Detaylı Şablon Kuralları (Daha Fazla...)';
 
-            document.getElementById('exam-import-modal').style.display = 'flex';
+            const dropzone = document.getElementById('exam-excel-dropzone');
+            const successArea = document.getElementById('exam-excel-success-area');
+            if (dropzone) dropzone.style.display = 'block';
+            if (successArea) successArea.style.display = 'none';
         }
 
         function closeExamImportModal() {
@@ -5359,6 +5434,14 @@ function showSchoolManagementView() {
                     if (parsedExamRecordsToImport.length > 0) {
                         if (statusDiv) statusDiv.innerText = `"${parsedExamName}" sınavına ait ${parsedExamRecordsToImport.length} kayıt aktarıma hazır.`;
                         
+                        const dropzone = document.getElementById('exam-excel-dropzone');
+                        const successArea = document.getElementById('exam-excel-success-area');
+                        const filenameText = document.getElementById('exam-excel-success-filename');
+                        if (dropzone) dropzone.style.display = 'none';
+                        if (successArea) successArea.style.display = 'flex';
+                        if (filenameText) filenameText.innerText = file.name;
+                        lucide.createIcons();
+
                         const startBtn = document.getElementById('btn-start-exam-import');
                         if (startBtn) {
                             startBtn.disabled = false;
