@@ -2617,6 +2617,18 @@ def build_merged_app():
                 </button>
             </div>
 
+            <!-- Yükleme Hata Durumu Geri Bildirimi -->
+            <div id="exam-excel-error-area" style="display:none; border:2px solid #ef4444; background:rgba(239,68,68,0.05); border-radius:var(--radius-lg); padding:2rem; text-align:center; margin-bottom:1.5rem; flex-direction:column; align-items:center; justify-content:center; gap:0.5rem; box-sizing:border-box;">
+                <div style="background:rgba(239,68,68,0.1); padding:0.75rem; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#ef4444;">
+                    <i data-lucide="alert-circle" style="width:36px; height:36px;"></i>
+                </div>
+                <h4 style="margin:0; font-size:0.95rem; font-weight:700; color:#ef4444;">Uyumsuz Excel Formatı</h4>
+                <p id="exam-excel-error-message" style="margin:0.25rem 0 0 0; font-size:0.82rem; color:var(--text-secondary); line-height:1.5; max-width:400px; word-break:break-word;">Hata detayı burada görünecek.</p>
+                <button onclick="clearExamExcelFile()" style="margin-top:0.75rem; padding:0.5rem 1rem; background:none; border:1px solid #ef4444; color:#ef4444; border-radius:var(--radius-md); font-size:0.8rem; cursor:pointer; font-weight:600; display:inline-flex; align-items:center; gap:0.25rem; transition:all 0.2s;">
+                    <i data-lucide="refresh-cw" size="14"></i> Tekrar Dene / Başka Dosya Seç
+                </button>
+            </div>
+
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div id="exam-import-status" style="font-size:0.8rem; color:var(--text-secondary);">Dosya bekleniyor...</div>
                 <div style="display:flex; gap:0.75rem;">
@@ -2713,6 +2725,18 @@ def build_merged_app():
                 <p style="margin:0; font-size:0.8rem; color:#10b981; font-weight:600;">aktarıma hazır.</p>
                 <button onclick="clearStudentExcelFile()" style="margin-top:0.5rem; background:none; border:none; color:var(--text-secondary); text-decoration:underline; font-size:0.78rem; cursor:pointer; font-weight:600; display:inline-flex; align-items:center; gap:0.25rem;">
                     <i data-lucide="trash-2" size="14"></i> Başka bir dosya seç
+                </button>
+            </div>
+
+            <!-- Yükleme Hata Durumu Geri Bildirimi -->
+            <div id="student-excel-error-area" style="display:none; border:2px solid #ef4444; background:rgba(239,68,68,0.05); border-radius:var(--radius-lg); padding:2rem; text-align:center; margin-bottom:1.5rem; flex-direction:column; align-items:center; justify-content:center; gap:0.5rem; box-sizing:border-box;">
+                <div style="background:rgba(239,68,68,0.1); padding:0.75rem; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#ef4444;">
+                    <i data-lucide="alert-circle" style="width:36px; height:36px;"></i>
+                </div>
+                <h4 style="margin:0; font-size:0.95rem; font-weight:700; color:#ef4444;">Uyumsuz Excel Formatı</h4>
+                <p id="student-excel-error-message" style="margin:0.25rem 0 0 0; font-size:0.82rem; color:var(--text-secondary); line-height:1.5; max-width:400px; word-break:break-word;">Hata detayı burada görünecek.</p>
+                <button onclick="clearStudentExcelFile()" style="margin-top:0.75rem; padding:0.5rem 1rem; background:none; border:1px solid #ef4444; color:#ef4444; border-radius:var(--radius-md); font-size:0.8rem; cursor:pointer; font-weight:600; display:inline-flex; align-items:center; gap:0.25rem; transition:all 0.2s;">
+                    <i data-lucide="refresh-cw" size="14"></i> Tekrar Dene / Başka Dosya Seç
                 </button>
             </div>
 
@@ -5087,8 +5111,30 @@ function showSchoolManagementView() {
 
             const dropzone = document.getElementById('student-excel-dropzone');
             const successArea = document.getElementById('student-excel-success-area');
+            const errorArea = document.getElementById('student-excel-error-area');
             if (dropzone) dropzone.style.display = 'block';
             if (successArea) successArea.style.display = 'none';
+            if (errorArea) errorArea.style.display = 'none';
+        }
+
+        function showStudentImportError(msg) {
+            const dropzone = document.getElementById('student-excel-dropzone');
+            const successArea = document.getElementById('student-excel-success-area');
+            const errorArea = document.getElementById('student-excel-error-area');
+            const errorMessage = document.getElementById('student-excel-error-message');
+            const previewSection = document.getElementById('student-import-preview-section');
+            const startBtn = document.getElementById('btn-start-student-import');
+
+            if (dropzone) dropzone.style.display = 'none';
+            if (successArea) successArea.style.display = 'none';
+            if (previewSection) previewSection.style.display = 'none';
+            if (errorArea) errorArea.style.display = 'flex';
+            if (errorMessage) errorMessage.innerText = msg;
+            if (startBtn) {
+                startBtn.disabled = true;
+                startBtn.style.opacity = '0.5';
+            }
+            lucide.createIcons();
         }
 
         function closeStudentImportModal() {
@@ -5116,7 +5162,7 @@ function showSchoolManagementView() {
                     const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                     
                     if (rows.length < 2) {
-                        showToast("Hata: Dosya boş veya sütun başlıkları yok.", "error");
+                        showStudentImportError("Dosya boş veya sütun başlıkları bulunamadı.");
                         if (statusDiv) statusDiv.innerText = 'Hata: Sütun başlıkları bulunamadı.';
                         return;
                     }
@@ -5128,7 +5174,7 @@ function showSchoolManagementView() {
                     const sinifIdx = headers.indexOf('SINIF/ŞUBE');
 
                     if (noIdx === -1 || adIdx === -1 || soyadIdx === -1 || sinifIdx === -1) {
-                        showToast("Hata: Sütun başlıkları eşleşmedi! NO, ADI, SOYADI, SINIF/ŞUBE zorunludur.", "error");
+                        showStudentImportError("Sütun başlıkları eşleşmedi! NO, ADI, SOYADI, SINIF/ŞUBE zorunludur.");
                         if (statusDiv) statusDiv.innerText = 'Hata: Uyumsuz sütun başlıkları.';
                         return;
                     }
@@ -5169,7 +5215,6 @@ function showSchoolManagementView() {
 
                     if (parsedStudentsToImport.length > 0) {
                         if (previewBody) previewBody.innerHTML = previewHtml;
-                        document.getElementById('student-import-preview-section').style.display = 'block';
                         if (statusDiv) statusDiv.innerText = `${parsedStudentsToImport.length} öğrenci yüklendi, aktarıma hazır.`;
                         
                         const dropzone = document.getElementById('student-excel-dropzone');
@@ -5186,13 +5231,13 @@ function showSchoolManagementView() {
                             startBtn.style.opacity = '1';
                         }
                     } else {
-                        showToast("Dosyada geçerli öğrenci verisi bulunamadı.", "error");
+                        showStudentImportError("Dosyada geçerli öğrenci verisi bulunamadı.");
                         if (statusDiv) statusDiv.innerText = 'Geçerli kayıt bulunamadı.';
                     }
 
                 } catch (error) {
                     console.error("Excel parse error:", error);
-                    showToast("Excel dosyası çözümlenirken hata oluştu.", "error");
+                    showStudentImportError("Excel dosyası çözümlenirken hata oluştu.");
                     if (statusDiv) statusDiv.innerText = 'Çözümleme hatası.';
                 }
             };
@@ -5327,8 +5372,28 @@ function showSchoolManagementView() {
 
             const dropzone = document.getElementById('exam-excel-dropzone');
             const successArea = document.getElementById('exam-excel-success-area');
+            const errorArea = document.getElementById('exam-excel-error-area');
             if (dropzone) dropzone.style.display = 'block';
             if (successArea) successArea.style.display = 'none';
+            if (errorArea) errorArea.style.display = 'none';
+        }
+
+        function showExamImportError(msg) {
+            const dropzone = document.getElementById('exam-excel-dropzone');
+            const successArea = document.getElementById('exam-excel-success-area');
+            const errorArea = document.getElementById('exam-excel-error-area');
+            const errorMessage = document.getElementById('exam-excel-error-message');
+            const startBtn = document.getElementById('btn-start-exam-import');
+
+            if (dropzone) dropzone.style.display = 'none';
+            if (successArea) successArea.style.display = 'none';
+            if (errorArea) errorArea.style.display = 'flex';
+            if (errorMessage) errorMessage.innerText = msg;
+            if (startBtn) {
+                startBtn.disabled = true;
+                startBtn.style.opacity = '0.5';
+            }
+            lucide.createIcons();
         }
 
         function closeExamImportModal() {
@@ -5370,7 +5435,7 @@ function showSchoolManagementView() {
                     const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                     
                     if (rows.length < 3) {
-                        showToast("Hata: Dosyada yeterli satır yok (en az 3 satır olmalı).", "error");
+                        showExamImportError("Dosyada yeterli satır yok (en az 3 satır olmalı).");
                         if (statusDiv) statusDiv.innerText = 'Hata: Yetersiz satır sayısı.';
                         return;
                     }
@@ -5385,7 +5450,7 @@ function showSchoolManagementView() {
                     }
 
                     if (!parsedExamName) {
-                        showToast("Hata: Sınav adı (39. sütun) bulunamadı.", "error");
+                        showExamImportError("Sınav adı (39. sütun) bulunamadı.");
                         if (statusDiv) statusDiv.innerText = 'Hata: Sınav adı sütunu boş.';
                         return;
                     }
@@ -5448,13 +5513,13 @@ function showSchoolManagementView() {
                             startBtn.style.opacity = '1';
                         }
                     } else {
-                        showToast("Dosyada geçerli öğrenci kaydı bulunamadı.", "error");
+                        showExamImportError("Dosyada geçerli öğrenci kaydı bulunamadı.");
                         if (statusDiv) statusDiv.innerText = 'Geçerli kayıt bulunamadı.';
                     }
 
                 } catch (error) {
                     console.error("Excel parse error:", error);
-                    showToast("Excel dosyası çözümlenirken hata oluştu.", "error");
+                    showExamImportError("Excel dosyası çözümlenirken hata oluştu.");
                     if (statusDiv) statusDiv.innerText = 'Çözümleme hatası.';
                 }
             };
