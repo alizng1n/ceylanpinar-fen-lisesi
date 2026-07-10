@@ -762,6 +762,10 @@ def build_merged_app():
             to { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         .hub-header {
             display: flex;
             justify-content: space-between;
@@ -2397,7 +2401,7 @@ def build_merged_app():
                 <button id="school-add-btn" onclick="openSchoolModal(null)" style="padding:0 1.25rem; height:44px; border-radius:var(--radius-lg); background:var(--accent-gradient); color:#fff; border:none; font-weight:600; font-size:0.875rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.4rem; white-space:nowrap; box-shadow:var(--shadow-sm);">
                     <i data-lucide="plus" size="16"></i> Yeni Ekle
                 </button>
-                <button id="school-import-excel-btn" onclick="openStudentImportModal()" style="display:none; padding:0 1.25rem; height:44px; border-radius:var(--radius-lg); background:#10b981; color:#fff; border:none; font-weight:600; font-size:0.875rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.4rem; white-space:nowrap; box-shadow:var(--shadow-sm);">
+                <button id="school-import-excel-btn" onclick="openStudentImportConfirmModal()" style="display:none; padding:0 1.25rem; height:44px; border-radius:var(--radius-lg); background:#10b981; color:#fff; border:none; font-weight:600; font-size:0.875rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.4rem; white-space:nowrap; box-shadow:var(--shadow-sm);">
                     <i data-lucide="file-spreadsheet" size="16"></i> Excel'den Aktar
                 </button>
 
@@ -2537,6 +2541,24 @@ def build_merged_app():
     <!-- Sınav Excel İçe Aktarma Modalı -->
     <div id="exam-import-modal" class="modal-backdrop" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; align-items:center; justify-content:center; padding:1rem;">
         <div style="background:var(--bg-card); border-radius:var(--radius-lg); padding:2rem; width:100%; max-width:640px; box-shadow:0 20px 60px rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); position:relative; max-height:85vh; display:flex; flex-direction:column; box-sizing:border-box;">
+            <!-- Yükleme Göstergesi Overlay -->
+            <div id="exam-import-loading-overlay" style="display:none; position:absolute; inset:0; background:var(--bg-card); opacity:0.96; backdrop-filter:blur(8px); z-index:100; border-radius:var(--radius-lg); flex-direction:column; align-items:center; justify-content:center; gap:1.25rem; box-sizing:border-box; padding:2rem;">
+                <!-- Dönen Dış Halka -->
+                <div style="position:relative; width:80px; height:80px; display:flex; align-items:center; justify-content:center;">
+                    <div style="position:absolute; inset:0; border:4px solid var(--border-color); border-radius:50%;"></div>
+                    <div style="position:absolute; inset:0; border:4px solid transparent; border-top-color:#10b981; border-radius:50%; animation:spin 1s linear infinite;"></div>
+                    <span id="exam-import-loading-percent" style="font-size:1.15rem; font-weight:700; color:var(--text-primary);">0%</span>
+                </div>
+                <div style="text-align:center;">
+                    <h4 style="margin:0; color:var(--text-primary); font-size:1rem; font-weight:600;">Sınav Sonuçları Buluta Aktarılıyor</h4>
+                    <p id="exam-import-loading-status" style="margin:0.35rem 0 0 0; color:var(--text-secondary); font-size:0.8rem;">Hazırlanıyor...</p>
+                </div>
+                <!-- İlerleme Çubuğu -->
+                <div style="width:200px; height:6px; background:var(--bg-page); border-radius:3px; overflow:hidden; border:1px solid var(--border-color);">
+                    <div id="exam-import-loading-bar" style="width:0%; height:100%; background:#10b981; transition:width 0.2s ease; border-radius:3px;"></div>
+                </div>
+            </div>
+
             <button onclick="closeExamImportModal()" style="position:absolute; right:1.5rem; top:1.5rem; background:none; border:none; color:var(--text-secondary); cursor:pointer; padding:0.25rem;"><i data-lucide="x" size="20"></i></button>
             <h3 style="margin-top:0; margin-bottom:1.25rem; font-size:1.15rem; font-weight:700; display:flex; align-items:center; gap:0.5rem; color:var(--text-primary);"><i data-lucide="file-spreadsheet" style="color:var(--accent-color); width:20px; height:20px;"></i> Sınav Sonuçları İçe Aktar</h3>
             
@@ -2595,9 +2617,60 @@ def build_merged_app():
         </div>
     </div>
 
-    <!-- Öğrenci Excel İçe Aktarma Modalı -->
+    <!-- Öğrenci İçe Aktarım Silme Onay Modalı -->
+    <div id="student-import-confirm-modal" class="modal-backdrop" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; align-items:center; justify-content:center; padding:1rem;">
+        <div style="background:var(--bg-card); border-radius:var(--radius-lg); padding:2rem; width:100%; max-width:480px; box-shadow:0 20px 60px rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); position:relative; display:flex; flex-direction:column; box-sizing:border-box; gap:1.5rem;">
+            <!-- Loading indicator for confirmation modal -->
+            <div id="student-import-confirm-loading" style="display:none; position:absolute; inset:0; background:var(--bg-card); opacity:0.95; backdrop-filter:blur(6px); z-index:10; border-radius:var(--radius-lg); flex-direction:column; align-items:center; justify-content:center; gap:0.75rem;">
+                <div style="width:40px; height:40px; border:3px solid var(--border-color); border-top-color:#ef4444; border-radius:50%; animation:spin 1s linear infinite;"></div>
+                <p style="margin:0; font-size:0.875rem; color:var(--text-secondary); font-weight:600;">Mevcut kayıtlar siliniyor...</p>
+            </div>
+            
+            <div style="display:flex; align-items:center; gap:0.75rem; color:#ef4444;">
+                <div style="background:rgba(239,68,68,0.1); padding:0.75rem; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                    <i data-lucide="alert-triangle" size="24" style="color:#ef4444;"></i>
+                </div>
+                <h3 style="margin:0; font-size:1.15rem; font-weight:700; color:var(--text-primary);">Mevcut Verilerin Yönetimi</h3>
+            </div>
+            
+            <p style="margin:0; font-size:0.9rem; line-height:1.6; color:var(--text-secondary);">
+                Veri aktarmadan önce, sistemdeki mevcut öğrenci kayıtlarını ve bunlara bağlı evrak geçmişini toplu olarak silmek ister misiniz?
+            </p>
+            
+            <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                <button onclick="handleStudentImportConfirm(true)" style="padding:0.75rem 1.25rem; border-radius:var(--radius-lg); background:#ef4444; color:#fff; border:none; cursor:pointer; font-weight:700; font-size:0.875rem; display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; transition:opacity 0.2s;">
+                    <i data-lucide="trash-2" size="16"></i> Evet, Tümünü Sil ve Devam Et
+                </button>
+                <button onclick="handleStudentImportConfirm(false)" style="padding:0.75rem 1.25rem; border-radius:var(--radius-lg); background:var(--bg-page); color:var(--text-primary); border:1px solid var(--border-color); cursor:pointer; font-weight:600; font-size:0.875rem; display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; transition:background 0.2s;">
+                    <i data-lucide="plus-circle" size="16"></i> Hayır, Mevcutların Üzerine Ekle
+                </button>
+                <button onclick="closeStudentImportConfirmModal()" style="padding:0.5rem 1.25rem; border-radius:var(--radius-lg); background:none; color:var(--text-secondary); border:none; cursor:pointer; font-weight:600; font-size:0.8rem; text-decoration:underline;">
+                    İptal Et / Geri Dön
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="student-import-modal" class="modal-backdrop" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; align-items:center; justify-content:center; padding:1rem;">
         <div style="background:var(--bg-card); border-radius:var(--radius-lg); padding:2rem; width:100%; max-width:640px; box-shadow:0 20px 60px rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); position:relative; max-height:85vh; display:flex; flex-direction:column; box-sizing:border-box;">
+            <!-- Yükleme Göstergesi Overlay -->
+            <div id="student-import-loading-overlay" style="display:none; position:absolute; inset:0; background:var(--bg-card); opacity:0.96; backdrop-filter:blur(8px); z-index:100; border-radius:var(--radius-lg); flex-direction:column; align-items:center; justify-content:center; gap:1.25rem; box-sizing:border-box; padding:2rem;">
+                <!-- Dönen Dış Halka -->
+                <div style="position:relative; width:80px; height:80px; display:flex; align-items:center; justify-content:center;">
+                    <div style="position:absolute; inset:0; border:4px solid var(--border-color); border-radius:50%;"></div>
+                    <div style="position:absolute; inset:0; border:4px solid transparent; border-top-color:#10b981; border-radius:50%; animation:spin 1s linear infinite;"></div>
+                    <span id="student-import-loading-percent" style="font-size:1.15rem; font-weight:700; color:var(--text-primary);">0%</span>
+                </div>
+                <div style="text-align:center;">
+                    <h4 style="margin:0; color:var(--text-primary); font-size:1rem; font-weight:600;">Öğrenciler Buluta Aktarılıyor</h4>
+                    <p id="student-import-loading-status" style="margin:0.35rem 0 0 0; color:var(--text-secondary); font-size:0.8rem;">Hazırlanıyor...</p>
+                </div>
+                <!-- İlerleme Çubuğu -->
+                <div style="width:200px; height:6px; background:var(--bg-page); border-radius:3px; overflow:hidden; border:1px solid var(--border-color);">
+                    <div id="student-import-loading-bar" style="width:0%; height:100%; background:#10b981; transition:width 0.2s ease; border-radius:3px;"></div>
+                </div>
+            </div>
+
             <button onclick="closeStudentImportModal()" style="position:absolute; right:1.5rem; top:1.5rem; background:none; border:none; color:var(--text-secondary); cursor:pointer; padding:0.25rem;"><i data-lucide="x" size="20"></i></button>
             <h3 style="margin-top:0; margin-bottom:1.25rem; font-size:1.15rem; font-weight:700; display:flex; align-items:center; gap:0.5rem; color:var(--text-primary);"><i data-lucide="file-spreadsheet" style="color:#10b981; width:20px; height:20px;"></i> Excel'den Öğrenci İçe Aktar</h3>
             
@@ -2923,10 +2996,10 @@ def build_merged_app():
             }
         }
 
-        // MEB Haber Cekilmesi - corsproxy.io uzerinden
+        // MEB Haber Cekilmesi - api.codetabs.com uzerinden
         function initNewsFetcher() {
             const targetUrl = 'https://ceylanpinarfenlisesi.meb.k12.tr';
-            const proxyUrl = 'https://corsproxy.io/?url=' + encodeURIComponent(targetUrl);
+            const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(targetUrl);
 
             fetch(proxyUrl)
                 .then(response => {
@@ -4900,6 +4973,43 @@ function showSchoolManagementView() {
             reader.readAsArrayBuffer(file);
         }
 
+        function openStudentImportConfirmModal() {
+            document.getElementById('student-import-confirm-modal').style.display = 'flex';
+        }
+
+        function closeStudentImportConfirmModal() {
+            document.getElementById('student-import-confirm-modal').style.display = 'none';
+        }
+
+        async function handleStudentImportConfirm(deleteFirst) {
+            if (deleteFirst) {
+                if (!supabaseClient) {
+                    showToast("Bulut bağlantısı yok! Silme işlemi yapılamaz.", "error");
+                    return;
+                }
+
+                const loadingIndicator = document.getElementById('student-import-confirm-loading');
+                if (loadingIndicator) loadingIndicator.style.display = 'flex';
+
+                try {
+                    await supabaseClient.from('document_history').delete().neq('id', 0);
+                    await supabaseClient.from('students').delete().neq('no', 0);
+                    await loadSchoolData(true);
+                    document.getElementById('school-stat-ogrenci').innerText = schoolData.ogrenci.length;
+                    renderSchoolTable();
+                    showToast("Mevcut öğrenci kayıtları başarıyla silindi.");
+                } catch (error) {
+                    console.error("Bulk delete error:", error);
+                    showToast("Öğrenciler silinirken hata oluştu: " + error.message, "error");
+                } finally {
+                    if (loadingIndicator) loadingIndicator.style.display = 'none';
+                }
+            }
+
+            closeStudentImportConfirmModal();
+            openStudentImportModal();
+        }
+
         let parsedStudentsToImport = [];
 
         function openStudentImportModal() {
@@ -5039,9 +5149,22 @@ function showSchoolManagementView() {
 
             if (statusDiv) statusDiv.innerText = 'Öğrenciler buluta aktarılıyor...';
 
+            const loadingOverlay = document.getElementById('student-import-loading-overlay');
+            const loadingPercentText = document.getElementById('student-import-loading-percent');
+            const loadingBar = document.getElementById('student-import-loading-bar');
+            const loadingStatus = document.getElementById('student-import-loading-status');
+
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'flex';
+                if (loadingPercentText) loadingPercentText.innerText = '0%';
+                if (loadingBar) loadingBar.style.width = '0%';
+                if (loadingStatus) loadingStatus.innerText = `0 / ${parsedStudentsToImport.length} Öğrenci`;
+            }
+
             try {
+                const total = parsedStudentsToImport.length;
                 const chunkSize = 100;
-                for (let i = 0; i < parsedStudentsToImport.length; i += chunkSize) {
+                for (let i = 0; i < total; i += chunkSize) {
                     const chunk = parsedStudentsToImport.slice(i, i + chunkSize);
                     const { error } = await supabaseClient
                         .from('students')
@@ -5051,11 +5174,19 @@ function showSchoolManagementView() {
                         console.error("Supabase student upsert error:", error);
                         showToast("Aktarım esnasında hata oluştu: " + error.message, "error");
                         if (statusDiv) statusDiv.innerText = 'Aktarım yarıda kaldı.';
+                        if (loadingOverlay) loadingOverlay.style.display = 'none';
                         return;
                     }
+
+                    const processed = Math.min(i + chunk.length, total);
+                    const percent = Math.round((processed / total) * 100);
+                    if (loadingPercentText) loadingPercentText.innerText = `${percent}%`;
+                    if (loadingBar) loadingBar.style.width = `${percent}%`;
+                    if (loadingStatus) loadingStatus.innerText = `${processed} / ${total} Öğrenci`;
                 }
 
                 showToast(`Başarılı! ${parsedStudentsToImport.length} öğrenci buluta aktarıldı/güncellendi.`);
+                if (loadingOverlay) loadingOverlay.style.display = 'none';
                 closeStudentImportModal();
                 
                 await loadSchoolData(true);
@@ -5066,6 +5197,7 @@ function showSchoolManagementView() {
                 console.error("startStudentImport exception:", e);
                 showToast("Buluta bağlanırken hata oluştu.", "error");
                 if (statusDiv) statusDiv.innerText = 'Bağlantı hatası.';
+                if (loadingOverlay) loadingOverlay.style.display = 'none';
             }
         }
 
@@ -5309,6 +5441,18 @@ function showSchoolManagementView() {
 
             const examName = newRecords[0]?.deneme || "Bilinmeyen Sınav";
 
+            const loadingOverlay = document.getElementById('exam-import-loading-overlay');
+            const loadingPercentText = document.getElementById('exam-import-loading-percent');
+            const loadingBar = document.getElementById('exam-import-loading-bar');
+            const loadingStatus = document.getElementById('exam-import-loading-status');
+
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'flex';
+                if (loadingPercentText) loadingPercentText.innerText = '0%';
+                if (loadingBar) loadingBar.style.width = '0%';
+                if (loadingStatus) loadingStatus.innerText = 'Veritabanı hazırlanıyor...';
+            }
+
             try {
                 // 1. Sınavlar tablosuna eklemeyi deneyelim
                 const { error: errExam } = await supabaseClient
@@ -5334,8 +5478,9 @@ function showSchoolManagementView() {
                 }));
 
                 // 100'erli paketler halinde toplu ekleme yapalım
+                const total = recordsToInsert.length;
                 const chunkSize = 100;
-                for (let i = 0; i < recordsToInsert.length; i += chunkSize) {
+                for (let i = 0; i < total; i += chunkSize) {
                     const chunk = recordsToInsert.slice(i, i + chunkSize);
                     const { error: errInsert } = await supabaseClient
                         .from('exam_results')
@@ -5344,16 +5489,25 @@ function showSchoolManagementView() {
                     if (errInsert) {
                         console.error("Supabase bulk insert error:", errInsert);
                         showToast("Hata: Sınav verileri kaydedilirken sorun oluştu.", "error");
+                        if (loadingOverlay) loadingOverlay.style.display = 'none';
                         return;
                     }
+
+                    const processed = Math.min(i + chunk.length, total);
+                    const percent = Math.round((processed / total) * 100);
+                    if (loadingPercentText) loadingPercentText.innerText = `${percent}%`;
+                    if (loadingBar) loadingBar.style.width = `${percent}%`;
+                    if (loadingStatus) loadingStatus.innerText = `${processed} / ${total} Sınav Kaydı`;
                 }
 
                 showToast(message);
+                if (loadingOverlay) loadingOverlay.style.display = 'none';
                 await loadExamData();
 
             } catch (e) {
                 console.error("saveRecordsToDB exception:", e);
                 showToast("Bulut veritabanına bağlanırken hata oluştu.", "error");
+                if (loadingOverlay) loadingOverlay.style.display = 'none';
             }
         }
 
