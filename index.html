@@ -2293,6 +2293,9 @@
                 <button id="school-add-btn" onclick="openSchoolModal(null)" style="padding:0 1.25rem; height:44px; border-radius:var(--radius-lg); background:var(--accent-gradient); color:#fff; border:none; font-weight:600; font-size:0.875rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.4rem; white-space:nowrap; box-shadow:var(--shadow-sm);">
                     <i data-lucide="plus" size="16"></i> Yeni Ekle
                 </button>
+                <button id="school-import-excel-btn" onclick="openStudentImportModal()" style="padding:0 1.25rem; height:44px; border-radius:var(--radius-lg); background:#10b981; color:#fff; border:none; font-weight:600; font-size:0.875rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.4rem; white-space:nowrap; box-shadow:var(--shadow-sm);">
+                    <i data-lucide="file-spreadsheet" size="16"></i> Excel'den Aktar
+                </button>
                 <button id="school-settings-btn" onclick="openSupabaseSettingsModal()" style="padding:0; width:44px; height:44px; border-radius:var(--radius-lg); background:var(--bg-card); color:var(--text-primary); border:1px solid var(--border-color); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; box-shadow:var(--shadow-sm);" title="Supabase Bağlantı Ayarları">
                     <i data-lucide="settings" size="18"></i>
                 </button>
@@ -2425,6 +2428,59 @@
             <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
                 <button onclick="closeSupabaseSettingsModal()" style="padding:0.6rem 1.25rem; border-radius:var(--radius-lg); border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-primary); cursor:pointer; font-weight:600; font-size:0.875rem;">Kapat</button>
                 <button onclick="saveSupabaseSettings()" style="padding:0.6rem 1.25rem; border-radius:var(--radius-lg); background:var(--accent-gradient); color:#fff; border:none; cursor:pointer; font-weight:600; font-size:0.875rem; display:inline-flex; align-items:center; gap:0.4rem; box-shadow:var(--shadow-sm);"><i data-lucide="check" size="16"></i> Kaydet ve Bağlan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Öğrenci Excel İçe Aktarma Modalı -->
+    <div id="student-import-modal" class="modal-backdrop" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; align-items:center; justify-content:center; padding:1rem;">
+        <div style="background:var(--bg-card); border-radius:var(--radius-lg); padding:2rem; width:100%; max-width:640px; box-shadow:0 20px 60px rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); position:relative; max-height:85vh; display:flex; flex-direction:column; box-sizing:border-box;">
+            <button onclick="closeStudentImportModal()" style="position:absolute; right:1.5rem; top:1.5rem; background:none; border:none; color:var(--text-secondary); cursor:pointer; padding:0.25rem;"><i data-lucide="x" size="20"></i></button>
+            <h3 style="margin-top:0; margin-bottom:1.25rem; font-size:1.15rem; font-weight:700; display:flex; align-items:center; gap:0.5rem; color:var(--text-primary);"><i data-lucide="file-spreadsheet" style="color:#10b981; width:20px; height:20px;"></i> Excel'den Öğrenci İçe Aktar</h3>
+            
+            <div style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:1.5rem; line-height:1.5; background:var(--bg-page); border-radius:var(--radius); padding:1rem; border:1px solid var(--border-color);">
+                <strong style="color:var(--text-primary); display:block; margin-bottom:0.4rem;">⚠️ Şablon Kuralları:</strong>
+                Yükleyeceğiniz Excel dosyasının ilk satırı başlık olmalı ve sırasıyla şu sütunları içermelidir: <br>
+                <code style="background:var(--bg-card); padding:0.15rem 0.35rem; border-radius:4px; font-weight:bold; color:var(--accent-color);">NO</code> | 
+                <code style="background:var(--bg-card); padding:0.15rem 0.35rem; border-radius:4px; font-weight:bold; color:var(--accent-color);">ADI</code> | 
+                <code style="background:var(--bg-card); padding:0.15rem 0.35rem; border-radius:4px; font-weight:bold; color:var(--accent-color);">SOYADI</code> | 
+                <code style="background:var(--bg-card); padding:0.15rem 0.35rem; border-radius:4px; font-weight:bold; color:var(--accent-color);">SINIF/ŞUBE</code> (örn: 9/A, 10/B)
+                <button onclick="downloadStudentTemplate()" style="display:inline-flex; align-items:center; gap:0.25rem; border:none; background:none; color:#10b981; cursor:pointer; font-weight:600; font-size:0.82rem; padding:0; margin-left:0.5rem; text-decoration:underline;"><i data-lucide="download" size="12"></i> Örnek Şablonu İndir</button>
+            </div>
+
+            <!-- Sürükle Bırak / Dosya Seçme Alanı -->
+            <div id="student-excel-dropzone" onclick="document.getElementById('student-excel-file-input').click()" style="border:2px dashed var(--border-color); border-radius:var(--radius-lg); padding:2rem; text-align:center; cursor:pointer; transition:all 0.2s; background:var(--bg-page); margin-bottom:1.5rem;">
+                <input type="file" id="student-excel-file-input" accept=".xlsx,.xlsm,.xls" style="display:none;" onchange="handleStudentExcelImport(event)">
+                <i data-lucide="upload-cloud" style="width:36px; height:36px; color:#10b981; margin-bottom:0.5rem;"></i>
+                <p style="margin:0; font-size:0.85rem; font-weight:600; color:var(--text-primary);">Excel Dosyası Seç veya Buraya Sürükle</p>
+                <p style="margin:0.25rem 0 0 0; font-size:0.75rem; color:var(--text-secondary);">.xlsx, .xlsm veya .xls formatında</p>
+            </div>
+
+            <!-- Yükleme Sonrası Önizleme Alanı -->
+            <div id="student-import-preview-section" style="display:none; flex:1; overflow-y:auto; margin-bottom:1.5rem; max-height:220px; border:1px solid var(--border-color); border-radius:var(--radius); box-sizing:border-box;">
+                <table style="width:100%; border-collapse:collapse; font-size:0.8rem; text-align:left;">
+                    <thead style="background:var(--bg-page); position:sticky; top:0; z-index:2; border-bottom:1px solid var(--border-color);">
+                        <tr>
+                            <th style="padding:0.5rem; font-weight:600;">No</th>
+                            <th style="padding:0.5rem; font-weight:600;">Adı</th>
+                            <th style="padding:0.5rem; font-weight:600;">Soyadı</th>
+                            <th style="padding:0.5rem; font-weight:600;">Sınıf/Şube</th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-import-preview-body">
+                        <!-- JS ile doldurulacak -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div id="student-import-status" style="font-size:0.8rem; color:var(--text-secondary);">Dosya bekleniyor...</div>
+                <div style="display:flex; gap:0.75rem;">
+                    <button onclick="closeStudentImportModal()" style="padding:0.6rem 1.25rem; border-radius:var(--radius-lg); border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-primary); cursor:pointer; font-weight:600; font-size:0.875rem;">Kapat</button>
+                    <button id="btn-start-student-import" onclick="startStudentImport()" disabled style="padding:0.6rem 1.25rem; border-radius:var(--radius-lg); background:var(--accent-gradient); color:#fff; border:none; cursor:pointer; font-weight:600; font-size:0.875rem; display:inline-flex; align-items:center; gap:0.4rem; opacity:0.5;">
+                        <i data-lucide="check-circle" size="16"></i> Aktarımı Başlat
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -4129,6 +4185,10 @@ function showSchoolManagementView() {
                     btn.style.color = 'var(--text-secondary)';
                 }
             });
+            const importBtn = document.getElementById('school-import-excel-btn');
+            if (importBtn) {
+                importBtn.style.display = (tab === 'ogrenci') ? 'inline-flex' : 'none';
+            }
             const s = document.getElementById('school-search-input');
             if (s) s.value = '';
             renderSchoolTable();
@@ -4530,29 +4590,58 @@ function showSchoolManagementView() {
         // Excel Drag and Drop
         function setupDragAndDrop() {
             const dropzone = document.getElementById('excel-dropzone');
-            if(!dropzone) return;
+            if(dropzone) {
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dropzone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        dropzone.classList.add('dragover');
+                    }, false);
+                });
 
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dropzone.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    dropzone.classList.add('dragover');
-                }, false);
-            });
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dropzone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        dropzone.classList.remove('dragover');
+                    }, false);
+                });
 
-            ['dragleave', 'drop'].forEach(eventName => {
-                dropzone.addEventListener(eventName, (e) => {
+                dropzone.addEventListener('drop', (e) => {
                     e.preventDefault();
                     dropzone.classList.remove('dragover');
-                }, false);
-            });
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+                    if (files.length > 0) {
+                        importExcelFile(files[0]);
+                    }
+                });
+            }
 
-            dropzone.addEventListener('drop', (e) => {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-                if (files.length > 0) {
-                    importExcelFile(files[0]);
-                }
-            });
+            const studentDropzone = document.getElementById('student-excel-dropzone');
+            if(studentDropzone) {
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    studentDropzone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        studentDropzone.classList.add('dragover');
+                    }, false);
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    studentDropzone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        studentDropzone.classList.remove('dragover');
+                    }, false);
+                });
+
+                studentDropzone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    studentDropzone.classList.remove('dragover');
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+                    if (files.length > 0) {
+                        parseStudentExcel(files[0]);
+                    }
+                });
+            }
         }
 
         function handleExcelImport(event) {
@@ -4647,6 +4736,206 @@ function showSchoolManagementView() {
                 }
             };
             reader.readAsArrayBuffer(file);
+        }
+
+        let parsedStudentsToImport = [];
+
+        function openStudentImportModal() {
+            parsedStudentsToImport = [];
+            const previewSection = document.getElementById('student-import-preview-section');
+            const previewBody = document.getElementById('student-import-preview-body');
+            const statusDiv = document.getElementById('student-import-status');
+            const startBtn = document.getElementById('btn-start-student-import');
+            const fileInput = document.getElementById('student-excel-file-input');
+            
+            if (fileInput) fileInput.value = '';
+            if (previewSection) previewSection.style.display = 'none';
+            if (previewBody) previewBody.innerHTML = '';
+            if (statusDiv) statusDiv.innerText = 'Dosya bekleniyor...';
+            if (startBtn) {
+                startBtn.disabled = true;
+                startBtn.style.opacity = '0.5';
+            }
+
+            document.getElementById('student-import-modal').style.display = 'flex';
+        }
+
+        function closeStudentImportModal() {
+            document.getElementById('student-import-modal').style.display = 'none';
+        }
+
+        function handleStudentExcelImport(event) {
+            const file = event.target.files[0];
+            if (file) {
+                parseStudentExcel(file);
+            }
+        }
+
+        function parseStudentExcel(file) {
+            const statusDiv = document.getElementById('student-import-status');
+            if (statusDiv) statusDiv.innerText = 'Dosya okunuyor...';
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    
+                    if (rows.length < 2) {
+                        showToast("Hata: Dosya boş veya sütun başlıkları yok.", "error");
+                        if (statusDiv) statusDiv.innerText = 'Hata: Sütun başlıkları bulunamadı.';
+                        return;
+                    }
+
+                    const headers = rows[0].map(h => String(h || '').trim().toUpperCase());
+                    const noIdx = headers.indexOf('NO');
+                    const adIdx = headers.indexOf('ADI');
+                    const soyadIdx = headers.indexOf('SOYADI');
+                    const sinifIdx = headers.indexOf('SINIF/ŞUBE');
+
+                    if (noIdx === -1 || adIdx === -1 || soyadIdx === -1 || sinifIdx === -1) {
+                        showToast("Hata: Sütun başlıkları eşleşmedi! NO, ADI, SOYADI, SINIF/ŞUBE zorunludur.", "error");
+                        if (statusDiv) statusDiv.innerText = 'Hata: Uyumsuz sütun başlıkları.';
+                        return;
+                    }
+
+                    parsedStudentsToImport = [];
+                    const previewBody = document.getElementById('student-import-preview-body');
+                    if (previewBody) previewBody.innerHTML = '';
+
+                    let previewHtml = '';
+                    for (let r = 1; r < rows.length; r++) {
+                        const row = rows[r];
+                        if (!row || row.length === 0) continue;
+
+                        const rawNo = row[noIdx];
+                        const rawAd = row[adIdx];
+                        const rawSoyad = row[soyadIdx];
+                        const rawSinif = row[sinifIdx];
+
+                        if (!rawAd || String(rawAd).trim() === "" || !rawSoyad || String(rawSoyad).trim() === "") continue;
+
+                        const no = parseInt(rawNo, 10);
+                        const ad = String(rawAd).trim().toUpperCase();
+                        const soyad = String(rawSoyad).trim().toUpperCase();
+                        const snf = String(rawSinif || '').trim().toUpperCase();
+
+                        if (isNaN(no)) continue;
+
+                        parsedStudentsToImport.push({ no, ad, soyad, snf });
+                        previewHtml += `
+                            <tr style="border-bottom:1px solid var(--border-color);">
+                                <td style="padding:0.5rem; color:var(--text-secondary);">${no}</td>
+                                <td style="padding:0.5rem; font-weight:600; color:var(--text-primary);">${ad}</td>
+                                <td style="padding:0.5rem; font-weight:600; color:var(--text-primary);">${soyad}</td>
+                                <td style="padding:0.5rem; color:var(--text-secondary);">${snf}</td>
+                            </tr>
+                        `;
+                    }
+
+                    if (parsedStudentsToImport.length > 0) {
+                        if (previewBody) previewBody.innerHTML = previewHtml;
+                        document.getElementById('student-import-preview-section').style.display = 'block';
+                        if (statusDiv) statusDiv.innerText = `${parsedStudentsToImport.length} öğrenci yüklendi, aktarıma hazır.`;
+                        
+                        const startBtn = document.getElementById('btn-start-student-import');
+                        if (startBtn) {
+                            startBtn.disabled = false;
+                            startBtn.style.opacity = '1';
+                        }
+                    } else {
+                        showToast("Dosyada geçerli öğrenci verisi bulunamadı.", "error");
+                        if (statusDiv) statusDiv.innerText = 'Geçerli kayıt bulunamadı.';
+                    }
+
+                } catch (error) {
+                    console.error("Excel parse error:", error);
+                    showToast("Excel dosyası çözümlenirken hata oluştu.", "error");
+                    if (statusDiv) statusDiv.innerText = 'Çözümleme hatası.';
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function startStudentImport() {
+            if (!supabaseClient) {
+                showToast("Bulut bağlantısı yok! Aktarım yapılamaz.", "error");
+                return;
+            }
+
+            if (parsedStudentsToImport.length === 0) return;
+
+            const statusDiv = document.getElementById('student-import-status');
+            const startBtn = document.getElementById('btn-start-student-import');
+            if (startBtn) {
+                startBtn.disabled = true;
+                startBtn.style.opacity = '0.5';
+            }
+
+            if (statusDiv) statusDiv.innerText = 'Öğrenciler buluta aktarılıyor...';
+
+            try {
+                const chunkSize = 100;
+                for (let i = 0; i < parsedStudentsToImport.length; i += chunkSize) {
+                    const chunk = parsedStudentsToImport.slice(i, i + chunkSize);
+                    const { error } = await supabaseClient
+                        .from('students')
+                        .upsert(chunk, { onConflict: 'no' });
+
+                    if (error) {
+                        console.error("Supabase student upsert error:", error);
+                        showToast("Aktarım esnasında hata oluştu: " + error.message, "error");
+                        if (statusDiv) statusDiv.innerText = 'Aktarım yarıda kaldı.';
+                        return;
+                    }
+                }
+
+                showToast(`Başarılı! ${parsedStudentsToImport.length} öğrenci buluta aktarıldı/güncellendi.`);
+                closeStudentImportModal();
+                
+                await loadSchoolData(true);
+                document.getElementById('school-stat-ogrenci').innerText = schoolData.ogrenci.length;
+                renderSchoolTable();
+
+            } catch (e) {
+                console.error("startStudentImport exception:", e);
+                showToast("Buluta bağlanırken hata oluştu.", "error");
+                if (statusDiv) statusDiv.innerText = 'Bağlantı hatası.';
+            }
+        }
+
+        function downloadStudentTemplate() {
+            try {
+                const headers = [["NO", "ADI", "SOYADI", "SINIF/ŞUBE"]];
+                const sampleRows = [
+                    [1, "ALİ RIZA", "BOZ", "9/A"],
+                    [4, "ELİF", "TEKE", "10/B"],
+                    [6, "SÜMEYYE RANA", "ASLAN", "11/A"]
+                ];
+                const worksheetData = [...headers, ...sampleRows];
+                
+                const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Öğrenci Listesi");
+                
+                const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'ceylanpinar_ogrenci_sablonu.xlsx';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showToast("Örnek öğrenci şablonu indirildi.");
+            } catch (error) {
+                console.error("Template generation error:", error);
+                showToast("Şablon oluşturulurken hata oluştu.", "error");
+            }
         }
 
         async function saveRecordsToDB(newRecords, message = "Veritabanı güncellendi") {
