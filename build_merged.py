@@ -2002,14 +2002,9 @@ def build_merged_app():
             <!-- Sınav Yükleme -->
             <div class="sidebar-card" id="sidebar-upload-card">
                 <h3><i data-lucide="file-plus"></i> Sınav İçe Aktar</h3>
-                <div class="dropzone" id="excel-dropzone" onclick="document.getElementById('excel-file-input').click()">
-                    <div class="dropzone-icon">
-                        <i data-lucide="file-spreadsheet" size="32"></i>
-                    </div>
-                    <strong>Excel Dosyası Seç</strong>
-                    <p>TYT Sonuç dosyasını (xlsx/xlsm) buraya sürükleyin veya tıklayın</p>
-                    <input type="file" id="excel-file-input" accept=".xlsx,.xlsm" onchange="handleExcelImport(event)">
-                </div>
+                <button onclick="openExamImportModal()" style="width:100%; height:44px; border-radius:var(--radius-lg); background:#10b981; color:#fff; border:none; font-weight:600; font-size:0.875rem; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:0.4rem; box-shadow:var(--shadow-sm); margin-top:0.75rem;">
+                    <i data-lucide="file-spreadsheet" size="16"></i> Excel'den Sınav Aktar
+                </button>
             </div>
 
             <!-- İstatistik Kartları -->
@@ -2171,19 +2166,7 @@ def build_merged_app():
                         </div>
                     </div>
 
-                    <!-- Program Kartı (Placeholder) -->
-                    <div class="portal-card portal-card-disabled">
-                        <div class="card-icon-wrapper">
-                            <i data-lucide="calendar" size="24"></i>
-                        </div>
-                        <div class="card-content">
-                            <h3>Ders Programı & Nöbetler <span class="badge badge-disabled">Yakında</span></h3>
-                            <p>Haftalık ders programlarını, nöbet çizelgelerini ve öğretmen izin/yedek planhamalarını yönetin.</p>
-                        </div>
-                        <div class="card-action" >
-                            Kullanıma Kapalı <i data-lucide="lock" size="16"></i>
-                        </div>
-                    </div>
+
                 </div>
             </div>
 
@@ -2345,12 +2328,9 @@ def build_merged_app():
                         <!-- Sınav Yükleme Mobile -->
                         <div id="mobile-upload-section" style="display:flex; flex-direction:column; gap:0.75rem;">
                             <span style="font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Yeni Sınav İçe Aktar (.xlsx/.xlsm)</span>
-                            <div class="dropzone" onclick="document.getElementById('excel-file-input-mobile').click()">
-                                <i data-lucide="file-spreadsheet" size="28" style="color:#1e3c72;"></i>
-                                <strong style="font-size:0.85rem; color:#1e3c72;">Excel Dosyası Seçin</strong>
-                                <p style="font-size:0.7rem;">Sınav Excel'ini seçmek için buraya dokunun</p>
-                                <input type="file" id="excel-file-input-mobile" accept=".xlsx,.xlsm" onchange="handleExcelImport(event)">
-                            </div>
+                            <button onclick="openExamImportModal()" style="width:100%; height:44px; border-radius:var(--radius-lg); background:#10b981; color:#fff; border:none; font-weight:600; font-size:0.875rem; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:0.4rem; box-shadow:var(--shadow-sm);">
+                                <i data-lucide="file-spreadsheet" size="16"></i> Excel'den Sınav Aktar
+                            </button>
                         </div>
 
                         <!-- Veritabanı Sıfırlama Mobile -->
@@ -2417,12 +2397,10 @@ def build_merged_app():
                 <button id="school-add-btn" onclick="openSchoolModal(null)" style="padding:0 1.25rem; height:44px; border-radius:var(--radius-lg); background:var(--accent-gradient); color:#fff; border:none; font-weight:600; font-size:0.875rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.4rem; white-space:nowrap; box-shadow:var(--shadow-sm);">
                     <i data-lucide="plus" size="16"></i> Yeni Ekle
                 </button>
-                <button id="school-import-excel-btn" onclick="openStudentImportModal()" style="padding:0 1.25rem; height:44px; border-radius:var(--radius-lg); background:#10b981; color:#fff; border:none; font-weight:600; font-size:0.875rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.4rem; white-space:nowrap; box-shadow:var(--shadow-sm);">
+                <button id="school-import-excel-btn" onclick="openStudentImportModal()" style="display:none; padding:0 1.25rem; height:44px; border-radius:var(--radius-lg); background:#10b981; color:#fff; border:none; font-weight:600; font-size:0.875rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.4rem; white-space:nowrap; box-shadow:var(--shadow-sm);">
                     <i data-lucide="file-spreadsheet" size="16"></i> Excel'den Aktar
                 </button>
-                <button id="school-settings-btn" onclick="openSupabaseSettingsModal()" style="padding:0; width:44px; height:44px; border-radius:var(--radius-lg); background:var(--bg-card); color:var(--text-primary); border:1px solid var(--border-color); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; box-shadow:var(--shadow-sm);" title="Supabase Bağlantı Ayarları">
-                    <i data-lucide="settings" size="18"></i>
-                </button>
+
             </div>
 
             <!-- Table Container -->
@@ -2552,6 +2530,67 @@ def build_merged_app():
             <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
                 <button onclick="closeSupabaseSettingsModal()" style="padding:0.6rem 1.25rem; border-radius:var(--radius-lg); border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-primary); cursor:pointer; font-weight:600; font-size:0.875rem;">Kapat</button>
                 <button onclick="saveSupabaseSettings()" style="padding:0.6rem 1.25rem; border-radius:var(--radius-lg); background:var(--accent-gradient); color:#fff; border:none; cursor:pointer; font-weight:600; font-size:0.875rem; display:inline-flex; align-items:center; gap:0.4rem; box-shadow:var(--shadow-sm);"><i data-lucide="check" size="16"></i> Kaydet ve Bağlan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sınav Excel İçe Aktarma Modalı -->
+    <div id="exam-import-modal" class="modal-backdrop" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; align-items:center; justify-content:center; padding:1rem;">
+        <div style="background:var(--bg-card); border-radius:var(--radius-lg); padding:2rem; width:100%; max-width:640px; box-shadow:0 20px 60px rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); position:relative; max-height:85vh; display:flex; flex-direction:column; box-sizing:border-box;">
+            <button onclick="closeExamImportModal()" style="position:absolute; right:1.5rem; top:1.5rem; background:none; border:none; color:var(--text-secondary); cursor:pointer; padding:0.25rem;"><i data-lucide="x" size="20"></i></button>
+            <h3 style="margin-top:0; margin-bottom:1.25rem; font-size:1.15rem; font-weight:700; display:flex; align-items:center; gap:0.5rem; color:var(--text-primary);"><i data-lucide="file-spreadsheet" style="color:var(--accent-color); width:20px; height:20px;"></i> Sınav Sonuçları İçe Aktar</h3>
+            
+            <!-- Üst Bilgilendirme ve Şablon İndirme -->
+            <div style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:1rem; line-height:1.5; background:var(--bg-page); border-radius:var(--radius); padding:1rem; border:1px solid var(--border-color);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+                    <span>Sınav verilerini yüklemeden önce şablon formatına uygun olduğundan emin olun.</span>
+                    <button onclick="downloadExamTemplate()" style="display:inline-flex; align-items:center; gap:0.25rem; border:none; background:none; color:#10b981; cursor:pointer; font-weight:600; font-size:0.82rem; padding:0; text-decoration:underline;"><i data-lucide="download" size="12"></i> Örnek Şablonu İndir</button>
+                </div>
+                
+                <!-- Daha Fazla / Şablon Detayları (Collapsible) -->
+                <div style="margin-top:0.75rem; border-top:1px solid var(--border-color); padding-top:0.75rem;">
+                    <button onclick="toggleExamRulesDetails()" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; font-size:0.8rem; font-weight:600; padding:0; display:inline-flex; align-items:center; gap:0.25rem;">
+                        <span id="exam-rules-toggle-text">Detaylı Şablon Kuralları (Daha Fazla...)</span>
+                        <i id="exam-rules-toggle-icon" data-lucide="chevron-down" size="14"></i>
+                    </button>
+                    <div id="exam-rules-details-content" style="display:none; margin-top:0.5rem; max-height:150px; overflow-y:auto; font-size:0.78rem; color:var(--text-secondary); background:var(--bg-card); padding:0.75rem; border-radius:6px; border:1px solid var(--border-color);">
+                        <strong style="color:var(--text-primary); display:block; margin-bottom:0.25rem;">📊 Sütun Düzeni (Sıralı):</strong>
+                        <ul style="margin:0; padding-left:1.1rem; list-style-type:disc;">
+                            <li><strong>Sütun A (0):</strong> Öğrenci Numarası (NO)</li>
+                            <li><strong>Sütun B (1):</strong> Öğrenci Adı ve Soyadı</li>
+                            <li><strong>Sütun C-D (2-3):</strong> Sınıf ve Şube</li>
+                            <li><strong>Sütun E-H (4-7):</strong> Türkçe (Doğru, Yanlış, Boş, Net)</li>
+                            <li><strong>Sütun I-L (8-11):</strong> Sosyal Bilimler (Doğru, Yanlış, Boş, Net)</li>
+                            <li><strong>Sütun M-P (12-15):</strong> Temel Matematik (Doğru, Yanlış, Boş, Net)</li>
+                            <li><strong>Sütun Q-T (16-19):</strong> Geometri (Doğru, Yanlış, Boş, Net)</li>
+                            <li><strong>Sütun U-X (20-23):</strong> Fizik (Doğru, Yanlış, Boş, Net)</li>
+                            <li><strong>Sütun Y-AB (24-27):</strong> Kimya (Doğru, Yanlış, Boş, Net)</li>
+                            <li><strong>Sütun AC-AF (28-31):</strong> Biyoloji (Doğru, Yanlış, Boş, Net)</li>
+                            <li><strong>Sütun AG-AJ (32-35):</strong> Toplam (Doğru, Yanlış, Boş, Net)</li>
+                            <li><strong>Sütun AK (36):</strong> Sınav Puanı</li>
+                            <li><strong>Sütun AL (37):</strong> Okul/Genel Sıralaması</li>
+                            <li><strong>Sütun AM (38):</strong> Sınav Adı (örn: <em>"Özdebir TYT-1"</em>)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sürükle Bırak / Dosya Seçme Alanı -->
+            <div id="exam-excel-dropzone" onclick="document.getElementById('exam-excel-file-input').click()" style="border:2px dashed var(--border-color); border-radius:var(--radius-lg); padding:2rem; text-align:center; cursor:pointer; transition:all 0.2s; background:var(--bg-page); margin-bottom:1.5rem;">
+                <input type="file" id="exam-excel-file-input" accept=".xlsx,.xlsm,.xls" style="display:none;" onchange="handleExamExcelImport(event)">
+                <i data-lucide="upload-cloud" style="width:36px; height:36px; color:#10b981; margin-bottom:0.5rem;"></i>
+                <p style="margin:0; font-size:0.85rem; font-weight:600; color:var(--text-primary);">Excel Dosyası Seç veya Buraya Sürükle</p>
+                <p style="margin:0.25rem 0 0 0; font-size:0.75rem; color:var(--text-secondary);">TYT Sonuç dosyasını (xlsx/xlsm/xls) seçin</p>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div id="exam-import-status" style="font-size:0.8rem; color:var(--text-secondary);">Dosya bekleniyor...</div>
+                <div style="display:flex; gap:0.75rem;">
+                    <button onclick="closeExamImportModal()" style="padding:0.6rem 1.25rem; border-radius:var(--radius-lg); border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-primary); cursor:pointer; font-weight:600; font-size:0.875rem;">Kapat</button>
+                    <button id="btn-start-exam-import" onclick="startExamImport()" disabled style="padding:0.6rem 1.25rem; border-radius:var(--radius-lg); background:var(--accent-gradient); color:#fff; border:none; cursor:pointer; font-weight:600; font-size:0.875rem; display:inline-flex; align-items:center; gap:0.4rem; opacity:0.5;">
+                        <i data-lucide="check-circle" size="16"></i> Aktarımı Başlat
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -4279,12 +4318,7 @@ function showSchoolManagementView() {
             document.getElementById('header-subtitle').innerText = 'Okul Yönetim Sistemi';
             document.getElementById('mobile-nav-analysis').style.setProperty('display', 'none', 'important');
 
-            // Ayarlar dişlisini sadece müdür (admin) rolü için görünür yapalım
-            const userRole = sessionStorage.getItem('user_role') || 'student';
-            const settingsBtn = document.getElementById('school-settings-btn');
-            if (settingsBtn) {
-                settingsBtn.style.display = (userRole === 'admin') ? 'inline-flex' : 'none';
-            }
+
 
             // Supabase'den güncel verileri asenkron yükleyelim
             loadSchoolData().then(() => {
@@ -4311,7 +4345,9 @@ function showSchoolManagementView() {
             });
             const importBtn = document.getElementById('school-import-excel-btn');
             if (importBtn) {
-                importBtn.style.display = (tab === 'ogrenci') ? 'inline-flex' : 'none';
+                const role = sessionStorage.getItem('user_role') || 'student';
+                const isAdmin = (role === 'admin');
+                importBtn.style.display = (tab === 'ogrenci' && isAdmin) ? 'inline-flex' : 'none';
             }
             const s = document.getElementById('school-search-input');
             if (s) s.value = '';
@@ -4354,7 +4390,7 @@ function showSchoolManagementView() {
                 // İsimsiz Belge Üretme Satırını En Üste Sabitleyelim
                 const anonBtnClass = 'btn-action btn-action-anon';
                 const anonActionButtons = `<button onclick="openDocumentModal('ADI')" class="${anonBtnClass}"><i data-lucide="file-text" size="13"></i>İsimsiz Belge Üret</button>`;
-                rows += `<tr class="school-table-row" style="background:rgba(239, 68, 68, 0.03); border-bottom:1px solid var(--border-color);"><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.8rem;">-</td><td style="padding:0.7rem 1rem; font-weight:600; color:var(--text-primary);">İSİMSİZ BELGE ÜRETİMİ</td><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.85rem;">-</td><td style="padding:0.7rem 1rem; text-align:center;">${anonActionButtons}</td></tr>`;
+                rows += `<tr class="school-table-row" style="border-bottom:1px solid var(--border-color);"><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.8rem;">-</td><td style="padding:0.7rem 1rem; font-weight:600; color:var(--text-primary);">İSİMSİZ BELGE ÜRETİMİ</td><td style="padding:0.7rem 1rem; color:var(--text-secondary); font-size:0.85rem;">-</td><td style="padding:0.7rem 1rem; text-align:center;">${anonActionButtons}</td></tr>`;
 
                 records.forEach(r => {
                     // Veritabanındaki eski "ADI" satırını (varsa) atlayalım
@@ -4363,9 +4399,12 @@ function showSchoolManagementView() {
                     const btnClass = 'btn-action btn-action-print';
                     const btnIcon = 'printer';
                     const btnText = 'Belge Üret';
-                    let actionButtons = `<button onclick="openDocumentModal('${r.no||''}')" class="${btnClass}"><i data-lucide="${btnIcon}" size="13"></i>${btnText}</button>`;
+                    let actionButtons = '';
                     if (isAdmin) {
+                        actionButtons = `<button onclick="openDocumentModal('${r.no||''}')" class="${btnClass}"><i data-lucide="${btnIcon}" size="13"></i>${btnText}</button>`;
                         actionButtons += `<button onclick="openSchoolModal('${r.no||''}')" class="btn-action btn-action-edit"><i data-lucide="edit-2" size="13"></i>Düzenle</button><button onclick="deleteSchoolRecord('${r.no||''}','ogrenci')" class="btn-action btn-action-delete"><i data-lucide="trash-2" size="13"></i>Sil</button>`;
+                    } else {
+                        actionButtons = '';
                     }
                     
                     // Sınıf ve Şube bilgilerini birleştirelim
@@ -5059,6 +5098,207 @@ function showSchoolManagementView() {
             } catch (error) {
                 console.error("Template generation error:", error);
                 showToast("Şablon oluşturulurken hata oluştu.", "error");
+            }
+        }
+
+        let parsedExamRecordsToImport = [];
+        let parsedExamName = "";
+
+        function openExamImportModal() {
+            parsedExamRecordsToImport = [];
+            parsedExamName = "";
+            const statusDiv = document.getElementById('exam-import-status');
+            const startBtn = document.getElementById('btn-start-exam-import');
+            const fileInput = document.getElementById('exam-excel-file-input');
+            const rulesContent = document.getElementById('exam-rules-details-content');
+            const rulesToggleText = document.getElementById('exam-rules-toggle-text');
+            
+            if (fileInput) fileInput.value = '';
+            if (statusDiv) statusDiv.innerText = 'Dosya bekleniyor...';
+            if (startBtn) {
+                startBtn.disabled = true;
+                startBtn.style.opacity = '0.5';
+            }
+            if (rulesContent) rulesContent.style.display = 'none';
+            if (rulesToggleText) rulesToggleText.innerText = 'Detaylı Şablon Kuralları (Daha Fazla...)';
+
+            document.getElementById('exam-import-modal').style.display = 'flex';
+        }
+
+        function closeExamImportModal() {
+            document.getElementById('exam-import-modal').style.display = 'none';
+        }
+
+        function toggleExamRulesDetails() {
+            const content = document.getElementById('exam-rules-details-content');
+            const toggleText = document.getElementById('exam-rules-toggle-text');
+            if (!content || !toggleText) return;
+
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                toggleText.innerText = 'Detaylı Şablon Kuralları (Gizle)';
+            } else {
+                content.style.display = 'none';
+                toggleText.innerText = 'Detaylı Şablon Kuralları (Daha Fazla...)';
+            }
+        }
+
+        function handleExamExcelImport(event) {
+            const file = event.target.files[0];
+            if (file) {
+                parseExamExcel(file);
+            }
+        }
+
+        function parseExamExcel(file) {
+            const statusDiv = document.getElementById('exam-import-status');
+            if (statusDiv) statusDiv.innerText = 'Dosya okunuyor...';
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    
+                    if (rows.length < 3) {
+                        showToast("Hata: Dosyada yeterli satır yok (en az 3 satır olmalı).", "error");
+                        if (statusDiv) statusDiv.innerText = 'Hata: Yetersiz satır sayısı.';
+                        return;
+                    }
+
+                    parsedExamName = "";
+                    for (let r = 2; r < rows.length; r++) {
+                        const row = rows[r];
+                        if (row && row[38]) {
+                            parsedExamName = String(row[38]).trim();
+                            break;
+                        }
+                    }
+
+                    if (!parsedExamName) {
+                        showToast("Hata: Sınav adı (39. sütun) bulunamadı.", "error");
+                        if (statusDiv) statusDiv.innerText = 'Hata: Sınav adı sütunu boş.';
+                        return;
+                    }
+
+                    parsedExamRecordsToImport = [];
+                    for (let r = 2; r < rows.length; r++) {
+                        const row = rows[r];
+                        if (!row || row.length === 0) continue;
+
+                        const rawNo = row[0];
+                        const name = row[1] ? String(row[1]).trim().toUpperCase() : "";
+                        const cls = row[2] ? String(row[2]).trim() : "";
+                        const branch = row[3] ? String(row[3]).trim().toUpperCase() : "";
+
+                        if (!name || name === "" || name === "ADI SOYADI") continue;
+
+                        const no = parseInt(rawNo, 10);
+                        if (isNaN(no)) continue;
+
+                        const subjects = {
+                            turkce: { d: parseFloat(row[4]) || 0, y: parseFloat(row[5]) || 0, b: parseFloat(row[6]) || 0, n: parseFloat(row[7]) || 0 },
+                            sosyal: { d: parseFloat(row[8]) || 0, y: parseFloat(row[9]) || 0, b: parseFloat(row[10]) || 0, n: parseFloat(row[11]) || 0 },
+                            matematik: { d: parseFloat(row[12]) || 0, y: parseFloat(row[13]) || 0, b: parseFloat(row[14]) || 0, n: parseFloat(row[15]) || 0 },
+                            geometri: { d: parseFloat(row[16]) || 0, y: parseFloat(row[17]) || 0, b: parseFloat(row[18]) || 0, n: parseFloat(row[19]) || 0 },
+                            fizik: { d: parseFloat(row[20]) || 0, y: parseFloat(row[21]) || 0, b: parseFloat(row[22]) || 0, n: parseFloat(row[23]) || 0 },
+                            kimya: { d: parseFloat(row[24]) || 0, y: parseFloat(row[25]) || 0, b: parseFloat(row[26]) || 0, n: parseFloat(row[27]) || 0 },
+                            biyoloji: { d: parseFloat(row[28]) || 0, y: parseFloat(row[29]) || 0, b: parseFloat(row[30]) || 0, n: parseFloat(row[31]) || 0 }
+                        };
+
+                        const total = { d: parseFloat(row[32]) || 0, y: parseFloat(row[33]) || 0, b: parseFloat(row[34]) || 0, n: parseFloat(row[35]) || 0 };
+                        const score = parseFloat(row[36]) || 0;
+                        const rank = parseInt(row[37], 10) || 9999;
+
+                        parsedExamRecordsToImport.push({
+                            no: no,
+                            name: name,
+                            class: cls,
+                            branch: branch,
+                            deneme: parsedExamName,
+                            subjects: subjects,
+                            puan: score,
+                            siralama: rank
+                        });
+                    }
+
+                    if (parsedExamRecordsToImport.length > 0) {
+                        if (statusDiv) statusDiv.innerText = `"${parsedExamName}" sınavına ait ${parsedExamRecordsToImport.length} kayıt aktarıma hazır.`;
+                        
+                        const startBtn = document.getElementById('btn-start-exam-import');
+                        if (startBtn) {
+                            startBtn.disabled = false;
+                            startBtn.style.opacity = '1';
+                        }
+                    } else {
+                        showToast("Dosyada geçerli öğrenci kaydı bulunamadı.", "error");
+                        if (statusDiv) statusDiv.innerText = 'Geçerli kayıt bulunamadı.';
+                    }
+
+                } catch (error) {
+                    console.error("Excel parse error:", error);
+                    showToast("Excel dosyası çözümlenirken hata oluştu.", "error");
+                    if (statusDiv) statusDiv.innerText = 'Çözümleme hatası.';
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function startExamImport() {
+            if (!supabaseClient) {
+                showToast("Bulut bağlantısı yok! Aktarım yapılamaz.", "error");
+                return;
+            }
+
+            if (parsedExamRecordsToImport.length === 0) return;
+
+            const statusDiv = document.getElementById('exam-import-status');
+            const startBtn = document.getElementById('btn-start-exam-import');
+            if (startBtn) {
+                startBtn.disabled = true;
+                startBtn.style.opacity = '0.5';
+            }
+
+            if (statusDiv) statusDiv.innerText = 'Sınav verileri buluta aktarılıyor...';
+
+            try {
+                await saveRecordsToDB(parsedExamRecordsToImport, `"${parsedExamName}" sınavına ait ${parsedExamRecordsToImport.length} kayıt yüklendi!`);
+                closeExamImportModal();
+            } catch (error) {
+                console.error("startExamImport error:", error);
+                if (statusDiv) statusDiv.innerText = 'Yükleme başarısız.';
+            }
+        }
+
+        function downloadExamTemplate() {
+            try {
+                const row0 = ["NO", "ADI SOYADI", "SINIF", "ŞUBE", "TÜRKÇE", "", "", "", "SOSYAL", "", "", "", "MATEMATİK", "", "", "", "GEOMETRİ", "", "", "", "FİZİK", "", "", "", "KİMYA", "", "", "", "BİYOLOJİ", "", "", "", "TOPLAM", "", "", "", "PUAN", "SIRALAMA", "SINAV ADI"];
+                const row1 = ["", "", "", "", "D", "Y", "B", "N", "D", "Y", "B", "N", "D", "Y", "B", "N", "D", "Y", "B", "N", "D", "Y", "B", "N", "D", "Y", "B", "N", "D", "Y", "B", "N", "D", "Y", "B", "N", "", "", ""];
+                const row2 = [118, "BÜNYAMİN ZORLU", "10", "E", 30, 5, 5, 28.75, 15, 3, 2, 14.25, 35, 2, 3, 34.5, 8, 1, 1, 7.75, 5, 1, 1, 4.75, 6, 0, 0, 6.0, 5, 1, 0, 4.75, 104, 13, 12, 100.75, 450.25, 1, "Örnek Sınav TYT-1"];
+                const row3 = [119, "ALİ RIZA BOZ", "9", "A", 25, 10, 5, 22.5, 12, 5, 3, 10.75, 20, 10, 10, 17.5, 5, 3, 2, 4.25, 4, 2, 1, 3.5, 3, 3, 0, 2.25, 3, 3, 0, 2.25, 72, 36, 12, 63.0, 310.5, 2, "Örnek Sınav TYT-1"];
+                
+                const worksheetData = [row0, row1, row2, row3];
+                const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Sınav Sonuçları");
+                
+                const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'ceylanpinar_ornek_sinav_sablonu.xlsx';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showToast("Örnek sınav şablonu indirildi.");
+            } catch (error) {
+                console.error("Exam template generation error:", error);
+                showToast("Sınav şablonu oluşturulurken hata oluştu.", "error");
             }
         }
 
