@@ -2923,19 +2923,18 @@ def build_merged_app():
             }
         }
 
-        // MEB Haber Cekilmesi - Netlify Function uzerinden (CORS sorunu yok)
+        // MEB Haber Cekilmesi - corsproxy.io uzerinden
         function initNewsFetcher() {
             const targetUrl = 'https://ceylanpinarfenlisesi.meb.k12.tr';
-            const functionUrl = '/.netlify/functions/meb-news';
+            const proxyUrl = 'https://corsproxy.io/?url=' + encodeURIComponent(targetUrl);
 
-            fetch(functionUrl)
+            fetch(proxyUrl)
                 .then(response => {
-                    if (response.ok) return response.json();
-                    throw new Error('Netlify function response was not ok: ' + response.status);
+                    if (response.ok) return response.text();
+                    throw new Error('Proxy yanit vermedi: ' + response.status);
                 })
-                .then(data => {
-                    const htmlContent = data.contents;
-                    if (!htmlContent) throw new Error('Proxy returned empty content.');
+                .then(htmlContent => {
+                    if (!htmlContent) throw new Error('Proxy bos icerik donurdu.');
                     
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(htmlContent, 'text/html');
