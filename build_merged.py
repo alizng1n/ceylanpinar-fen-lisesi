@@ -2923,15 +2923,15 @@ def build_merged_app():
             }
         }
 
-        // e-Okul News Scraper/Proxy Parser (Uses JSON endpoint for stability)
+        // MEB Haber Cekilmesi - Netlify Function uzerinden (CORS sorunu yok)
         function initNewsFetcher() {
             const targetUrl = 'https://ceylanpinarfenlisesi.meb.k12.tr';
-            const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
+            const functionUrl = '/.netlify/functions/meb-news';
 
-            fetch(proxyUrl)
+            fetch(functionUrl)
                 .then(response => {
                     if (response.ok) return response.json();
-                    throw new Error('CORS proxy response was not ok.');
+                    throw new Error('Netlify function response was not ok: ' + response.status);
                 })
                 .then(data => {
                     const htmlContent = data.contents;
