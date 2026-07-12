@@ -2256,6 +2256,7 @@ def build_merged_app():
                             <table id="results-table">
                                 <thead>
                                     <tr>
+                                        <th id="results-delete-header" rowspan="2" style="vertical-align: middle; text-align: center; width: 50px; display: none;">İşlem</th>
                                         <th rowspan="2" style="vertical-align: middle;">Deneme Sınav Adı</th>
                                         <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Türkçe</th>
                                         <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Sosyal</th>
@@ -3255,17 +3256,38 @@ def build_merged_app():
                         console.error("Supabase loadExamData query error:", error);
                         examDatabase = [];
                     } else {
-                        examDatabase = (data || []).map(r => ({
-                            id: r.id,
-                            no: r.student_no,
-                            name: r.student_name,
-                            class: r.student_class,
-                            branch: r.student_branch,
-                            subjects: r.subjects,
-                            puan: r.puan,
-                            siralama: r.siralama,
-                            deneme: r.exam_name
-                        }));
+                        examDatabase = (data || []).map(r => {
+                            const sub = r.subjects || {};
+                            let toplam = sub.toplam || { d: 0, y: 0, b: 0, n: 0 };
+                            
+                            const subjectsKeys = ['turkce', 'sosyal', 'matematik', 'geometri', 'fizik', 'kimya', 'biyoloji'];
+                            const hasSubjectData = subjectsKeys.some(key => sub[key] && (sub[key].d > 0 || sub[key].y > 0 || sub[key].n > 0));
+                            
+                            if (hasSubjectData && (toplam.d === 0 && toplam.y === 0 && toplam.n === 0)) {
+                                let calcD = 0, calcY = 0, calcB = 0, calcN = 0;
+                                subjectsKeys.forEach(key => {
+                                    const s = sub[key] || { d: 0, y: 0, b: 0, n: 0 };
+                                    calcD += s.d || 0;
+                                    calcY += s.y || 0;
+                                    calcB += s.b || 0;
+                                    calcN += s.n || 0;
+                                });
+                                toplam = { d: calcD, y: calcY, b: calcB, n: calcN };
+                                sub.toplam = toplam;
+                            }
+
+                            return {
+                                id: r.id,
+                                no: r.student_no,
+                                name: r.student_name,
+                                class: r.student_class,
+                                branch: r.student_branch,
+                                subjects: sub,
+                                puan: r.puan,
+                                siralama: r.siralama,
+                                deneme: r.exam_name
+                            };
+                        });
                         console.log(`Loaded ${examDatabase.length} records from Supabase!`);
                     }
                 } catch (e) {
@@ -5481,6 +5503,23 @@ function showSchoolManagementView() {
                         };
 
                         const total = { d: parseFloat(row[32]) || 0, y: parseFloat(row[33]) || 0, b: parseFloat(row[34]) || 0, n: parseFloat(row[35]) || 0 };
+                        if (total.d === 0 && total.y === 0 && total.n === 0) {
+                            let dTotal = 0, yTotal = 0, bTotal = 0, nTotal = 0;
+                            const subjectsKeys = ['turkce', 'sosyal', 'matematik', 'geometri', 'fizik', 'kimya', 'biyoloji'];
+                            subjectsKeys.forEach(key => {
+                                const s = subjects[key];
+                                dTotal += s.d;
+                                yTotal += s.y;
+                                bTotal += s.b;
+                                nTotal += s.n;
+                            });
+                            total.d = dTotal;
+                            total.y = yTotal;
+                            total.b = bTotal;
+                            total.n = nTotal;
+                        }
+                        subjects.toplam = total;
+
                         const score = parseFloat(row[36]) || 0;
                         const rank = parseInt(row[37], 10) || 9999;
 
@@ -5818,6 +5857,12 @@ function showSchoolManagementView() {
             const tbody = document.getElementById('results-table-body');
             tbody.innerHTML = '';
 
+            const isAdmin = (sessionStorage.getItem('user_role') === 'admin');
+            const deleteHeader = document.getElementById('results-delete-header');
+            if (deleteHeader) {
+                deleteHeader.style.display = isAdmin ? 'table-cell' : 'none';
+            }
+
             let sumNets = { turkce:0, sosyal:0, matematik:0, geometri:0, fizik:0, kimya:0, biyoloji:0, toplam:0 };
 
             records.forEach(r => {
@@ -5842,6 +5887,13 @@ function showSchoolManagementView() {
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
+                    ${isAdmin ? `
+                    <td style="text-align:center; vertical-align:middle; width: 50px;">
+                        <button onclick="deleteExamRecord(${r.id}, '${r.deneme.replace(/'/g, "\\'")}', ${r.no})" class="btn-delete-row" style="background:none; border:none; color:#ef4444; cursor:pointer; padding:6px; display:inline-flex; align-items:center; justify-content:center; transition: all 0.2s;" title="Bu deneme kaydını sil">
+                            <i data-lucide="trash-2" style="width:16px; height:16px;"></i>
+                        </button>
+                    </td>
+                    ` : ''}
                     <td style="font-weight: 600;">${r.deneme}</td>
                     <td style="text-align:center;">${t.d}</td><td style="text-align:center;">${t.y}</td><td style="text-align:center;">${t.b}</td><td class="cell-net">${t.n.toFixed(2)}</td>
                     <td style="text-align:center;">${s.d}</td><td style="text-align:center;">${s.y}</td><td style="text-align:center;">${s.b}</td><td class="cell-net">${s.n.toFixed(2)}</td>
@@ -5861,7 +5913,7 @@ function showSchoolManagementView() {
             avgRow.className = 'total-row';
             const count = records.length;
             avgRow.innerHTML = `
-                <td>ORTALAMALAR</td>
+                <td colspan="${isAdmin ? 2 : 1}" style="font-weight:bold;">ORTALAMALAR</td>
                 <td colspan="3"></td><td class="cell-net">${(sumNets.turkce / count).toFixed(2)}</td>
                 <td colspan="3"></td><td class="cell-net">${(sumNets.sosyal / count).toFixed(2)}</td>
                 <td colspan="3"></td><td class="cell-net">${(sumNets.matematik / count).toFixed(2)}</td>
@@ -5874,11 +5926,46 @@ function showSchoolManagementView() {
             `;
             tbody.appendChild(avgRow);
 
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+
             renderProgressChart(records);
             
             // Switch to Karne tab on mobile
             if (window.innerWidth <= 768) {
                 switchAnalysisTab('karne');
+            }
+        }
+
+        async function deleteExamRecord(id, examName, studentNo) {
+            if (!confirm(`Bu öğrencinin "${examName}" deneme sınavı sonucunu silmek istediğinize emin misiniz?`)) {
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient
+                    .from('exam_results')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) {
+                    showToast("Hata: Sınav sonucu silinemedi: " + error.message, "error");
+                } else {
+                    showToast("Sınav sonucu başarıyla silindi.");
+                    await loadExamData();
+                    const studentRecords = examDatabase.filter(r => r.no === studentNo);
+                    if (studentRecords.length > 0) {
+                        selectStudent(studentNo);
+                    } else {
+                        activeStudent = null;
+                        document.getElementById('student-report-card').style.display = 'none';
+                        document.getElementById('welcome-panel-analysis').style.display = 'block';
+                    }
+                }
+            } catch (err) {
+                console.error("Delete exam result error:", err);
+                showToast("Silme işlemi sırasında bir hata oluştu.", "error");
             }
         }
 
