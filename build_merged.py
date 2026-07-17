@@ -393,6 +393,104 @@ def build_merged_app():
             background: var(--border-color);
         }
 
+        /* Profil Avatar Dropdown */
+        .profile-wrapper {
+            position: relative;
+            display: none;
+        }
+        .profile-wrapper.visible {
+            display: flex;
+            align-items: center;
+        }
+        .profile-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            color: #fff;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            user-select: none;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+        }
+        .profile-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+        }
+        .profile-dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 220px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            padding: 0.5rem;
+            z-index: 20000;
+            opacity: 0;
+            transform: translateY(-8px) scale(0.97);
+            pointer-events: none;
+            transition: all 0.2s cubic-bezier(0.16,1,0.3,1);
+        }
+        .profile-dropdown.open {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+        .profile-dropdown-header {
+            padding: 0.75rem 0.875rem 0.6rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 0.4rem;
+        }
+        .profile-dropdown-header .pd-name {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .profile-dropdown-header .pd-role {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.15rem;
+        }
+        .profile-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.6rem 0.875rem;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            transition: background 0.15s ease;
+        }
+        .profile-dropdown-item:hover {
+            background: var(--bg-page);
+        }
+        .profile-dropdown-item.danger {
+            color: #ef4444;
+        }
+        .profile-dropdown-item.danger:hover {
+            background: rgba(239,68,68,0.08);
+        }
+        .profile-dropdown-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 0.4rem 0;
+        }
+
         /* Layout Grid */
         .app-container {
             display: grid;
@@ -2015,13 +2113,27 @@ def build_merged_app():
             <div id="db-status-badge" style="width:32px; height:32px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:rgba(100,116,139,0.08); border: 1px solid rgba(100,116,139,0.15); transition: all 0.2s ease;" title="Veritabanı: Bağlanıyor...">
                 <span id="db-status-dot" style="width:8px; height:8px; border-radius:50%; background:#64748b; display:inline-block; transition: all 0.2s ease;"></span>
             </div>
-            
-            <button class="btn btn-secondary" id="change-pw-btn" style="display:none;" onclick="openChangePasswordModal()" title="Şifremi Değiştir">
-                <i data-lucide="lock"></i> <span>Şifremi Değiştir</span>
-            </button>
-            <button class="btn btn-secondary" id="logout-btn" style="display:none;" onclick="logout()">
-                <i data-lucide="log-out"></i> <span>Çıkış Yap</span>
-            </button>
+
+            <!-- Profil Avatar + Dropdown -->
+            <div class="profile-wrapper" id="profile-wrapper">
+                <div class="profile-avatar" id="profile-avatar" onclick="toggleProfileDropdown()" title="Hesabım">
+                    <span id="profile-initials">?</span>
+                </div>
+                <div class="profile-dropdown" id="profile-dropdown">
+                    <div class="profile-dropdown-header" style="border-bottom: none; margin-bottom: 0;">
+                        <div class="pd-name" id="pd-name">—</div>
+                    </div>
+                    <div class="profile-dropdown-divider"></div>
+                    <button class="profile-dropdown-item" onclick="closeProfileDropdown(); openProfileSettingsModal();">
+                        <i data-lucide="settings" size="15"></i> Profil Ayarları
+                    </button>
+                    <div class="profile-dropdown-divider"></div>
+                    <button class="profile-dropdown-item danger" onclick="closeProfileDropdown(); logout();">
+                        <i data-lucide="log-out" size="15"></i> Çıkış Yap
+                    </button>
+                </div>
+            </div>
+
             <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Temayı Değiştir">
                 <i data-lucide="moon"></i>
             </button>
@@ -2952,38 +3064,6 @@ def build_merged_app():
 
     <!-- Student Login Modal -->
     <div class="modal" id="student-login-modal">
-
-    <!-- Şifre Değiştirme Modalı (Öğretmen kendi şifresini değiştirir) -->
-    <div class="modal" id="change-password-modal">
-        <div class="modal-card" style="max-width:400px; padding:2rem;">
-            <div style="text-align:center; margin-bottom:1.5rem;">
-                <div style="background:rgba(16,185,129,0.1); width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem auto; color:#10b981;">
-                    <i data-lucide="lock" size="32"></i>
-                </div>
-                <h3 style="margin:0; font-size:1.2rem; font-weight:700; color:var(--text-primary);">Şifremi Değiştir</h3>
-                <p style="margin:0.25rem 0 0 0; font-size:0.8rem; color:var(--text-secondary);">Güvenliğiniz için mevcut şifrenizi doğrulayın.</p>
-            </div>
-            <div style="display:flex; flex-direction:column; gap:1rem;">
-                <div style="display:flex; flex-direction:column; gap:0.35rem;">
-                    <label style="font-size:0.78rem; font-weight:600; color:var(--text-secondary);">Mevcut Şifre</label>
-                    <input type="password" id="cp-current" class="input-field" placeholder="••••••••" style="height:44px; border-radius:var(--radius-md); font-size:0.88rem; padding:0 0.75rem; border:1px solid var(--border-color); background:var(--bg-page); color:var(--text-primary);">
-                </div>
-                <div style="display:flex; flex-direction:column; gap:0.35rem;">
-                    <label style="font-size:0.78rem; font-weight:600; color:var(--text-secondary);">Yeni Şifre</label>
-                    <input type="password" id="cp-new" class="input-field" placeholder="••••••••" style="height:44px; border-radius:var(--radius-md); font-size:0.88rem; padding:0 0.75rem; border:1px solid var(--border-color); background:var(--bg-page); color:var(--text-primary);">
-                </div>
-                <div style="display:flex; flex-direction:column; gap:0.35rem;">
-                    <label style="font-size:0.78rem; font-weight:600; color:var(--text-secondary);">Yeni Şifre (Tekrar)</label>
-                    <input type="password" id="cp-confirm" class="input-field" placeholder="••••••••" style="height:44px; border-radius:var(--radius-md); font-size:0.88rem; padding:0 0.75rem; border:1px solid var(--border-color); background:var(--bg-page); color:var(--text-primary);">
-                </div>
-            </div>
-            <div id="cp-error" style="display:none; color:#ef4444; font-size:0.8rem; text-align:center; margin-top:0.75rem; font-weight:600;"></div>
-            <div style="display:flex; gap:0.75rem; margin-top:1.5rem;">
-                <button class="btn btn-secondary" onclick="closeChangePasswordModal()" style="flex:1; justify-content:center; height:44px; font-weight:600; border-radius:var(--radius-md);">Vazgeç</button>
-                <button class="btn btn-primary" onclick="changeTeacherPassword()" style="flex:1; justify-content:center; height:44px; font-weight:600; border-radius:var(--radius-md);">Kaydet</button>
-            </div>
-        </div>
-    </div>
         <div class="modal-card" style="max-width: 420px; padding: 2rem;">
             <div style="text-align: center; margin-bottom: 1.5rem;">
                 <div style="background: rgba(59, 130, 246, 0.1); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; color: var(--accent-color);">
@@ -3044,6 +3124,42 @@ def build_merged_app():
             <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
                 <button class="btn btn-secondary" onclick="closeStudentLoginModal()" style="flex: 1; justify-content: center; height: 44px; font-weight: 600; border-radius: var(--radius-md);">Vazgeç</button>
                 <button class="btn btn-primary" onclick="verifyStudentLogin()" style="flex: 1; justify-content: center; height: 44px; font-weight: 600; border-radius: var(--radius-md);">Giriş Yap</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profil Ayarları Modalı (Kullanıcı kendi kullanıcı adını ve şifresini değiştirir) -->
+    <div class="modal" id="profile-settings-modal">
+        <div class="modal-card" style="max-width:400px; padding:2rem;">
+            <div style="text-align:center; margin-bottom:1.5rem;">
+                <div style="background:rgba(99,102,241,0.1); width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem auto; color:var(--accent-color);">
+                    <i data-lucide="settings" size="32"></i>
+                </div>
+                <h3 style="margin:0; font-size:1.2rem; font-weight:700; color:var(--text-primary);">Profil Ayarları</h3>
+                <p style="margin:0.25rem 0 0 0; font-size:0.8rem; color:var(--text-secondary);">Kullanıcı adınızı ve şifrenizi güncelleyebilirsiniz.</p>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:0.85rem;">
+                <div style="display:flex; flex-direction:column; gap:0.35rem;">
+                    <label style="font-size:0.78rem; font-weight:600; color:var(--text-secondary);">Kullanıcı Adı</label>
+                    <input type="text" id="ps-username" class="input-field" placeholder="kullanici_adi" style="height:44px; border-radius:var(--radius-md); font-size:0.88rem; padding:0 0.75rem; border:1px solid var(--border-color); background:var(--bg-page); color:var(--text-primary);">
+                </div>
+                <div style="display:flex; flex-direction:column; gap:0.35rem; border-top:1px solid var(--border-color); padding-top:0.75rem; margin-top:0.25rem;">
+                    <label style="font-size:0.78rem; font-weight:600; color:var(--text-secondary);">Mevcut Şifre (Doğrulama)</label>
+                    <input type="password" id="ps-current" class="input-field" placeholder="••••••••" style="height:44px; border-radius:var(--radius-md); font-size:0.88rem; padding:0 0.75rem; border:1px solid var(--border-color); background:var(--bg-page); color:var(--text-primary);">
+                </div>
+                <div style="display:flex; flex-direction:column; gap:0.35rem;">
+                    <label style="font-size:0.78rem; font-weight:600; color:var(--text-secondary);">Yeni Şifre (Değiştirmek istemiyorsanız boş bırakın)</label>
+                    <input type="password" id="ps-new" class="input-field" placeholder="••••••••" style="height:44px; border-radius:var(--radius-md); font-size:0.88rem; padding:0 0.75rem; border:1px solid var(--border-color); background:var(--bg-page); color:var(--text-primary);">
+                </div>
+                <div style="display:flex; flex-direction:column; gap:0.35rem;">
+                    <label style="font-size:0.78rem; font-weight:600; color:var(--text-secondary);">Yeni Şifre (Tekrar)</label>
+                    <input type="password" id="ps-confirm" class="input-field" placeholder="••••••••" style="height:44px; border-radius:var(--radius-md); font-size:0.88rem; padding:0 0.75rem; border:1px solid var(--border-color); background:var(--bg-page); color:var(--text-primary);">
+                </div>
+            </div>
+            <div id="ps-error" style="display:none; color:#ef4444; font-size:0.8rem; text-align:center; margin-top:0.75rem; font-weight:600;"></div>
+            <div style="display:flex; gap:0.75rem; margin-top:1.5rem;">
+                <button class="btn btn-secondary" onclick="closeProfileSettingsModal()" style="flex:1; justify-content:center; height:44px; font-weight:600; border-radius:var(--radius-md);">Vazgeç</button>
+                <button class="btn btn-primary" onclick="saveProfileSettings()" style="flex:1; justify-content:center; height:44px; font-weight:600; border-radius:var(--radius-md);">Kaydet</button>
             </div>
         </div>
     </div>
@@ -3688,6 +3804,7 @@ function navigate(state, push = true) {
                     sessionStorage.setItem('user_role', 'admin');
                     sessionStorage.setItem('staff_id', String(adminMatch.id));
                     sessionStorage.setItem('staff_name', adminMatch.ad_soyad || '');
+                    sessionStorage.setItem('staff_username', adminMatch.kullanici_adi || '');
                 } catch (e) {}
                 closeLoginModal();
                 navigate('teacher-hub');
@@ -3706,6 +3823,7 @@ function navigate(state, push = true) {
                     sessionStorage.setItem('user_role', 'teacher');
                     sessionStorage.setItem('staff_id', String(teacherMatch.id));
                     sessionStorage.setItem('staff_name', teacherMatch.ad_soyad || '');
+                    sessionStorage.setItem('staff_username', teacherMatch.kullanici_adi || '');
                 } catch (e) {}
                 closeLoginModal();
                 navigate('teacher-hub');
@@ -3812,40 +3930,124 @@ function navigate(state, push = true) {
                 sessionStorage.removeItem('student_no');
                 sessionStorage.removeItem('staff_id');
                 sessionStorage.removeItem('staff_name');
+                sessionStorage.removeItem('staff_username');
             } catch (e) {}
             navigate('home');
         }
 
-        function openChangePasswordModal() {
-            document.getElementById('cp-current').value = '';
-            document.getElementById('cp-new').value = '';
-            document.getElementById('cp-confirm').value = '';
-            document.getElementById('cp-error').style.display = 'none';
-            document.getElementById('change-password-modal').classList.add('open');
-            setTimeout(() => document.getElementById('cp-current').focus(), 100);
+        function openProfileSettingsModal() {
+            try {
+                const usernameVal = sessionStorage.getItem('staff_username') || '';
+                const uEl = document.getElementById('ps-username');
+                if (uEl) uEl.value = usernameVal;
+                
+                const cEl = document.getElementById('ps-current');
+                if (cEl) cEl.value = '';
+                
+                const nEl = document.getElementById('ps-new');
+                if (nEl) nEl.value = '';
+                
+                const cfEl = document.getElementById('ps-confirm');
+                if (cfEl) cfEl.value = '';
+                
+                const errDiv = document.getElementById('ps-error');
+                if (errDiv) errDiv.style.display = 'none';
+                
+                const modal = document.getElementById('profile-settings-modal');
+                if (modal) {
+                    modal.classList.add('open');
+                } else {
+                    console.error('profile-settings-modal element not found');
+                    alert('Hata: Profil ayarları modalı bulunamadı.');
+                }
+                
+                setTimeout(() => {
+                    const focusEl = document.getElementById('ps-current');
+                    if (focusEl) focusEl.focus();
+                }, 100);
+            } catch (e) {
+                console.error('openProfileSettingsModal error:', e);
+                alert('Profil ayarları açılırken hata oluştu: ' + e.message);
+            }
         }
 
-        function closeChangePasswordModal() {
-            document.getElementById('change-password-modal').classList.remove('open');
+        function closeProfileSettingsModal() {
+            try {
+                const modal = document.getElementById('profile-settings-modal');
+                if (modal) modal.classList.remove('open');
+            } catch (e) {
+                console.error(e);
+            }
         }
 
-        async function changeTeacherPassword() {
-            const currentPw = (document.getElementById('cp-current').value || '').trim();
-            const newPw = (document.getElementById('cp-new').value || '').trim();
-            const confirmPw = (document.getElementById('cp-confirm').value || '').trim();
-            const errDiv = document.getElementById('cp-error');
+        function updateProfileAvatar() {
+            const role = sessionStorage.getItem('user_role') || 'student';
+            let name = '';
+            
+            if (role === 'student') {
+                const studentNo = sessionStorage.getItem('student_no');
+                if (studentNo && schoolData && schoolData.ogrenci) {
+                    const s = schoolData.ogrenci.find(x => String(x.no) === String(studentNo));
+                    if (s) {
+                        name = (s.ad || '') + ' ' + (s.soyad || '');
+                    }
+                }
+                if (!name) name = 'Öğrenci';
+            } else {
+                name = sessionStorage.getItem('staff_name') || '';
+            }
+
+            const words = name.trim().split(' ').filter(Boolean);
+            let initials = '?';
+            if (words.length >= 2) {
+                initials = (words[0][0] + words[words.length - 1][0]).toUpperCase();
+            } else if (words.length === 1 && words[0]) {
+                initials = words[0].slice(0, 2).toUpperCase();
+            }
+
+            document.getElementById('profile-initials').textContent = initials;
+            document.getElementById('pd-name').textContent = name || 'Kullanıcı';
+            
+            const settingsBtn = document.querySelector('#profile-dropdown button[onclick*="openProfileSettingsModal"]');
+            const divider = document.querySelector('#profile-dropdown .profile-dropdown-divider');
+            
+            if (role === 'student') {
+                if (settingsBtn) settingsBtn.style.display = 'none';
+                if (divider) divider.style.display = 'none';
+            } else {
+                if (settingsBtn) settingsBtn.style.display = 'flex';
+                if (divider) divider.style.display = 'block';
+            }
+        }
+
+        function toggleProfileDropdown() {
+            const dd = document.getElementById('profile-dropdown');
+            if (dd) dd.classList.toggle('open');
+        }
+
+        function closeProfileDropdown() {
+            const dd = document.getElementById('profile-dropdown');
+            if (dd) dd.classList.remove('open');
+        }
+
+        // Profil dropdown dışına tıklandığında kapatma
+        window.addEventListener('click', function(e) {
+            const wrapper = document.getElementById('profile-wrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                closeProfileDropdown();
+            }
+        });
+
+        async function saveProfileSettings() {
+            const newUsername = (document.getElementById('ps-username').value || '').trim();
+            const currentPw = (document.getElementById('ps-current').value || '').trim();
+            const newPw = (document.getElementById('ps-new').value || '').trim();
+            const confirmPw = (document.getElementById('ps-confirm').value || '').trim();
+            const errDiv = document.getElementById('ps-error');
             errDiv.style.display = 'none';
 
-            if (!currentPw || !newPw || !confirmPw) {
-                errDiv.textContent = 'Lütfen tüm alanları doldurunuz.';
-                errDiv.style.display = 'block'; return;
-            }
-            if (newPw !== confirmPw) {
-                errDiv.textContent = 'Yeni şifreler eşleşmiyor!';
-                errDiv.style.display = 'block'; return;
-            }
-            if (newPw.length < 4) {
-                errDiv.textContent = 'Şifre en az 4 karakter olmalıdır.';
+            if (!newUsername || !currentPw) {
+                errDiv.textContent = 'Kullanıcı adı ve mevcut şifre alanları zorunludur.';
                 errDiv.style.display = 'block'; return;
             }
 
@@ -3861,15 +4063,47 @@ function navigate(state, push = true) {
                 errDiv.style.display = 'block'; return;
             }
 
+            // Benzersiz kullanıcı adı kontrolü (hem öğretmenler hem idareciler arasında)
+            await loadSchoolData();
+            const allStaff = [...(schoolData?.idare || []), ...(schoolData?.ogretmen || [])];
+            const duplicate = allStaff.find(s => 
+                s.kullanici_adi && 
+                s.kullanici_adi.trim().toLowerCase() === newUsername.toLowerCase() && 
+                String(s.id) !== String(staffId)
+            );
+
+            if (duplicate) {
+                errDiv.textContent = 'Bu kullanıcı adı sistemde zaten kullanılmaktadır. Lütfen başka bir ad seçiniz.';
+                errDiv.style.display = 'block'; return;
+            }
+
+            if (newPw) {
+                if (newPw !== confirmPw) {
+                    errDiv.textContent = 'Yeni şifreler eşleşmiyor!';
+                    errDiv.style.display = 'block'; return;
+                }
+                if (newPw.length < 4) {
+                    errDiv.textContent = 'Yeni şifre en az 4 karakter olmalıdır.';
+                    errDiv.style.display = 'block'; return;
+                }
+            }
+
             if (!supabaseClient) { alert('Veritabanı bağlantısı yok!'); return; }
-            const { error } = await supabaseClient.from('staff').update({ sifre: newPw }).eq('id', staffId);
+            
+            const updateData = { kullanici_adi: newUsername };
+            if (newPw) {
+                updateData.sifre = newPw;
+            }
+
+            const { error } = await supabaseClient.from('staff').update(updateData).eq('id', staffId);
             if (error) {
                 errDiv.textContent = 'Güncelleme hatası: ' + error.message;
                 errDiv.style.display = 'block'; return;
             }
 
-            closeChangePasswordModal();
-            showToast('Şifreniz başarıyla güncellendi!');
+            sessionStorage.setItem('staff_username', newUsername);
+            closeProfileSettingsModal();
+            showToast('Profil ayarlarınız başarıyla güncellendi!');
             await loadSchoolData(true);
         }
 
@@ -3905,8 +4139,8 @@ function navigate(state, push = true) {
             document.getElementById('school-management-view').style.display = 'none';
             document.getElementById('selection-screen').style.display = 'flex';
             
-            document.getElementById('logout-btn').style.display = 'none';
-            document.getElementById('change-pw-btn').style.display = 'none';
+            document.getElementById('profile-wrapper').classList.remove('visible');
+            closeProfileDropdown();
             document.getElementById('header-logo-section').style.display = 'none';
             
             document.getElementById('mobile-nav-analysis').style.setProperty('display', 'none', 'important');
@@ -3943,7 +4177,8 @@ function navigate(state, push = true) {
                 document.getElementById('student-hub-dashboard').style.display = 'none';
             }
             
-            document.getElementById('logout-btn').style.display = 'inline-flex';
+            updateProfileAvatar();
+            document.getElementById('profile-wrapper').classList.add('visible');
             document.getElementById('header-logo-section').style.display = 'flex'; // Visible
             document.getElementById('header-title').innerText = 'Ceylanpınar Fen Lisesi';
             document.getElementById('header-subtitle').innerText = 'Öğrenci Portalı';
@@ -3961,8 +4196,8 @@ function navigate(state, push = true) {
             document.getElementById('school-management-view').style.display = 'none';
             document.getElementById('teacher-hub').style.display = 'block';
             
-            document.getElementById('logout-btn').style.display = 'inline-flex';
-            document.getElementById('change-pw-btn').style.display = 'inline-flex';
+            updateProfileAvatar();
+            document.getElementById('profile-wrapper').classList.add('visible');
             document.getElementById('header-logo-section').style.display = 'flex';
             document.getElementById('header-title').innerText = 'Ceylanpınar Fen Lisesi';
             document.getElementById('header-subtitle').innerText = 'Öğretmen Portalı';
@@ -3980,7 +4215,8 @@ function navigate(state, push = true) {
             document.getElementById('school-management-view').style.display = 'none';
             document.getElementById('teacher-analysis-view').style.display = 'flex';
             
-            document.getElementById('logout-btn').style.display = 'inline-flex';
+            updateProfileAvatar();
+            document.getElementById('profile-wrapper').classList.add('visible');
             document.getElementById('header-logo-section').style.display = 'flex'; // Visible
             document.getElementById('header-title').innerText = 'Ceylanpınar Fen Lisesi';
             document.getElementById('header-subtitle').innerText = 'Öğretmen Portalı';
@@ -4921,7 +5157,8 @@ function showSchoolManagementView() {
             document.getElementById('teacher-analysis-view').style.display = 'none';
             document.getElementById('school-management-view').style.display = 'block';
 
-            document.getElementById('logout-btn').style.display = 'inline-flex';
+            updateProfileAvatar();
+            document.getElementById('profile-wrapper').classList.add('visible');
             document.getElementById('header-logo-section').style.display = 'flex';
             document.getElementById('header-title').innerText = 'Ceylanpınar Fen Lisesi';
             document.getElementById('header-subtitle').innerText = 'Okul Yönetim Sistemi';
