@@ -190,7 +190,7 @@ def build_merged_app():
 
         /* Tema geçiş hızı ve performansı için animasyonlar optimize edilmiştir */
         body {
-            transition: background-color 0.1s ease, color 0.1s ease;
+            transition: background 0.15s ease, background-color 0.15s ease, color 0.15s ease;
         }
 
         body {
@@ -204,12 +204,12 @@ def build_merged_app():
 
         /* DYNAMIC PORTAL BACKGROUND MODES (e-Okul Style) */
         body.portal-mode {
-            background: linear-gradient(135deg, #e2e8f0, #cbd5e1) !important;
+            background: #cbd5e1 !important;
             color: #0f172a !important;
         }
         
         [data-theme="dark"] body.portal-mode {
-            background: linear-gradient(135deg, #102a43, #243b53) !important;
+            background: #102a43 !important;
             color: #ffffff !important;
         }
         
@@ -219,6 +219,7 @@ def build_merged_app():
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(15, 23, 42, 0.1) !important;
             box-shadow: var(--shadow-sm) !important;
+            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
         }
         
         [data-theme="dark"] body.portal-mode header {
@@ -227,6 +228,7 @@ def build_merged_app():
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
             box-shadow: var(--shadow-sm) !important;
+            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
         }
         
         body.portal-mode header .logo-title {
@@ -3386,21 +3388,27 @@ def build_merged_app():
         }
 
         function toggleTheme() {
-            // Tema geçişinde binlerce elemanın transition yükünü kaldırmak için geçici olarak animasyonları kapatıyoruz
+            // 1. Transition'ları geçici olarak devre dışı bırak
             document.documentElement.classList.add('disable-transitions');
+            
+            // 2. Tarayıcıyı mevcut stil durumunu işlemeye zorla (force reflow)
+            document.body.offsetHeight;
 
+            // 3. Tema değişimini gerçekleştir
             const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
             updateThemeButtonIcon(theme);
+            
             if (activeStudent) {
-                renderProgressChart(activeStudent); // redraw chart with new colors
+                renderProgressChart(activeStudent, false); // redraw chart instantly with new colors without animation
             }
 
-            // Render işlemi tamamlandıktan hemen sonra geçişleri geri açıyoruz (anlık geçiş sağlanmış olur)
-            setTimeout(() => {
-                document.documentElement.classList.remove('disable-transitions');
-            }, 30);
+            // 4. Yeni tema renklerinin transition olmadan ekrana basılmasını zorla (force reflow)
+            document.body.offsetHeight;
+
+            // 5. Transition'ları tekrar aktif et
+            document.documentElement.classList.remove('disable-transitions');
         }
 
         function updateThemeButtonIcon(theme) {
@@ -5523,7 +5531,7 @@ function showSchoolManagementView() {
                         }
 
 
-        function renderProgressChart(records) {
+        function renderProgressChart(records, animate = true) {
             const ctx = document.getElementById('progressChart').getContext('2d');
             if (progressChart) {
                 progressChart.destroy();
@@ -5588,6 +5596,7 @@ function showSchoolManagementView() {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: animate ? {} : false,
                     plugins: {
                         legend: {
                             display: false // We use our custom legend in HTML
