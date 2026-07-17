@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ceylanpınar Fen Lisesi - Portal Hub</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- SheetJS for Excel Reading -->
+    
+    
+    <!-- Chart.js for beautiful graphs -->
+    
+    
+    <!-- Lucide Icons -->
+    
+
+    
+</head>
+<body class="portal-mode">
+
+    <header>
+        <!-- Id and default hidden logo for selection page header -->
+        <div class="logo-section" id="header-logo-section" style="display:none;" onclick="handleLogoClick()">
+            <div class="logo-icon" id="logo-container">
+                <img id="logo-img" class="logo-img" src="logo.png" alt="Logo">
+            </div>
+            <div style="display: flex; flex-direction: column; justify-content: center;">
+                <h1 class="logo-title" id="header-title">Ceylanpınar Fen Lisesi</h1>
+                <p class="logo-subtitle" id="header-subtitle">Portal Hub</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" id="logout-btn" style="display:none;" onclick="logout()">
+                <i data-lucide="log-out"></i> <span>Çıkış Yap</span>
+            </button>
+            <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Temayı Değiştir">
+                <i data-lucide="moon"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="app-container no-sidebar" id="app-container">
+        <!-- Sidebar (Desktop Only - Hidden in Mobile View) -->
+        <aside class="desktop-only">
+            <!-- 1. Sınav Analiz Sidebar -->
+            <div id="sidebar-analysis">
+                <!-- Sınav Yükleme -->
+                <div class="sidebar-card">
+                    <h3><i data-lucide="file-plus"></i> Sınav İçe Aktar</h3>
+                    <div class="dropzone" id="excel-dropzone" onclick="document.getElementById('excel-file-input').click()">
+                        <div class="dropzone-icon">
+                            <i data-lucide="file-spreadsheet" size="32"></i>
+                        </div>
+                        <strong>Excel Dosyası Seç</strong>
+                        <p>TYT Sonuç dosyasını (xlsx/xlsm) buraya sürükleyin veya tıklayın</p>
+                        <input type="file" id="excel-file-input" accept=".xlsx,.xlsm" onchange="handleExcelImport(event)">
+                    </div>
+                </div>
+
+                <!-- İstatistik Kartları -->
+                <div class="sidebar-card">
+                    <h3><i data-lucide="bar-chart-2"></i> Sistem İstatistikleri</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card-small">
+                            <span class="val" id="stat-students">0</span>
+                            <span class="lbl">Kayıtlı Öğrenci</span>
+                        </div>
+                        <div class="stat-card-small">
+                            <span class="val" id="stat-exams">0</span>
+                            <span class="lbl">Toplam Deneme</span>
+                        </div>
+                        <div class="stat-card-small">
+                            <span class="val" id="stat-avg-net">0.00</span>
+                            <span class="lbl">Okul Genel Net Ort.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Veri Yönetimi -->
+                <div class="sidebar-card">
+                    <h3><i data-lucide="settings"></i> Sistem Ayarları</h3>
+                    <button class="btn btn-secondary" style="width:100%; border-color:#ef4444; color:#ef4444;" onclick="resetToDefault()" title="Tüm verileri silip varsayılan veriye döner">
+                        <i data-lucide="rotate-ccw"></i> Fabrika Ayarlarına Dön
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. Belge & Veritabanı Portal Sidebar -->
+            <div id="sidebar-documents" style="display: none;">
+                <div class="sidebar-card">
+                    <h3><i data-lucide="folder-open"></i> Portal Menüsü</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem;">
+                        <button class="btn btn-primary" id="btn-side-doc-builder" onclick="switchDocPortalTab('builder')" style="width: 100%; justify-content: flex-start; gap: 0.5rem;">
+                            <i data-lucide="scroll" size="16"></i> <span>Belge Oluşturucu</span>
+                        </button>
+                        <button class="btn btn-secondary" id="btn-side-doc-database" onclick="switchDocPortalTab('database')" style="width: 100%; justify-content: flex-start; gap: 0.5rem; background: transparent; border-color: transparent;">
+                            <i data-lucide="database" size="16"></i> <span>Veritabanı Yönetimi</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <h3><i data-lucide="info"></i> Okul İstatistikleri</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card-small">
+                            <span class="val" id="doc-stat-students">0</span>
+                            <span class="lbl">Kayıtlı Öğrenci</span>
+                        </div>
+                        <div class="stat-card-small">
+                            <span class="val" id="doc-stat-teachers">0</span>
+                            <span class="lbl">Kayıtlı Öğretmen</span>
+                        </div>
+                        <div class="stat-card-small">
+                            <span class="val" id="doc-stat-admins">0</span>
+                            <span class="lbl">İdari Kadro</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <button class="btn btn-secondary" style="width:100%;" onclick="navigate('teacher-hub')">
+                        <i data-lucide="arrow-left" size="16"></i> Portala Dön
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <main>
+            <!-- 1. Seçim Ekranı (e-Okul Style Layout) -->
+            <div class="portal-selection" id="selection-screen">
+                
+                <!-- Üst Kısım: Karşılama ve Giriş Butonları -->
+                <div style="display: flex; flex-direction: column; gap: 2rem; width: 100%; align-items: center; text-align: center;">
+                    <div class="portal-welcome">
+                        <img class="welcome-logo" src="logo.png" alt="Okul Logosu">
+                        <h2>Ceylanpınar Fen Lisesi</h2>
+                        <p>Uygulama Seçim Portalı</p>
+                    </div>
+
+                    <div class="selection-grid">
+                        <!-- Öğretmen Giriş Kartı (Icon on left, Symmetrical) -->
+                        <div class="split-btn-card" onclick="openLoginModal()">
+                            <div class="pane-color pane-color-teacher">
+                                <i data-lucide="user-cog" size="28"></i>
+                            </div>
+                            <div class="pane-text">
+                                <h3>Öğretmen Girişi</h3>
+                                <p>Sınav analiz ve yönetim araçları</p>
+                            </div>
+                        </div>
+
+                        <!-- Öğrenci Giriş Kartı (Icon on left, Symmetrical) -->
+                        <div class="split-btn-card" onclick="navigate('student-hub')">
+                            <div class="pane-color pane-color-student">
+                                <i data-lucide="graduation-cap" size="28"></i>
+                            </div>
+                            <div class="pane-text">
+                                <h3>Öğrenci Girişi</h3>
+                                <p>Kişisel karne ve gelişim grafikleri</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alt Kısım: Duyurular & Haberler (İki Sütunlu) -->
+                <div class="portal-announcements-grid">
+                    <!-- Sol Sütun: Haberler / Duyurular -->
+                    <div id="left-news-list" style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
+                        <h3><i data-lucide="megaphone" size="20"></i> Haberler ve Duyurular</h3>
+                        <a href="https://ceylanpinarfenlisesi.meb.k12.tr/icerikler/öğrencilerimiz-gazzeye-bağış-yaptı_16780532.html" target="_blank" class="news-card">
+                            <span class="ribbon">Yeni</span>
+                            <div class="news-icon-wrapper">
+                                <i data-lucide="bell" size="20"></i>
+                            </div>
+                            <div class="news-content">
+                                <h4>Öğrencilerimiz Gazze'ye Bağış yaptı</h4>
+                                <p>Ceylanpınar Fen Lisesi resmi haber duyurusu.</p>
+                            </div>
+                            <i data-lucide="chevron-right" class="news-arrow" size="16"></i>
+                        </a>
+                        <a href="https://ceylanpinarfenlisesi.meb.k12.tr/icerikler/afet-tatbikatı-başarıyla-gerçekleştirildi_16683329.html" target="_blank" class="news-card">
+                            
+                            <div class="news-icon-wrapper">
+                                <i data-lucide="calendar" size="20"></i>
+                            </div>
+                            <div class="news-content">
+                                <h4>Afet Tatbikatı Başarıyla Gerçekleştirildi.</h4>
+                                <p>Ceylanpınar Fen Lisesi resmi haber duyurusu.</p>
+                            </div>
+                            <i data-lucide="chevron-right" class="news-arrow" size="16"></i>
+                        </a>
+                        <a href="https://ceylanpinarfenlisesi.meb.k12.tr/icerikler/motivasyon-semineri_16594914.html" target="_blank" class="news-card">
+                            
+                            <div class="news-icon-wrapper">
+                                <i data-lucide="calendar" size="20"></i>
+                            </div>
+                            <div class="news-content">
+                                <h4>Motivasyon semineri</h4>
+                                <p>Ceylanpınar Fen Lisesi resmi haber duyurusu.</p>
+                            </div>
+                            <i data-lucide="chevron-right" class="news-arrow" size="16"></i>
+                        </a>
+                    </div>
+
+                    <!-- Sağ Sütun: Sınav ve Genel Duyurular -->
+                    <div id="right-news-list" style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
+                        <h3><i data-lucide="award" size="20"></i> Sınav ve Gelişim Duyuruları</h3>
+                        <a href="https://ceylanpinarfenlisesi.meb.k12.tr/icerikler/satranç-turnuvasi_16397754.html" target="_blank" class="news-card">
+                            <div class="news-icon-wrapper">
+                                <i data-lucide="file-text" size="20"></i>
+                            </div>
+                            <div class="news-content">
+                                <h4>SATRANÇ TURNUVASI</h4>
+                                <p>Ceylanpınar Fen Lisesi resmi sınav ve gelişim duyurusu.</p>
+                            </div>
+                            <i data-lucide="chevron-right" class="news-arrow" size="16"></i>
+                        </a>
+                        <a href="https://ceylanpinarfenlisesi.meb.k12.tr/icerikler/kutadgu-bilig_15749417.html" target="_blank" class="news-card">
+                            <div class="news-icon-wrapper">
+                                <i data-lucide="file-text" size="20"></i>
+                            </div>
+                            <div class="news-content">
+                                <h4>Kutadgu Bilig</h4>
+                                <p>Ceylanpınar Fen Lisesi resmi sınav ve gelişim duyurusu.</p>
+                            </div>
+                            <i data-lucide="chevron-right" class="news-arrow" size="16"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Öğretmen Hub (Menü) -->
+            <div class="hub-section" id="teacher-hub">
+                <div class="hub-header">
+                    <div class="hub-title-area">
+                        <h2>Öğretmen ve Yönetici Portalı</h2>
+                        <p>Analiz ve yönetim uygulamaları</p>
+                    </div>
+                </div>
+                <div class="portal-grid">
+                    <!-- Sınav Analiz Kartı -->
+                    <div class="portal-card" onclick="navigate('teacher-analysis')">
+                        <div class="card-icon-wrapper">
+                            <i data-lucide="bar-chart-3" size="24"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Deneme Analiz Sistemi <span class="badge">Aktif</span></h3>
+                            <p>Deneme sınav sonuçlarını veri tabanına yükleyin, öğrenci karneleri çıkartın ve gelişim istatistiklerini takip edin.</p>
+                        </div>
+                        <div class="card-action">
+                            Sisteme Giriş Yap <i data-lucide="arrow-right" size="16"></i>
+                        </div>
+                    </div>
+
+                    <!-- Resmi Belge & Veritabanı Sistemi Kartı -->
+                    <div class="portal-card" onclick="navigate('teacher-documents')">
+                        <div class="card-icon-wrapper">
+                            <i data-lucide="scroll" size="24"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Resmi Belge & Veritabanı Sistemi <span class="badge">Aktif</span></h3>
+                            <p>Öğrenci izin, geç, kabul kağıtlarını yazdırın ve okul veritabanı (Öğrenci, Öğretmen, İdareci) listelerini yönetin.</p>
+                        </div>
+                        <div class="card-action">
+                            Sisteme Giriş Yap <i data-lucide="arrow-right" size="16"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- YENİ BÖLÜM: Resmi Belge & Veritabanı Portal Görünümü -->
+            <!-- ============================================== -->
+            <div class="analysis-section" id="teacher-documents-view" style="display:none; width: 100%;">
+                
+                <!-- ALT SEKME 1: BELGE OLUŞTURUCU -->
+                <div id="doc-portal-tab-builder" style="display: flex; flex-direction: column; gap: 2rem; width: 100%;">
+                    
+                    <div style="display: flex; gap: 0.75rem; align-items: center; width: 100%; position: relative; z-index: 50;">
+                        <!-- Back button -->
+                        <button class="btn btn-secondary" onclick="navigate('teacher-hub')" style="padding: 0 1.25rem; border-radius: var(--radius-lg); height: 52px; display: inline-flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);" title="Geri Dön">
+                            <i data-lucide="arrow-left"></i> <span>Geri</span>
+                        </button>
+                        <div style="display: flex; flex-direction: column; justify-content: center;">
+                            <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">Resmi Belge Oluşturucu</h2>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary);">Öğrenci resmi evraklarını tasarlayın ve yazdırın</p>
+                        </div>
+                    </div>
+
+                    <div class="docs-grid">
+                        <!-- Sol Panel: Öğrenci Arama ve Arama Sonuçları -->
+                        <div class="docs-left">
+                            <!-- Arama Kriterleri Kartı -->
+                            <div class="doc-form-card">
+                                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-color); display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="search" size="18"></i> Öğrenci Arama</h3>
+                                
+                                <div class="search-criteria-grid" style="margin-bottom: 1rem;">
+                                    <div class="input-group">
+                                        <label class="doc-field-label">Öğrenci No</label>
+                                        <input type="number" id="doc-search-no" class="doc-field-input" placeholder="No girin..." oninput="searchStudentsForDocs()">
+                                    </div>
+                                    <div class="input-group">
+                                        <label class="doc-field-label">Sınıfı</label>
+                                        <input type="text" id="doc-search-snf" class="doc-field-input" placeholder="Örn: 10/E" oninput="searchStudentsForDocs()">
+                                    </div>
+                                </div>
+                                <div class="search-criteria-grid" style="margin-bottom: 1rem;">
+                                    <div class="input-group">
+                                        <label class="doc-field-label">Öğrenci Adı</label>
+                                        <input type="text" id="doc-search-ad" class="doc-field-input" placeholder="Adı..." oninput="searchStudentsForDocs()">
+                                    </div>
+                                    <div class="input-group">
+                                        <label class="doc-field-label">Öğr. Soyadı</label>
+                                        <input type="text" id="doc-search-soyad" class="doc-field-input" placeholder="Soyadı..." oninput="searchStudentsForDocs()">
+                                    </div>
+                                </div>
+                                
+                                <div class="input-group" style="margin-bottom: 1rem;">
+                                    <label class="doc-field-label">İşlem Tarihi</label>
+                                    <input type="date" id="doc-tarih" class="doc-field-input" style="width: 100%;">
+                                </div>
+                                
+                                <button class="btn btn-outline" style="width: 100%; justify-content: center; display: flex; align-items: center; gap: 0.5rem;" onclick="clearDocSearch()"><i data-lucide="rotate-ccw" size="16"></i> Arama Formunu Temizle</button>
+                            </div>
+
+                            <!-- Arama Sonuç Tablosu Kartı -->
+                            <div class="doc-form-card" style="padding: 1rem;">
+                                <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text-color);">Arama Sonuçları (<span id="doc-search-count">0</span>)</h4>
+                                <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px;">
+                                    <table style="width: 100%; border-collapse: collapse; text-align: left;" id="doc-student-results-table">
+                                        <thead>
+                                            <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 0.8rem; background: var(--bg-body); position: sticky; top: 0; z-index: 1;">
+                                                <th style="padding: 0.5rem; width: 20%;">Öğ.No</th>
+                                                <th style="padding: 0.5rem; width: 30%;">Adı</th>
+                                                <th style="padding: 0.5rem; width: 30%;">Soyadı</th>
+                                                <th style="padding: 0.5rem; width: 20%;">Sınıfı</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody style="font-size: 0.85rem; color: var(--text-color);">
+                                            <tr><td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">Arama yapmak için kriter girin.</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sağ Panel: Belge Seçimi ve Giriş Formu -->
+                        <div class="docs-right">
+                            <!-- Seçilen Öğrenci Detayı -->
+                            <div class="doc-selected-badge empty" id="selected-student-badge">
+                                <i data-lucide="info" size="18"></i>
+                                <span id="selected-student-text">Lütfen sol taraftaki aramadan belge düzenlenecek bir öğrenci seçin.</span>
+                            </div>
+
+                            <!-- Belge Giriş Alanı -->
+                            <div class="doc-form-card" id="doc-builder-form-card" style="opacity: 0.5; pointer-events: none; transition: opacity 0.3s ease;">
+                                <!-- Belge Sekmeleri -->
+                                <div class="doc-tabs-nav">
+                                    <button class="doc-tab-item active" id="doc-tab-item-izin" onclick="switchDocSubTab('izin')"><i data-lucide="door-closed" size="16"></i> İzin</button>
+                                    <button class="doc-tab-item" id="doc-tab-item-gec" onclick="switchDocSubTab('gec')"><i data-lucide="clock" size="16"></i> Geç</button>
+                                    <button class="doc-tab-item" id="doc-tab-item-kabul" onclick="switchDocSubTab('kabul')"><i data-lucide="log-in" size="16"></i> Derse Kabul</button>
+                                    <button class="doc-tab-item" id="doc-tab-item-cagri" onclick="switchDocSubTab('cagri')"><i data-lucide="phone-call" size="16"></i> Çağrı</button>
+                                    <button class="doc-tab-item" id="doc-tab-item-veli" onclick="switchDocSubTab('veli')"><i data-lucide="users" size="16"></i> Veli İzin</button>
+                                    <button class="doc-tab-item" id="doc-tab-item-uyari" onclick="switchDocSubTab('uyari')"><i data-lucide="alert-triangle" size="16"></i> Uyarı Belgesi</button>
+                                </div>
+
+                                <!-- Belge İçerik Formları -->
+                                <div id="doc-tab-forms-container">
+                                    <!-- Form alanları Adım 3'te dinamikleşecek, şimdilik placeholder -->
+                                    <div style="padding: 1.5rem; text-align: center; color: var(--text-secondary); border: 1px dashed var(--border-color); border-radius: 8px;">
+                                        <p>Giriş parametreleri Adım 3 kapsamında yüklenecektir.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ALT SEKME 2: OKUL VERİTABANI YÖNETİMİ -->
+                <div id="doc-portal-tab-database" style="display: none; flex-direction: column; gap: 2rem; width: 100%;">
+                    
+                    <div style="display: flex; gap: 0.75rem; align-items: center; width: 100%; position: relative; z-index: 50;">
+                        <!-- Back button -->
+                        <button class="btn btn-secondary" onclick="navigate('teacher-hub')" style="padding: 0 1.25rem; border-radius: var(--radius-lg); height: 52px; display: inline-flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);" title="Geri Dön">
+                            <i data-lucide="arrow-left"></i> <span>Geri</span>
+                        </button>
+                        <div style="display: flex; flex-direction: column; justify-content: center;">
+                            <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">Okul Veritabanı Yönetimi</h2>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary);">Okul genel öğrenci, öğretmen ve idari kadro kayıtlarını düzenleyin</p>
+                        </div>
+                    </div>
+
+                    <!-- Okul Veritabanı Gövde -->
+                    <div class="doc-form-card" style="padding: 1.5rem;">
+                        <!-- Tab butonları -->
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                            <button class="btn btn-primary" id="db-tab-btn-students" onclick="switchDbTab('students')" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Öğrenciler (0)</button>
+                            <button class="btn btn-outline" id="db-tab-btn-teachers" onclick="switchDbTab('teachers')" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: transparent; border-color: transparent;">Öğretmenler (0)</button>
+                            <button class="btn btn-outline" id="db-tab-btn-admins" onclick="switchDbTab('admins')" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: transparent; border-color: transparent;">İdari Kadro (0)</button>
+                        </div>
+
+                        <!-- Kontrol alanı -->
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+                            <div style="display: flex; flex: 1; max-width: 400px;">
+                                <input type="text" id="school-db-search" placeholder="Listede ara..." oninput="filterSchoolDb()" style="width: 100%; padding: 0.6rem 1rem; border-radius: 0.5rem; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-color); font-size: 0.9rem;">
+                            </div>
+                            <button class="btn btn-primary" onclick="showAddRecordModal()" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1rem; font-size: 0.9rem;"><i data-lucide="plus" size="16"></i> Yeni Kayıt Ekle</button>
+                        </div>
+
+                        <!-- Tablo alanı -->
+                        <div class="table-container" style="background: var(--bg-card); border-radius: 0.75rem; border: 1px solid var(--border-color); overflow-x: auto; padding: 0.5rem;">
+                            <table style="width: 100%; border-collapse: collapse; text-align: left;" id="school-db-table">
+                                <thead>
+                                    <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem;">
+                                        <!-- Headers dynamically rendered -->
+                                    </tr>
+                                </thead>
+                                <tbody style="color: var(--text-color);">
+                                    <!-- Rows dynamically rendered -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Öğrenci Paneli -->
+            <div class="hub-section" id="student-hub">
+                <div class="hub-header">
+                    <div class="hub-title-area">
+                        <h2>Öğrenci Bilgi Portalı</h2>
+                        <p>Kişisel sınav ve başarı takibi</p>
+                    </div>
+                </div>
+                <div class="portal-grid">
+                    <!-- Deneme Sonuç Sorgulama Kartı -->
+                    <div class="portal-card portal-card-disabled">
+                        <div class="card-icon-wrapper">
+                            <i data-lucide="search" size="24"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Sınav Sonuç Sorgulama <span class="badge badge-disabled">Yakında</span></h3>
+                            <p>Öğrenci numaranızla giriş yaparak deneme sınav sonuçlarınızı ve gelişim grafiklerinizi inceleyin.</p>
+                        </div>
+                        <div class="card-action" style="color: rgba(255,255,255,0.75);">
+                            Kullanıma Kapalı <i data-lucide="lock" size="16"></i>
+                        </div>
+                    </div>
+
+                    <!-- Haftalık Ders Programı Kartı -->
+                    <div class="portal-card portal-card-disabled">
+                        <div class="card-icon-wrapper">
+                            <i data-lucide="calendar-days" size="24"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Haftalık Ders Programı <span class="badge badge-disabled">Yakında</span></h3>
+                            <p>Sınıfınızın haftalık güncel ders saatlerini ve öğretmen programlarını takip edin.</p>
+                        </div>
+                        <div class="card-action" style="color: rgba(255,255,255,0.75);">
+                            Kullanıma Kapalı <i data-lucide="lock" size="16"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Öğretmen Sınav Analiz Görünümü -->
+            <div class="analysis-section" id="teacher-analysis-view">
+                
+                <!-- TAB 1: KARNE DETAYLARI -->
+                <div id="analysis-tab-karne" style="display: flex; flex-direction: column; gap: 2rem; width:100%;">
+                    <!-- Arama Bölümü -->
+                    <div style="display: flex; gap: 0.75rem; align-items: center; width: 100%; position: relative; z-index: 50;">
+                        <!-- Back button goes back in browser history -->
+                        <button class="btn btn-secondary" onclick="goBack('teacher-hub')" style="padding: 0 1.25rem; border-radius: var(--radius-lg); height: 52px; display: inline-flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);" title="Geri Dön">
+                            <i data-lucide="arrow-left"></i> <span>Geri</span>
+                        </button>
+                        <div class="search-container" style="flex-grow: 1; position: relative;">
+                            <div class="search-box-wrapper">
+                                <i data-lucide="search" class="search-icon"></i>
+                                <input type="text" class="search-input" id="search-student" placeholder="Öğrenci Adı veya Numarası ile Arayın..." autocomplete="off" style="height: 52px; border-radius: var(--radius-lg);">
+                            </div>
+                            <div class="search-results" id="search-results-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- Rapor ve Karne Gösterimi -->
+                    <div class="info-card" id="student-report-card" style="display:none;">
+                        <div class="info-card-header">
+                            <div class="student-details">
+                                <h2 id="report-student-name">MERYEM DAĞI</h2>
+                                <div class="student-meta">
+                                    <span class="badge badge-accent" id="report-student-no">No: 136</span>
+                                    <span class="badge" id="report-student-class">Sınıf: 12</span>
+                                    <span class="badge" id="report-student-branch">Şube: A</span>
+                                    <span class="badge" id="report-student-exam-count">Deneme Sayısı: 0</span>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" onclick="window.print()">
+                                <i data-lucide="printer"></i> <span>Karne Yazdır / PDF Kaydet</span>
+                            </button>
+                        </div>
+
+                        <!-- Sonuç Tablosu -->
+                        <div class="table-container">
+                            <table id="results-table">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2" style="vertical-align: middle;">Deneme Sınav Adı</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Türkçe</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Sosyal</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Matematik</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Geometri</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Fizik</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Kimya</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Biyoloji</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Genel Toplam</th>
+                                        <th rowspan="2" style="vertical-align: middle; text-align:center;">Puan</th>
+                                        <th rowspan="2" style="vertical-align: middle; text-align:center;">Sıra</th>
+                                    </tr>
+                                    <tr class="subheader-row">
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="results-table-body">
+                                    <!-- JS ile doldurulacak -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Hoş Geldiniz Paneli -->
+                    <div class="info-card" id="welcome-panel-analysis" style="text-align: center; padding: 4rem 2rem;">
+                        <i data-lucide="activity" size="64" style="color:var(--accent-color); margin: 0 auto 1.5rem auto;"></i>
+                        <h2 style="font-size: 1.75rem; font-weight:700; margin-bottom: 0.5rem;">Analiz Sistemine Hoş Geldiniz</h2>
+                        <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto 2rem auto; font-size:0.95rem;">
+                            Öğrenci karnelerini, sınav ortalamalarını ve net gelişim grafiklerini görmek için yukarıdaki arama kutusuna bir öğrencinin ismini veya numarasını yazarak arayınız.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- TAB 2: GRAFIK GELISIMI -->
+                <div id="analysis-tab-grafik" class="charts-container" style="width:100%;">
+                    <div class="chart-card">
+                        <h3>
+                            <span><i data-lucide="trending-up" style="display:inline; vertical-align:-3px; margin-right:4px;"></i> Net Gelişim Grafiği</span>
+                            <span style="font-size:0.75rem; font-weight:normal; color:var(--text-secondary);">Mavi: Öğrenci | Kırmızı: Okul Ortalaması</span>
+                        </h3>
+                        <div class="chart-wrapper">
+                            <canvas id="progressChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: ISTATISTIKLER (Mobile Only View) -->
+                <div id="analysis-tab-istatistik" class="mobile-only" style="width: 100%;">
+                    <div class="info-card">
+                        <h3 style="font-size:1.1rem; font-weight:700; border-bottom:1px solid var(--border-color); padding-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem; color:#1e293b;">
+                            <i data-lucide="bar-chart-2" style="color:#1e3c72;"></i> Okul Genel İstatistikleri
+                        </h3>
+                        <div class="stats-grid" style="grid-template-columns: 1fr; gap: 1rem; margin-top: 1rem;">
+                            <div class="stat-card-small">
+                                <span class="val" id="stat-students-mobile">0</span>
+                                <span class="lbl">Kayıtlı Öğrenci</span>
+                            </div>
+                            <div class="stat-card-small">
+                                <span class="val" id="stat-exams-mobile">0</span>
+                                <span class="lbl">Toplam Deneme</span>
+                            </div>
+                            <div class="stat-card-small">
+                                <span class="val" id="stat-avg-net-mobile">0.00</span>
+                                <span class="lbl">Okul Genel Net Ortalaması</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: YONETIM VE AYARLAR (Mobile Only View) -->
+                <div id="analysis-tab-ayarlar" class="mobile-only" style="width: 100%;">
+                    <div class="info-card" style="gap: 1.5rem;">
+                        <h3 style="font-size:1.1rem; font-weight:700; border-bottom:1px solid var(--border-color); padding-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem; color:#1e293b;">
+                            <i data-lucide="settings" style="color:#1e3c72;"></i> Veritabanı ve Sınav Yönetimi
+                        </h3>
+                        
+                        <!-- Sınav Yükleme Mobile -->
+                        <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                            <span style="font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Yeni Sınav İçe Aktar (.xlsx/.xlsm)</span>
+                            <div class="dropzone" onclick="document.getElementById('excel-file-input-mobile').click()">
+                                <i data-lucide="file-spreadsheet" size="28" style="color:#1e3c72;"></i>
+                                <strong style="font-size:0.85rem; color:#1e3c72;">Excel Dosyası Seçin</strong>
+                                <p style="font-size:0.7rem;">Sınav Excel'ini seçmek için buraya dokunun</p>
+                                <input type="file" id="excel-file-input-mobile" accept=".xlsx,.xlsm" onchange="handleExcelImport(event)">
+                            </div>
+                        </div>
+
+                        <!-- Veritabanı Sıfırlama Mobile -->
+                        <div style="display:flex; flex-direction:column; gap:0.75rem; border-top:1px solid var(--border-color); padding-top:1.5rem;">
+                            <span style="font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Sistem Sıfırlama</span>
+                            <button class="btn btn-secondary" style="width:100%; border-color:#ef4444; color:#ef4444; justify-content:center; height: 44px;" onclick="resetToDefault()">
+                                <i data-lucide="rotate-ccw"></i> Fabrika Ayarlarına Dön
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Password Modal -->
+    <div class="modal" id="login-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 style="color:#1e293b;">Öğretmen Girişi</h3>
+                <button class="close-btn" onclick="closeLoginModal()"><i data-lucide="x"></i></button>
+            </div>
+            <p style="font-size: 0.85rem; color:var(--text-secondary); font-weight:500;">
+                Yönetici uygulamalarına erişebilmek için lütfen öğretmen giriş şifresini yazın.
+            </p>
+            <div class="input-group">
+                <label for="password-input" style="color:#64748b;">Giriş Şifresi</label>
+                <input type="password" id="password-input" class="input-field" placeholder="••••••••" onkeydown="handlePasswordKeydown(event)" style="color:#0f172a;">
+                <span class="error-message" id="login-error">Hatalı şifre! Lütfen tekrar deneyin.</span>
+            </div>
+            <button class="btn btn-primary" style="justify-content:center;" onclick="verifyPassword()">Giriş Yap</button>
+        </div>
+    </div>
+
+    <!-- School Database Add/Edit Modal -->
+    <div class="modal" id="school-db-modal" style="display: none; align-items: center; justify-content: center;">
+        <div class="modal-card" style="width: 100%; max-width: 450px;">
+            <div class="modal-header">
+                <h3 id="school-db-modal-title" style="color:var(--text-color);">Yeni Kayıt Ekle</h3>
+                <button class="close-btn" onclick="closeSchoolDbModal()"><i data-lucide="x"></i></button>
+            </div>
+            
+            <input type="hidden" id="edit-record-id">
+            
+            <!-- Student Fields -->
+            <div id="modal-student-fields" style="display: none; margin-top: 1rem;">
+                <div class="input-group" style="margin-bottom: 1rem;">
+                    <label for="student-no" style="color:var(--text-muted); font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 0.25rem;">Öğrenci Numarası</label>
+                    <input type="number" id="student-no" class="input-field" placeholder="Öğrenci No" style="color:var(--text-color); background:var(--bg-body); border-color:var(--border-color); width: 100%;">
+                </div>
+                <div class="input-group" style="margin-bottom: 1rem;">
+                    <label for="student-ad" style="color:var(--text-muted); font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 0.25rem;">Öğrenci Adı</label>
+                    <input type="text" id="student-ad" class="input-field" placeholder="Adı" style="color:var(--text-color); background:var(--bg-body); border-color:var(--border-color); width: 100%;">
+                </div>
+                <div class="input-group" style="margin-bottom: 1rem;">
+                    <label for="student-soyad" style="color:var(--text-muted); font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 0.25rem;">Öğrenci Soyadı</label>
+                    <input type="text" id="student-soyad" class="input-field" placeholder="Soyadı" style="color:var(--text-color); background:var(--bg-body); border-color:var(--border-color); width: 100%;">
+                </div>
+                <div class="input-group" style="margin-bottom: 1rem;">
+                    <label for="student-snf" style="color:var(--text-muted); font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 0.25rem;">Sınıfı / Şubesi</label>
+                    <input type="text" id="student-snf" class="input-field" placeholder="Örn: 11/A" style="color:var(--text-color); background:var(--bg-body); border-color:var(--border-color); width: 100%;">
+                </div>
+            </div>
+            
+            <!-- Teacher Fields -->
+            <div id="modal-teacher-fields" style="display: none; margin-top: 1rem;">
+                <div class="input-group" style="margin-bottom: 1rem;">
+                    <label for="teacher-name" style="color:var(--text-muted); font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 0.25rem;">Öğretmen Adı Soyadı</label>
+                    <input type="text" id="teacher-name" class="input-field" placeholder="Ad Soyad" style="color:var(--text-color); background:var(--bg-body); border-color:var(--border-color); width: 100%;">
+                </div>
+            </div>
+            
+            <!-- Admin Fields -->
+            <div id="modal-admin-fields" style="display: none; margin-top: 1rem;">
+                <div class="input-group" style="margin-bottom: 1rem;">
+                    <label for="admin-name" style="color:var(--text-muted); font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 0.25rem;">İdareci Adı Soyadı</label>
+                    <input type="text" id="admin-name" class="input-field" placeholder="Ad Soyad" style="color:var(--text-color); background:var(--bg-body); border-color:var(--border-color); width: 100%;">
+                </div>
+                <div class="input-group" style="margin-bottom: 1rem;">
+                    <label for="admin-unvan" style="color:var(--text-muted); font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 0.25rem;">Görevi / Unvanı</label>
+                    <input type="text" id="admin-unvan" class="input-field" placeholder="Örn: Müdür Yardımcısı" style="color:var(--text-color); background:var(--bg-body); border-color:var(--border-color); width: 100%;">
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;">
+                <button class="btn btn-outline" onclick="closeSchoolDbModal()">İptal</button>
+                <button class="btn btn-primary" onclick="saveSchoolDbRecord()">Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast toast-success" id="status-toast">
+        <i data-lucide="check-circle" size="18"></i>
+        <span id="toast-message">Başarıyla tamamlandı!</span>
+    </div>
+
+    <!-- MOBILE BOTTOM NAVIGATION BAR (Only for Analysis View) -->
+    <div class="mobile-nav-bar" id="mobile-nav-analysis" style="display:none;">
+        <button class="mobile-nav-item active" id="nav-analysis-karne" onclick="switchAnalysisTab('karne')">
+            <i data-lucide="clipboard-list"></i>
+            <span>Karne</span>
+        </button>
+        <button class="mobile-nav-item" id="nav-analysis-grafik" onclick="switchAnalysisTab('grafik')">
+            <i data-lucide="trending-up"></i>
+            <span>Grafik</span>
+        </button>
+        <button class="mobile-nav-item" id="nav-analysis-istatistik" onclick="switchAnalysisTab('istatistik')">
+            <i data-lucide="bar-chart-2"></i>
+            <span>İstatistik</span>
+        </button>
+        <button class="mobile-nav-item" id="nav-analysis-ayarlar" onclick="switchAnalysisTab('ayarlar')">
+            <i data-lucide="settings"></i>
+            <span>Yönetim</span>
+        </button>
+    </div>
+
+    <!-- MOBILE BOTTOM NAVIGATION BAR (Only for Documents Portal) -->
+    <div class="mobile-nav-bar" id="mobile-nav-documents" style="display:none;">
+        <button class="mobile-nav-item active" id="nav-doc-builder" onclick="switchDocPortalTab('builder')">
+            <i data-lucide="scroll"></i>
+            <span>Belge Oluştur</span>
+        </button>
+        <button class="mobile-nav-item" id="nav-doc-database" onclick="switchDocPortalTab('database')">
+            <i data-lucide="database"></i>
+            <span>Veritabanı</span>
+        </button>
+    </div>
+
+    <!-- Redesigned Footer (Modern Layout) -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-col">
+                <h4><i data-lucide="map-pin"></i> Adres</h4>
+                <p>Yenişehir Mah. Seyfullah Hacımütfüoğlu Cad. No: 5<br>Ceylanpınar / Şanlıurfa</p>
+            </div>
+            <div class="footer-col">
+                <h4><i data-lucide="phone"></i> Telefon</h4>
+                <p><a href="tel:04144713519" style="color: inherit; text-decoration: none;">0414 471 35 19</a></p>
+            </div>
+            <div class="footer-col">
+                <h4><i data-lucide="instagram"></i> Instagram</h4>
+                <p><a href="https://www.instagram.com/cfenlisesi/" target="_blank" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.25rem;">@cfenlisesi <i data-lucide="external-link" size="12"></i></a></p>
+            </div>
+        </div>
+    </footer>
+
+    
+</body>
+</html>

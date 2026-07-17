@@ -927,10 +927,12 @@ def build_merged_app():
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            padding: 1rem;
+            z-index: 10000;
             opacity: 0;
             pointer-events: none;
             transition: all 0.3s ease;
+            box-sizing: border-box;
         }
 
         .modal.open {
@@ -2014,6 +2016,9 @@ def build_merged_app():
                 <span id="db-status-dot" style="width:8px; height:8px; border-radius:50%; background:#64748b; display:inline-block; transition: all 0.2s ease;"></span>
             </div>
             
+            <button class="btn btn-secondary" id="change-pw-btn" style="display:none;" onclick="openChangePasswordModal()" title="Şifremi Değiştir">
+                <i data-lucide="lock"></i> <span>Şifremi Değiştir</span>
+            </button>
             <button class="btn btn-secondary" id="logout-btn" style="display:none;" onclick="logout()">
                 <i data-lucide="log-out"></i> <span>Çıkış Yap</span>
             </button>
@@ -2077,7 +2082,7 @@ def build_merged_app():
                         </div>
 
                         <!-- Öğrenci Giriş Kartı (Icon on left, Symmetrical) -->
-                        <div class="split-btn-card" onclick="navigate('student-hub')">
+                        <div class="split-btn-card" onclick="handleStudentSelectionClick()">
                             <div class="pane-color pane-color-student">
                                 <i data-lucide="graduation-cap" size="28"></i>
                             </div>
@@ -2198,39 +2203,106 @@ def build_merged_app():
             </div>
 
             <!-- 3. Öğrenci Paneli -->
-            <div class="hub-section" id="student-hub">
-                <div class="hub-header">
-                    <div class="hub-title-area">
-                        <h2>Öğrenci Bilgi Portalı</h2>
-                        <p>Kişisel sınav ve başarı takibi</p>
+            <div class="hub-section" id="student-hub" style="width:100%;">
+                <!-- Giriş Yapılmadığında Gösterilecek Kartlar (Ziyaretçi Görünümü) -->
+                <div id="student-hub-guest-view" style="width:100%;">
+                    <div class="hub-header">
+                        <div class="hub-title-area">
+                            <h2>Öğrenci Bilgi Portalı</h2>
+                            <p>Kişisel sınav ve başarı takibi</p>
+                        </div>
+                    </div>
+                    <div class="portal-grid">
+                        <!-- Deneme Sonuç Sorgulama Kartı -->
+                        <div class="portal-card" onclick="openStudentLoginModal()" style="cursor:pointer;">
+                            <div class="card-icon-wrapper">
+                                <i data-lucide="search" size="24"></i>
+                            </div>
+                            <div class="card-content">
+                                <h3>Deneme Sonuçları Girişi</h3>
+                                <p>Bilgilerinizle giriş yaparak deneme sınav sonuçlarınızı ve gelişim grafiklerinizi inceleyin.</p>
+                            </div>
+                            <div class="card-action">
+                                Giriş Yap <i data-lucide="arrow-right" size="16"></i>
+                            </div>
+                        </div>
+
+                        <!-- Haftalık Ders Programı Kartı -->
+                        <div class="portal-card portal-card-disabled">
+                            <div class="card-icon-wrapper">
+                                <i data-lucide="calendar-days" size="24"></i>
+                            </div>
+                            <div class="card-content">
+                                <h3>Haftalık Ders Programı <span class="badge badge-disabled">Yakında</span></h3>
+                                <p>Sınıfınızın haftalık güncel ders saatlerini ve öğretmen programlarını takip edin.</p>
+                            </div>
+                            <div class="card-action">
+                                Kullanıma Kapalı <i data-lucide="lock" size="16"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="portal-grid">
-                    <!-- Deneme Sonuç Sorgulama Kartı -->
-                    <div class="portal-card portal-card-disabled">
-                        <div class="card-icon-wrapper">
-                            <i data-lucide="search" size="24"></i>
+
+                <!-- Giriş Yapıldığında Gösterilecek Öğrenci Paneli (Dashboard) -->
+                <div id="student-hub-dashboard" style="display:none; flex-direction:column; gap:2rem; width:100%;">
+                    <div class="info-card" id="student-dashboard-card" style="display:flex; width:100%; box-sizing:border-box;">
+                        <div class="info-card-header" style="display:flex; justify-content:space-between; align-items:center; width:100%; gap:1rem; flex-wrap:wrap;">
+                            <div class="student-details">
+                                <h2 id="student-dashboard-name">YÜKLENİYOR...</h2>
+                                <div class="student-meta" style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.5rem;">
+                                    <span class="badge badge-accent" id="student-dashboard-no">No: -</span>
+                                    <span class="badge" id="student-dashboard-class">Sınıf: -</span>
+                                    <span class="badge" id="student-dashboard-branch">Şube: -</span>
+                                    <span class="badge" id="student-dashboard-exam-count">Deneme Sayısı: 0</span>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" onclick="printStudentDashboardKarne()">
+                                <i data-lucide="printer"></i> <span>Karne Yazdır / PDF Kaydet</span>
+                            </button>
                         </div>
-                        <div class="card-content">
-                            <h3>Sınav Sonuç Sorgulama <span class="badge badge-disabled">Yakında</span></h3>
-                            <p>Öğrenci numaranızla giriş yaparak deneme sınav sonuçlarınızı ve gelişim grafiklerinizi inceleyin.</p>
-                        </div>
-                        <div class="card-action" >
-                            Kullanıma Kapalı <i data-lucide="lock" size="16"></i>
+
+                        <!-- Sonuç Tablosu -->
+                        <div class="table-container" style="width:100%; overflow-x:auto; margin-top:1.5rem;">
+                            <table id="student-dashboard-table" style="width:100%; border-collapse:collapse;">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2" style="vertical-align: middle;">Deneme Sınav Adı</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Türkçe</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Sosyal</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Matematik</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Geometri</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Fizik</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Kimya</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Biyoloji</th>
+                                        <th colspan="4" style="text-align:center; border-bottom: 1px solid var(--border-color);">Genel Toplam</th>
+                                        <th rowspan="2" style="vertical-align: middle; text-align:center;">Puan</th>
+                                        <th rowspan="2" style="vertical-align: middle; text-align:center;">Sıra</th>
+                                    </tr>
+                                    <tr class="subheader-row">
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                        <th>D</th><th>Y</th><th>B</th><th class="cell-net-header">N</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="student-dashboard-table-body">
+                                    <!-- JS ile doldurulacak -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
-                    <!-- Haftalık Ders Programı Kartı -->
-                    <div class="portal-card portal-card-disabled">
-                        <div class="card-icon-wrapper">
-                            <i data-lucide="calendar-days" size="24"></i>
-                        </div>
-                        <div class="card-content">
-                            <h3>Haftalık Ders Programı <span class="badge badge-disabled">Yakında</span></h3>
-                            <p>Sınıfınızın haftalık güncel ders saatlerini ve öğretmen programlarını takip edin.</p>
-                        </div>
-                        <div class="card-action" >
-                            Kullanıma Kapalı <i data-lucide="lock" size="16"></i>
+                    <!-- Gelişim Grafiği Kartı -->
+                    <div class="info-card" style="width:100%; box-sizing:border-box;">
+                        <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.5rem; margin-top:0;">
+                            <i data-lucide="line-chart" style="color:var(--accent-color);"></i> Net Gelişim Grafiği
+                        </h3>
+                        <div style="width:100%; position:relative; height:320px;">
+                            <canvas id="studentDashboardChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -2847,20 +2919,132 @@ def build_merged_app():
 
     <!-- Password Modal -->
     <div class="modal" id="login-modal">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3>Öğretmen Girişi</h3>
-                <button class="close-btn" onclick="closeLoginModal()"><i data-lucide="x"></i></button>
+        <div class="modal-card" style="max-width:420px; padding:2rem;">
+            <div style="text-align:center; margin-bottom:1.5rem;">
+                <div style="background:rgba(99,102,241,0.1); width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem auto; color:var(--accent-color);">
+                    <i data-lucide="shield-check" size="32"></i>
+                </div>
+                <h3 style="margin:0; font-size:1.25rem; font-weight:700; color:var(--text-primary);">Öğretmen / İdare Girişi</h3>
+                <p style="margin:0.25rem 0 0 0; font-size:0.8rem; color:var(--text-secondary);">Lütfen kullanıcı adı ve şifrenizi giriniz.</p>
             </div>
-            <p style="font-size: 0.85rem; color:var(--text-secondary); font-weight:500;">
-                Yönetici uygulamalarına erişebilmek için lütfen öğretmen giriş şifresini yazın.
-            </p>
-            <div class="input-group">
-                <label for="password-input" style="color:#64748b;">Giriş Şifresi</label>
-                <input type="password" id="password-input" class="input-field" placeholder="••••••••" onkeydown="handlePasswordKeydown(event)">
-                <span class="error-message" id="login-error">Hatalı şifre! Lütfen tekrar deneyin.</span>
+
+            <div style="display:flex; flex-direction:column; gap:1rem;">
+                <div style="display:flex; flex-direction:column; gap:0.35rem;">
+                    <label style="font-size:0.78rem; font-weight:600; color:var(--text-secondary);">Kullanıcı Adı</label>
+                    <input type="text" id="login-username" class="input-field" placeholder="kullanıcı adınız" onkeydown="handlePasswordKeydown(event)" autocomplete="username" style="height:44px; border-radius:var(--radius-md); font-size:0.88rem; padding:0 0.75rem; border:1px solid var(--border-color); background:var(--bg-page); color:var(--text-primary);">
+                </div>
+                <div style="display:flex; flex-direction:column; gap:0.35rem;">
+                    <label style="font-size:0.78rem; font-weight:600; color:var(--text-secondary);">Şifre</label>
+                    <input type="password" id="password-input" class="input-field" placeholder="••••••••" onkeydown="handlePasswordKeydown(event)" autocomplete="current-password" style="height:44px; border-radius:var(--radius-md); font-size:0.88rem; padding:0 0.75rem; border:1px solid var(--border-color); background:var(--bg-page); color:var(--text-primary);">
+                </div>
             </div>
-            <button class="btn btn-primary" style="justify-content:center;" onclick="verifyPassword()">Giriş Yap</button>
+
+            <div id="login-error" style="display:none; color:#ef4444; font-size:0.8rem; text-align:center; margin-top:0.75rem; font-weight:600;">
+                ❌ Kullanıcı adı veya şifre hatalı. Lütfen tekrar deneyin.
+            </div>
+
+            <div style="display:flex; gap:0.75rem; margin-top:1.5rem;">
+                <button class="btn btn-secondary" onclick="closeLoginModal()" style="flex:1; justify-content:center; height:44px; font-weight:600; border-radius:var(--radius-md);">Vazgeç</button>
+                <button class="btn btn-primary" onclick="verifyTeacherLogin()" style="flex:1; justify-content:center; height:44px; font-weight:600; border-radius:var(--radius-md);">Giriş Yap</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Login Modal -->
+    <div class="modal" id="student-login-modal">
+
+    <!-- Şifre Değiştirme Modalı (Öğretmen kendi şifresini değiştirir) -->
+    <div class="modal" id="change-password-modal">
+        <div class="modal-card" style="max-width:400px; padding:2rem;">
+            <div style="text-align:center; margin-bottom:1.5rem;">
+                <div style="background:rgba(16,185,129,0.1); width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem auto; color:#10b981;">
+                    <i data-lucide="lock" size="32"></i>
+                </div>
+                <h3 style="margin:0; font-size:1.2rem; font-weight:700; color:var(--text-primary);">Şifremi Değiştir</h3>
+                <p style="margin:0.25rem 0 0 0; font-size:0.8rem; color:var(--text-secondary);">Güvenliğiniz için mevcut şifrenizi doğrulayın.</p>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:1rem;">
+                <div style="display:flex; flex-direction:column; gap:0.35rem;">
+                    <label style="font-size:0.78rem; font-weight:600; color:var(--text-secondary);">Mevcut Şifre</label>
+                    <input type="password" id="cp-current" class="input-field" placeholder="••••••••" style="height:44px; border-radius:var(--radius-md); font-size:0.88rem; padding:0 0.75rem; border:1px solid var(--border-color); background:var(--bg-page); color:var(--text-primary);">
+                </div>
+                <div style="display:flex; flex-direction:column; gap:0.35rem;">
+                    <label style="font-size:0.78rem; font-weight:600; color:var(--text-secondary);">Yeni Şifre</label>
+                    <input type="password" id="cp-new" class="input-field" placeholder="••••••••" style="height:44px; border-radius:var(--radius-md); font-size:0.88rem; padding:0 0.75rem; border:1px solid var(--border-color); background:var(--bg-page); color:var(--text-primary);">
+                </div>
+                <div style="display:flex; flex-direction:column; gap:0.35rem;">
+                    <label style="font-size:0.78rem; font-weight:600; color:var(--text-secondary);">Yeni Şifre (Tekrar)</label>
+                    <input type="password" id="cp-confirm" class="input-field" placeholder="••••••••" style="height:44px; border-radius:var(--radius-md); font-size:0.88rem; padding:0 0.75rem; border:1px solid var(--border-color); background:var(--bg-page); color:var(--text-primary);">
+                </div>
+            </div>
+            <div id="cp-error" style="display:none; color:#ef4444; font-size:0.8rem; text-align:center; margin-top:0.75rem; font-weight:600;"></div>
+            <div style="display:flex; gap:0.75rem; margin-top:1.5rem;">
+                <button class="btn btn-secondary" onclick="closeChangePasswordModal()" style="flex:1; justify-content:center; height:44px; font-weight:600; border-radius:var(--radius-md);">Vazgeç</button>
+                <button class="btn btn-primary" onclick="changeTeacherPassword()" style="flex:1; justify-content:center; height:44px; font-weight:600; border-radius:var(--radius-md);">Kaydet</button>
+            </div>
+        </div>
+    </div>
+        <div class="modal-card" style="max-width: 420px; padding: 2rem;">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <div style="background: rgba(59, 130, 246, 0.1); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; color: var(--accent-color);">
+                    <i data-lucide="graduation-cap" size="32"></i>
+                </div>
+                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">Öğrenci Giriş Sistemi</h3>
+                <p style="margin: 0.25rem 0 0 0; font-size: 0.8rem; color: var(--text-secondary);">Lütfen okul kayıt bilgilerinizi eksiksiz giriniz.</p>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                    <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary);">Öğrenci Numarası</label>
+                    <input type="number" id="student-login-no" class="input-field" placeholder="Örn: 96" onkeydown="handleStudentLoginKeydown(event)" style="height: 44px; border-radius: var(--radius-md); font-size: 0.88rem; padding: 0 0.75rem; border:1px solid var(--border-color); background:var(--bg-page); color:var(--text-primary);">
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                    <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary);">Adı</label>
+                    <input type="text" id="student-login-ad" class="input-field" placeholder="Örn: ABDULLAH" onkeydown="handleStudentLoginKeydown(event)" style="height: 44px; border-radius: var(--radius-md); font-size: 0.88rem; padding: 0 0.75rem; text-transform: uppercase; border:1px solid var(--border-color); background:var(--bg-page); color:var(--text-primary);">
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                    <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary);">Soyadı</label>
+                    <input type="text" id="student-login-soyad" class="input-field" placeholder="Örn: BALCA" onkeydown="handleStudentLoginKeydown(event)" style="height: 44px; border-radius: var(--radius-md); font-size: 0.88rem; padding: 0 0.75rem; text-transform: uppercase; border:1px solid var(--border-color); background:var(--bg-page); color:var(--text-primary);">
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                    <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary);">Sınıf / Şube</label>
+                    <select id="student-login-snf" class="input-field" style="height: 44px; border-radius: var(--radius-md); font-size: 0.88rem; padding: 0 0.5rem; background: var(--bg-page); color: var(--text-primary); border:1px solid var(--border-color);">
+                        <option value="">Seçin</option>
+                        <option value="9/A">9/A</option>
+                        <option value="9/B">9/B</option>
+                        <option value="9/C">9/C</option>
+                        <option value="9/D">9/D</option>
+                        <option value="9/E">9/E</option>
+                        <option value="10/A">10/A</option>
+                        <option value="10/B">10/B</option>
+                        <option value="10/C">10/C</option>
+                        <option value="10/D">10/D</option>
+                        <option value="10/E">10/E</option>
+                        <option value="11/A">11/A</option>
+                        <option value="11/B">11/B</option>
+                        <option value="11/C">11/C</option>
+                        <option value="11/D">11/D</option>
+                        <option value="11/E">11/E</option>
+                        <option value="12/A">12/A</option>
+                        <option value="12/B">12/B</option>
+                        <option value="12/C">12/C</option>
+                        <option value="12/D">12/D</option>
+                        <option value="12/E">12/E</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="student-login-error" style="display: none; color: #ef4444; font-size: 0.8rem; text-align: center; margin-top: 1rem; font-weight: 600;">
+                ❌ Girdiğiniz bilgiler veritabanındaki kayıtlarla eşleşmedi. Lütfen kontrol ediniz.
+            </div>
+            
+            <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+                <button class="btn btn-secondary" onclick="closeStudentLoginModal()" style="flex: 1; justify-content: center; height: 44px; font-weight: 600; border-radius: var(--radius-md);">Vazgeç</button>
+                <button class="btn btn-primary" onclick="verifyStudentLogin()" style="flex: 1; justify-content: center; height: 44px; font-weight: 600; border-radius: var(--radius-md);">Giriş Yap</button>
+            </div>
         </div>
     </div>
 
@@ -2974,6 +3158,7 @@ def build_merged_app():
                     const docModal = document.getElementById('document-modal');
                     const schoolModal = document.getElementById('school-modal');
                     const loginModal = document.getElementById('login-modal');
+                    const studentLoginModal = document.getElementById('student-login-modal');
                     
                     if (docModal && docModal.style.display !== 'none') {
                         closeDocumentModal();
@@ -2983,6 +3168,9 @@ def build_merged_app():
                     }
                     if (loginModal && loginModal.classList.contains('open')) {
                         closeLoginModal();
+                    }
+                    if (studentLoginModal && studentLoginModal.classList.contains('open')) {
+                        closeStudentLoginModal();
                     }
                     const settingsModal = document.getElementById('supabase-settings-modal');
                     if (settingsModal && settingsModal.style.display !== 'none') {
@@ -3470,26 +3658,149 @@ function navigate(state, push = true) {
             renderSchoolTable();
         }
 
-function verifyPassword() {
-            const passwordVal = document.getElementById('password-input').value.trim();
-            if (passwordVal === 'müdür2014') {
+        async function verifyTeacherLogin() {
+            const usernameVal = (document.getElementById('login-username').value || '').trim();
+            const passwordVal = (document.getElementById('password-input').value || '').trim();
+            const errorDiv = document.getElementById('login-error');
+            if (errorDiv) errorDiv.style.display = 'none';
+
+            if (!usernameVal || !passwordVal) {
+                alert('Lütfen kullanıcı adı ve şifrenizi giriniz.');
+                return;
+            }
+
+            await loadSchoolData();
+
+            if (!schoolData) {
+                alert('Veritabanı bağlantısı kurulamadı. Lütfen internet bağlantınızı kontrol edin.');
+                return;
+            }
+
+            // Önce idare (admin/müdür) listesinde ara
+            const adminMatch = (schoolData.idare || []).find(s =>
+                s.kullanici_adi && s.kullanici_adi.trim() === usernameVal &&
+                s.sifre && s.sifre.trim() === passwordVal
+            );
+
+            if (adminMatch) {
                 try {
                     sessionStorage.setItem('teacher_logged_in', 'true');
                     sessionStorage.setItem('user_role', 'admin');
+                    sessionStorage.setItem('staff_id', String(adminMatch.id));
+                    sessionStorage.setItem('staff_name', adminMatch.ad_soyad || '');
                 } catch (e) {}
                 closeLoginModal();
                 navigate('teacher-hub');
-            } else if (passwordVal === 'ceylanpinar2014') {
+                return;
+            }
+
+            // Sonra öğretmen listesinde ara
+            const teacherMatch = (schoolData.ogretmen || []).find(s =>
+                s.kullanici_adi && s.kullanici_adi.trim() === usernameVal &&
+                s.sifre && s.sifre.trim() === passwordVal
+            );
+
+            if (teacherMatch) {
                 try {
                     sessionStorage.setItem('teacher_logged_in', 'true');
                     sessionStorage.setItem('user_role', 'teacher');
+                    sessionStorage.setItem('staff_id', String(teacherMatch.id));
+                    sessionStorage.setItem('staff_name', teacherMatch.ad_soyad || '');
                 } catch (e) {}
                 closeLoginModal();
                 navigate('teacher-hub');
+                return;
+            }
+
+            // Eşleşme yok
+            if (errorDiv) errorDiv.style.display = 'block';
+            document.getElementById('password-input').value = '';
+            document.getElementById('password-input').focus();
+        }
+
+        function cleanTurkishString(str) {
+            if (!str) return '';
+            return str.trim()
+                .toUpperCase()
+                .replace(/İ/g, 'I')
+                .replace(/ı/g, 'i')
+                .replace(/Ğ/g, 'G')
+                .replace(/ğ/g, 'g')
+                .replace(/Ü/g, 'U')
+                .replace(/ü/g, 'u')
+                .replace(/Ş/g, 'S')
+                .replace(/ş/g, 's')
+                .replace(/Ö/g, 'O')
+                .replace(/ö/g, 'o')
+                .replace(/Ç/g, 'C')
+                .replace(/ç/g, 'c');
+        }
+
+        async function verifyStudentLogin() {
+            const noVal = document.getElementById('student-login-no').value.trim();
+            const adVal = cleanTurkishString(document.getElementById('student-login-ad').value);
+            const soyadVal = cleanTurkishString(document.getElementById('student-login-soyad').value);
+            const snfVal = document.getElementById('student-login-snf').value.trim();
+            
+            const errorDiv = document.getElementById('student-login-error');
+            if (errorDiv) errorDiv.style.display = 'none';
+            
+            if (!noVal || !adVal || !soyadVal || !snfVal) {
+                alert("Lütfen tüm alanları doldurunuz.");
+                return;
+            }
+            
+            await loadSchoolData();
+            
+            if (!schoolData || !schoolData.ogrenci) {
+                alert("Öğrenci veritabanı yüklenemedi. Lütfen internet bağlantınızı kontrol edin.");
+                return;
+            }
+            
+            // snf alanı veritabanında '11/A' formatında birleşik tutuluyor
+            const matched = schoolData.ogrenci.find(s => {
+                const dbNo = String(s.no).trim();
+                const dbAd = cleanTurkishString(s.ad);
+                const dbSoyad = cleanTurkishString(s.soyad);
+                const dbSnf = String(s.snf || '').trim();
+                
+                return dbNo === String(noVal) &&
+                       dbAd === adVal &&
+                       dbSoyad === soyadVal &&
+                       dbSnf === snfVal;
+            });
+            
+            if (matched) {
+                try {
+                    sessionStorage.setItem('student_logged_in', 'true');
+                    sessionStorage.setItem('user_role', 'student');
+                    sessionStorage.setItem('student_no', String(matched.no));
+                } catch(e) {}
+                
+                closeStudentLoginModal();
+                navigate('student-hub');
             } else {
-                document.getElementById('login-error').style.display = 'block';
-                document.getElementById('password-input').value = '';
-                document.getElementById('password-input').focus();
+                if (errorDiv) errorDiv.style.display = 'block';
+            }
+        }
+
+        function openStudentLoginModal() {
+            document.getElementById('student-login-modal').classList.add('open');
+            document.getElementById('student-login-no').focus();
+            document.getElementById('student-login-error').style.display = 'none';
+        }
+
+        function closeStudentLoginModal() {
+            document.getElementById('student-login-modal').classList.remove('open');
+            document.getElementById('student-login-no').value = '';
+            document.getElementById('student-login-ad').value = '';
+            document.getElementById('student-login-soyad').value = '';
+            document.getElementById('student-login-snf').value = '';
+        }
+
+        function handleStudentLoginKeydown(event) {
+            if (event.key === 'Enter') {
+                verifyStudentLogin();
             }
         }
 
@@ -3497,24 +3808,89 @@ function verifyPassword() {
             try {
                 sessionStorage.removeItem('teacher_logged_in');
                 sessionStorage.removeItem('user_role');
+                sessionStorage.removeItem('student_logged_in');
+                sessionStorage.removeItem('student_no');
+                sessionStorage.removeItem('staff_id');
+                sessionStorage.removeItem('staff_name');
             } catch (e) {}
             navigate('home');
         }
 
+        function openChangePasswordModal() {
+            document.getElementById('cp-current').value = '';
+            document.getElementById('cp-new').value = '';
+            document.getElementById('cp-confirm').value = '';
+            document.getElementById('cp-error').style.display = 'none';
+            document.getElementById('change-password-modal').classList.add('open');
+            setTimeout(() => document.getElementById('cp-current').focus(), 100);
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('change-password-modal').classList.remove('open');
+        }
+
+        async function changeTeacherPassword() {
+            const currentPw = (document.getElementById('cp-current').value || '').trim();
+            const newPw = (document.getElementById('cp-new').value || '').trim();
+            const confirmPw = (document.getElementById('cp-confirm').value || '').trim();
+            const errDiv = document.getElementById('cp-error');
+            errDiv.style.display = 'none';
+
+            if (!currentPw || !newPw || !confirmPw) {
+                errDiv.textContent = 'Lütfen tüm alanları doldurunuz.';
+                errDiv.style.display = 'block'; return;
+            }
+            if (newPw !== confirmPw) {
+                errDiv.textContent = 'Yeni şifreler eşleşmiyor!';
+                errDiv.style.display = 'block'; return;
+            }
+            if (newPw.length < 4) {
+                errDiv.textContent = 'Şifre en az 4 karakter olmalıdır.';
+                errDiv.style.display = 'block'; return;
+            }
+
+            const staffId = sessionStorage.getItem('staff_id');
+            if (!staffId) { alert('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.'); return; }
+
+            const role = sessionStorage.getItem('user_role');
+            const list = role === 'admin' ? (schoolData ? schoolData.idare : []) : (schoolData ? schoolData.ogretmen : []);
+            const me = list.find(s => String(s.id) === String(staffId));
+
+            if (!me || me.sifre !== currentPw) {
+                errDiv.textContent = 'Mevcut şifre hatalı!';
+                errDiv.style.display = 'block'; return;
+            }
+
+            if (!supabaseClient) { alert('Veritabanı bağlantısı yok!'); return; }
+            const { error } = await supabaseClient.from('staff').update({ sifre: newPw }).eq('id', staffId);
+            if (error) {
+                errDiv.textContent = 'Güncelleme hatası: ' + error.message;
+                errDiv.style.display = 'block'; return;
+            }
+
+            closeChangePasswordModal();
+            showToast('Şifreniz başarıyla güncellendi!');
+            await loadSchoolData(true);
+        }
+
         function openLoginModal() {
             document.getElementById('login-modal').classList.add('open');
-            document.getElementById('password-input').focus();
-            document.getElementById('login-error').style.display = 'none';
+            document.getElementById('login-username').value = '';
+            document.getElementById('password-input').value = '';
+            const errDiv = document.getElementById('login-error');
+            if (errDiv) errDiv.style.display = 'none';
+            setTimeout(() => document.getElementById('login-username').focus(), 100);
         }
 
         function closeLoginModal() {
             document.getElementById('login-modal').classList.remove('open');
+            document.getElementById('login-username').value = '';
             document.getElementById('password-input').value = '';
         }
 
         function handlePasswordKeydown(event) {
             if (event.key === 'Enter') {
-                verifyPassword();
+                verifyTeacherLogin();
             }
         }
 
@@ -3530,9 +3906,19 @@ function verifyPassword() {
             document.getElementById('selection-screen').style.display = 'flex';
             
             document.getElementById('logout-btn').style.display = 'none';
-            document.getElementById('header-logo-section').style.display = 'none'; // Hidden on home selection screen
+            document.getElementById('change-pw-btn').style.display = 'none';
+            document.getElementById('header-logo-section').style.display = 'none';
             
             document.getElementById('mobile-nav-analysis').style.setProperty('display', 'none', 'important');
+        }
+
+        function handleStudentSelectionClick() {
+            const isStudent = sessionStorage.getItem('user_role') === 'student';
+            if (isStudent) {
+                navigate('student-hub');
+            } else {
+                openStudentLoginModal();
+            }
         }
 
         function showStudentHubView() {
@@ -3544,6 +3930,18 @@ function verifyPassword() {
             document.getElementById('teacher-analysis-view').style.display = 'none';
             document.getElementById('school-management-view').style.display = 'none';
             document.getElementById('student-hub').style.display = 'block';
+            
+            const isStudent = sessionStorage.getItem('user_role') === 'student';
+            const studentNo = sessionStorage.getItem('student_no');
+            
+            if (isStudent && studentNo) {
+                document.getElementById('student-hub-guest-view').style.display = 'none';
+                document.getElementById('student-hub-dashboard').style.display = 'flex';
+                displayStudentDashboard(parseInt(studentNo, 10));
+            } else {
+                document.getElementById('student-hub-guest-view').style.display = 'block';
+                document.getElementById('student-hub-dashboard').style.display = 'none';
+            }
             
             document.getElementById('logout-btn').style.display = 'inline-flex';
             document.getElementById('header-logo-section').style.display = 'flex'; // Visible
@@ -3564,7 +3962,8 @@ function verifyPassword() {
             document.getElementById('teacher-hub').style.display = 'block';
             
             document.getElementById('logout-btn').style.display = 'inline-flex';
-            document.getElementById('header-logo-section').style.display = 'flex'; // Visible
+            document.getElementById('change-pw-btn').style.display = 'inline-flex';
+            document.getElementById('header-logo-section').style.display = 'flex';
             document.getElementById('header-title').innerText = 'Ceylanpınar Fen Lisesi';
             document.getElementById('header-subtitle').innerText = 'Öğretmen Portalı';
             
@@ -4476,12 +4875,16 @@ function openDocumentModal(studentNo) {
                             ogretmen: (staff || []).filter(st => st.role === 'ogretmen').map(st => ({
                                 id: String(st.id),
                                 ad_soyad: st.ad_soyad,
-                                unvan: st.unvan
+                                unvan: st.unvan,
+                                kullanici_adi: st.kullanici_adi || '',
+                                sifre: st.sifre || ''
                             })),
                             idare: (staff || []).filter(st => st.role === 'idare').map(st => ({
                                 id: String(st.id),
                                 ad_soyad: st.ad_soyad,
-                                unvan: st.unvan
+                                unvan: st.unvan,
+                                kullanici_adi: st.kullanici_adi || '',
+                                sifre: st.sifre || ''
                             }))
                         };
                         updateDbStatusBadge(true);
@@ -4666,12 +5069,29 @@ function showSchoolManagementView() {
             document.getElementById('school-modal-title').innerText = record ? 'Kaydı Düzenle' : 'Yeni Kayıt Ekle';
 
             let fields = '';
+            const isAdmin = sessionStorage.getItem('user_role') === 'admin';
             if (currentSchoolTab === 'ogrenci') {
                 fields = '<div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Öğrenci No</label><input id="mf-no" class="input-field" value="' + (record?record.no||'':'') + '" placeholder="Örn: 1001"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;"><div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Ad</label><input id="mf-ad" class="input-field" value="' + (record?record.ad||'':'') + '" placeholder="Ad"></div><div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Soyad</label><input id="mf-soyad" class="input-field" value="' + (record?record.soyad||'':'') + '" placeholder="Soyad"></div></div><div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Sınıf</label><input id="mf-snf" class="input-field" value="' + (record?record.snf||'':'') + '" placeholder="Örn: 10-A"></div>';
             } else if (currentSchoolTab === 'ogretmen') {
-                fields = '<div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">ID</label><input id="mf-id" class="input-field" value="' + (record?record.id||'':'') + '" placeholder="Sıra no"></div><div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Ad Soyad</label><input id="mf-ad_soyad" class="input-field" value="' + (record?record.ad_soyad||'':'') + '" placeholder="Ad Soyad"></div>';
+                const credFields = isAdmin ? `
+                    <div style="border-top:1px solid var(--border-color); padding-top:0.75rem; margin-top:0.25rem;">
+                        <p style="font-size:0.75rem; color:var(--text-secondary); margin:0 0 0.75rem 0; font-weight:600;">🔐 Giriş Bilgileri (Sadece Admin)</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                            <div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Kullanıcı Adı</label><input id="mf-kullanici_adi" class="input-field" value="${record?record.kullanici_adi||'':''}" placeholder="kullanici_adi"></div>
+                            <div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Şifre (boş=değişmez)</label><input id="mf-sifre" class="input-field" type="password" value="" placeholder="yeni şifre"></div>
+                        </div>
+                    </div>` : '';
+                fields = '<div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">ID</label><input id="mf-id" class="input-field" value="' + (record?record.id||'':'') + '" placeholder="Sıra no"></div><div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Ad Soyad</label><input id="mf-ad_soyad" class="input-field" value="' + (record?record.ad_soyad||'':'') + '" placeholder="Ad Soyad"></div>' + credFields;
             } else {
-                fields = '<div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">ID</label><input id="mf-id" class="input-field" value="' + (record?record.id||'':'') + '" placeholder="Sıra no"></div><div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Ad Soyad</label><input id="mf-ad_soyad" class="input-field" value="' + (record?record.ad_soyad||'':'') + '" placeholder="Ad Soyad"></div><div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Unvan</label><input id="mf-unvan" class="input-field" value="' + (record?record.unvan||'':'') + '" placeholder="Örn: Müdür"></div>';
+                const credFields = isAdmin ? `
+                    <div style="border-top:1px solid var(--border-color); padding-top:0.75rem; margin-top:0.25rem;">
+                        <p style="font-size:0.75rem; color:var(--text-secondary); margin:0 0 0.75rem 0; font-weight:600;">🔐 Giriş Bilgileri (Sadece Admin)</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                            <div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Kullanıcı Adı</label><input id="mf-kullanici_adi" class="input-field" value="${record?record.kullanici_adi||'':''}" placeholder="kullanici_adi"></div>
+                            <div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Şifre (boş=değişmez)</label><input id="mf-sifre" class="input-field" type="password" value="" placeholder="yeni şifre"></div>
+                        </div>
+                    </div>` : '';
+                fields = '<div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">ID</label><input id="mf-id" class="input-field" value="' + (record?record.id||'':'') + '" placeholder="Sıra no"></div><div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Ad Soyad</label><input id="mf-ad_soyad" class="input-field" value="' + (record?record.ad_soyad||'':'') + '" placeholder="Ad Soyad"></div><div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Unvan</label><input id="mf-unvan" class="input-field" value="' + (record?record.unvan||'':'') + '" placeholder="Örn: Müdür"></div>' + credFields;
             }
 
             document.getElementById('school-modal-body').innerHTML = fields;
@@ -4726,16 +5146,20 @@ function showSchoolManagementView() {
             } else if (currentSchoolTab === 'ogretmen') {
                 const id = (document.getElementById('mf-id')?.value || '').trim();
                 const ad_soyad = (document.getElementById('mf-ad_soyad')?.value || '').trim();
+                const kullanici_adi = (document.getElementById('mf-kullanici_adi')?.value || '').trim();
+                const sifre_yeni = (document.getElementById('mf-sifre')?.value || '').trim();
                 if (!ad_soyad) { alert('Ad Soyad zorunludur!'); return; }
-                
+
                 if (supabaseClient) {
+                    const updateData = { ad_soyad, unvan: 'Rehber Öğretmen' };
+                    if (kullanici_adi) updateData.kullanici_adi = kullanici_adi;
+                    if (sifre_yeni) updateData.sifre = sifre_yeni;
                     if (schoolEditId) {
-                        await supabaseClient.from('staff').update({ ad_soyad, unvan: 'Rehber Öğretmen' }).eq('id', schoolEditId);
+                        await supabaseClient.from('staff').update(updateData).eq('id', schoolEditId);
                     } else {
-                        await supabaseClient.from('staff').insert({ ad_soyad, unvan: 'Rehber Öğretmen', role: 'ogretmen' });
+                        await supabaseClient.from('staff').insert({ ad_soyad, unvan: 'Rehber Öğretmen', role: 'ogretmen', kullanici_adi: kullanici_adi || null, sifre: sifre_yeni || null });
                     }
                 } else {
-                    // Local fallback
                     if (schoolEditId) {
                         const idx = schoolData.ogretmen.findIndex(r => String(r.id) === String(schoolEditId));
                         if (idx >= 0) schoolData.ogretmen[idx] = {id, ad_soyad};
@@ -4747,16 +5171,20 @@ function showSchoolManagementView() {
                 const id = (document.getElementById('mf-id')?.value || '').trim();
                 const ad_soyad = (document.getElementById('mf-ad_soyad')?.value || '').trim();
                 const unvan = (document.getElementById('mf-unvan')?.value || '').trim();
+                const kullanici_adi = (document.getElementById('mf-kullanici_adi')?.value || '').trim();
+                const sifre_yeni = (document.getElementById('mf-sifre')?.value || '').trim();
                 if (!ad_soyad) { alert('Ad Soyad zorunludur!'); return; }
-                
+
                 if (supabaseClient) {
+                    const updateData = { ad_soyad, unvan };
+                    if (kullanici_adi) updateData.kullanici_adi = kullanici_adi;
+                    if (sifre_yeni) updateData.sifre = sifre_yeni;
                     if (schoolEditId) {
-                        await supabaseClient.from('staff').update({ ad_soyad, unvan }).eq('id', schoolEditId).eq('role', currentSchoolTab);
+                        await supabaseClient.from('staff').update(updateData).eq('id', schoolEditId).eq('role', currentSchoolTab);
                     } else {
-                        await supabaseClient.from('staff').insert({ ad_soyad, unvan, role: currentSchoolTab });
+                        await supabaseClient.from('staff').insert({ ad_soyad, unvan, role: currentSchoolTab, kullanici_adi: kullanici_adi || null, sifre: sifre_yeni || null });
                     }
                 } else {
-                    // Local fallback
                     if (schoolEditId) {
                         const idx = schoolData.idare.findIndex(r => String(r.id) === String(schoolEditId));
                         if (idx >= 0) schoolData.idare[idx] = {id, ad_soyad, unvan};
@@ -5898,6 +6326,209 @@ function showSchoolManagementView() {
             displayStudentReport(studentRecords);
         }
 
+        let studentDashboardChart = null;
+
+        function displayStudentDashboard(studentNo) {
+            const studentRecords = examDatabase.filter(r => r.no === studentNo);
+            
+            const nameEl = document.getElementById('student-dashboard-name');
+            const noEl = document.getElementById('student-dashboard-no');
+            const classEl = document.getElementById('student-dashboard-class');
+            const branchEl = document.getElementById('student-dashboard-branch');
+            const countEl = document.getElementById('student-dashboard-exam-count');
+            
+            if (studentRecords.length === 0) {
+                const sInfo = (schoolData && schoolData.ogrenci) ? schoolData.ogrenci.find(s => s.no === studentNo) : null;
+                if (sInfo) {
+                    nameEl.innerText = sInfo.ad + " " + sInfo.soyad;
+                    noEl.innerText = `No: ${sInfo.no}`;
+                    classEl.innerText = `Sınıf: ${sInfo.snf}`;
+                    branchEl.innerText = sInfo.sube ? `Şube: ${sInfo.sube}` : 'Şube: -';
+                } else {
+                    nameEl.innerText = '-';
+                    noEl.innerText = `No: ${studentNo}`;
+                    classEl.innerText = 'Sınıf: -';
+                    branchEl.innerText = 'Şube: -';
+                }
+                countEl.innerText = `Deneme Sayısı: 0`;
+                document.getElementById('student-dashboard-table-body').innerHTML = `
+                    <tr><td colspan="34" style="text-align:center; padding:2rem; color:var(--text-secondary);">Henüz girilmiş bir deneme sınavı kaydınız bulunmamaktadır.</td></tr>
+                `;
+                if (studentDashboardChart) {
+                    studentDashboardChart.destroy();
+                    studentDashboardChart = null;
+                }
+                return;
+            }
+
+            studentRecords.sort((a, b) => {
+                const dateA = extractDate(a.deneme);
+                const dateB = extractDate(b.deneme);
+                return dateA - dateB;
+            });
+
+            const first = studentRecords[0];
+            nameEl.innerText = first.name;
+            noEl.innerText = `No: ${first.no}`;
+            classEl.innerText = `Sınıf: ${first.class}`;
+            branchEl.innerText = first.branch ? `Şube: ${first.branch}` : 'Şube: -';
+            countEl.innerText = `Deneme Sayısı: ${studentRecords.length}`;
+
+            const tbody = document.getElementById('student-dashboard-table-body');
+            tbody.innerHTML = '';
+
+            let sumNets = { turkce:0, sosyal:0, matematik:0, geometri:0, fizik:0, kimya:0, biyoloji:0, toplam:0 };
+
+            studentRecords.forEach(r => {
+                const sub = r.subjects || {};
+                const t = sub.turkce || {d:0,y:0,b:0,n:0};
+                const s = sub.sosyal || {d:0,y:0,b:0,n:0};
+                const m = sub.matematik || {d:0,y:0,b:0,n:0};
+                const g = sub.geometri || {d:0,y:0,b:0,n:0};
+                const f = sub.fizik || {d:0,y:0,b:0,n:0};
+                const k = sub.kimya || {d:0,y:0,b:0,n:0};
+                const b = sub.biyoloji || {d:0,y:0,b:0,n:0};
+                const tot = sub.toplam || {d:0,y:0,b:0,n:0};
+
+                sumNets.turkce += t.n;
+                sumNets.sosyal += s.n;
+                sumNets.matematik += m.n;
+                sumNets.geometri += g.n;
+                sumNets.fizik += f.n;
+                sumNets.kimya += k.n;
+                sumNets.biyoloji += b.n;
+                sumNets.toplam += tot.n;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <button onclick="showExamLeaderboard('${r.deneme.replace(/'/g, "\\'")}')" class="exam-link-btn" style="background:none; border:none; padding:0; margin:0; font-family:inherit; font-size:inherit; font-weight:600; color:var(--text-primary); text-align:left; cursor:pointer; text-decoration:none; transition:all 0.2s; outline:none;" onmouseover="this.style.textDecoration='underline'; this.style.color='var(--accent-color)'" onmouseout="this.style.textDecoration='none'; this.style.color='var(--text-primary)'">
+                            ${r.deneme}
+                        </button>
+                    </td>
+                    <td style="text-align:center;">${t.d}</td><td style="text-align:center;">${t.y}</td><td style="text-align:center;">${t.b}</td><td class="cell-net">${t.n.toFixed(2)}</td>
+                    <td style="text-align:center;">${s.d}</td><td style="text-align:center;">${s.y}</td><td style="text-align:center;">${s.b}</td><td class="cell-net">${s.n.toFixed(2)}</td>
+                    <td style="text-align:center;">${m.d}</td><td style="text-align:center;">${m.y}</td><td style="text-align:center;">${m.b}</td><td class="cell-net">${m.n.toFixed(2)}</td>
+                    <td style="text-align:center;">${g.d}</td><td style="text-align:center;">${g.y}</td><td style="text-align:center;">${g.b}</td><td class="cell-net">${g.n.toFixed(2)}</td>
+                    <td style="text-align:center;">${f.d}</td><td style="text-align:center;">${f.y}</td><td style="text-align:center;">${f.b}</td><td class="cell-net">${f.n.toFixed(2)}</td>
+                    <td style="text-align:center;">${k.d}</td><td style="text-align:center;">${k.y}</td><td style="text-align:center;">${k.b}</td><td class="cell-net">${k.n.toFixed(2)}</td>
+                    <td style="text-align:center;">${b.d}</td><td style="text-align:center;">${b.y}</td><td style="text-align:center;">${b.b}</td><td class="cell-net">${b.n.toFixed(2)}</td>
+                    <td style="text-align:center; font-weight:600;">${tot.d}</td><td style="text-align:center; font-weight:600;">${tot.y}</td><td style="text-align:center; font-weight:600;">${tot.b}</td><td class="cell-net">${tot.n.toFixed(2)}</td>
+                    <td class="cell-score" style="text-align:center;">${r.puan > 0 ? r.puan.toFixed(3) : '-'}</td>
+                    <td class="cell-rank" style="text-align:center;">${r.siralama > 0 ? r.siralama : '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const avgRow = document.createElement('tr');
+            avgRow.className = 'total-row';
+            const count = studentRecords.length;
+            avgRow.innerHTML = `
+                <td style="font-weight:bold;">ORTALAMALAR</td>
+                <td colspan="3"></td><td class="cell-net">${(sumNets.turkce / count).toFixed(2)}</td>
+                <td colspan="3"></td><td class="cell-net">${(sumNets.sosyal / count).toFixed(2)}</td>
+                <td colspan="3"></td><td class="cell-net">${(sumNets.matematik / count).toFixed(2)}</td>
+                <td colspan="3"></td><td class="cell-net">${(sumNets.geometri / count).toFixed(2)}</td>
+                <td colspan="3"></td><td class="cell-net">${(sumNets.fizik / count).toFixed(2)}</td>
+                <td colspan="3"></td><td class="cell-net">${(sumNets.kimya / count).toFixed(2)}</td>
+                <td colspan="3"></td><td class="cell-net">${(sumNets.biyoloji / count).toFixed(2)}</td>
+                <td colspan="3"></td><td class="cell-net">${(sumNets.toplam / count).toFixed(2)}</td>
+                <td colspan="2"></td>
+            `;
+            tbody.appendChild(avgRow);
+
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+
+            renderStudentDashboardChart(studentRecords);
+        }
+
+        function renderStudentDashboardChart(records) {
+            const canvas = document.getElementById('studentDashboardChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if (studentDashboardChart) {
+                studentDashboardChart.destroy();
+            }
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)';
+            const textColor = isDark ? '#94a3b8' : '#64748b';
+
+            const examAvgsMap = {};
+            examDatabase.forEach(rec => {
+                if (rec.subjects && rec.subjects.toplam) {
+                    if (!examAvgsMap[rec.deneme]) {
+                        examAvgsMap[rec.deneme] = { sum: 0, count: 0 };
+                    }
+                    examAvgsMap[rec.deneme].sum += rec.subjects.toplam.n;
+                    examAvgsMap[rec.deneme].count++;
+                }
+            });
+
+            const labels = records.map(r => r.deneme);
+            const studentNets = records.map(r => r.subjects && r.subjects.toplam ? r.subjects.toplam.n : 0);
+            
+            const schoolNets = records.map(r => {
+                const stats = examAvgsMap[r.deneme];
+                return stats ? parseFloat((stats.sum / stats.count).toFixed(2)) : 0;
+            });
+
+            studentDashboardChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Öğrenci Net Toplamı',
+                            data: studentNets,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59,130,246,0.1)',
+                            borderWidth: 3,
+                            pointBackgroundColor: '#3b82f6',
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Okul Ortalaması',
+                            data: schoolNets,
+                            borderColor: '#ef4444',
+                            borderDash: [5, 5],
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            fill: false,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: textColor,
+                                font: { family: 'Outfit, sans-serif', size: 12 }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: gridColor },
+                            ticks: { color: textColor }
+                        },
+                        x: {
+                            grid: { color: gridColor },
+                            ticks: { color: textColor }
+                        }
+                    }
+                }
+            });
+        }
+
         function extractDate(examName) {
             const match = examName.match(/(\d{2})[\/.-](\d{2})[\/.-](\d{4})/);
             if (match) {
@@ -6183,6 +6814,92 @@ function showSchoolManagementView() {
                     ${chartImg ? `<img src="${chartImg}" style="width:100%; max-height:160px; object-fit:contain; object-position:left; border:1px solid #e2e8f0; border-radius:4px; margin-bottom:14px;" />` : '<p style="color:#6b7280; font-size:8pt; margin-bottom:14px;">Grafik bulunamadı.</p>'}
 
                     <!-- Sicil Kaydı -->
+                    <div style="font-size:8pt; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; color:#374151;">📋 Öğrenci İşlem Geçmişi (Sicil)</div>
+                    ${historyHTML}
+                </div>
+            `;
+
+            const printArea = document.getElementById('karne-print-area');
+            printArea.innerHTML = karneHTML;
+            printArea.style.display = 'block';
+            document.body.classList.add('print-karne');
+
+            const originalTitle = document.title;
+            const fileDateStr = dateStr.replace(/\//g, '.');
+            document.title = `Öğrenci Analizi - ${studentName.trim()} - ${fileDateStr}`;
+
+            setTimeout(() => {
+                window.print();
+                setTimeout(() => {
+                    document.body.classList.remove('print-karne');
+                    printArea.style.display = 'none';
+                    printArea.innerHTML = '';
+                    document.title = originalTitle;
+                }, 500);
+            }, 300);
+        }
+
+        async function printStudentDashboardKarne() {
+            await loadSchoolData();
+
+            const chartCanvas = document.getElementById('studentDashboardChart');
+            const chartImg = chartCanvas ? chartCanvas.toDataURL('image/png') : null;
+
+            const tableEl = document.getElementById('student-dashboard-table');
+            const tableHTML = tableEl ? tableEl.outerHTML : '<p>Tablo bulunamadı.</p>';
+
+            const studentName = document.getElementById('student-dashboard-name')?.innerText || '-';
+            const studentNo   = document.getElementById('student-dashboard-no')?.innerText || '-';
+            const studentClass = document.getElementById('student-dashboard-class')?.innerText || '-';
+            const studentBranch = document.getElementById('student-dashboard-branch')?.innerText || '-';
+            const examCount   = document.getElementById('student-dashboard-exam-count')?.innerText || '-';
+
+            const noMatch = studentNo.match(/\d+/);
+            const noStr = noMatch ? noMatch[0] : '';
+
+            let historyHTML = '<p style="color:#6b7280; font-size:8pt;">Bu öğrenciye ait belge geçmişi bulunmamaktadır.</p>';
+            if (noStr && typeof schoolData !== 'undefined' && schoolData.ogrenci) {
+                const ogr = schoolData.ogrenci.find(s => String(s.no) === noStr);
+                if (ogr && ogr.history && ogr.history.length > 0) {
+                    historyHTML = '<table style="width:100%; border-collapse:collapse; font-size:8pt;">';
+                    historyHTML += '<thead><tr style="background:#f3f4f6;"><th style="padding:3px 6px; text-align:left; border:1px solid #d1d5db;">Belge Türü</th><th style="padding:3px 6px; text-align:left; border:1px solid #d1d5db;">Tarih</th><th style="padding:3px 6px; text-align:left; border:1px solid #d1d5db;">Detay</th></tr></thead><tbody>';
+                    ogr.history.forEach(h => {
+                        historyHTML += `<tr><td style="padding:3px 6px; border:1px solid #d1d5db;">${h.tur || '-'}</td><td style="padding:3px 6px; border:1px solid #d1d5db;">${h.tarih || '-'}</td><td style="padding:3px 6px; border:1px solid #d1d5db;">${h.detay || '-'}</td></tr>`;
+                    });
+                    historyHTML += '</tbody></table>';
+                }
+            }
+
+            const today = new Date();
+            const dateStr = today.getDate().toString().padStart(2,'0') + '/' + (today.getMonth()+1).toString().padStart(2,'0') + '/' + today.getFullYear();
+
+            const karneHTML = `
+                <div style="font-family:'Inter',sans-serif; color:#111;">
+                    <div style="text-align:center; border-bottom:2px solid #111; padding-bottom:6px; margin-bottom:10px;">
+                        <div style="font-size:10pt; font-weight:700; text-transform:uppercase; letter-spacing:1px;">CEYLANPINAR FEN LİSESİ</div>
+                        <div style="font-size:16pt; font-weight:800; margin:2px 0;">ÖĞRENCİ DENEME ANALİZ KARNESİ</div>
+                        <div style="font-size:8pt; color:#555;">Baskı Tarihi: ${dateStr}</div>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px 12px; margin-bottom:12px; font-size:9pt;">
+                        <div><strong>Ad Soyad:</strong> ${studentName}</div>
+                        <div><strong>${studentNo}</strong></div>
+                        <div><strong>${studentClass}</strong></div>
+                        <div><strong>${studentBranch}</strong></div>
+                        <div><strong>${examCount}</strong></div>
+                    </div>
+
+                    <div style="font-size:8pt; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; color:#374151;">📊 Deneme Sınav Sonuçları</div>
+                    <div style="width:100%; overflow:visible; margin-bottom:12px;">
+                        ${tableHTML}
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <div style="font-size:8pt; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#374151;">📈 Net Gelişim Grafiği</div>
+                        <div style="font-size:7.5pt; color:#4b5563; font-weight:600;">Mavi: Öğrenci | Kırmızı: Okul Ortalaması</div>
+                    </div>
+                    ${chartImg ? `<img src="${chartImg}" style="width:100%; max-height:160px; object-fit:contain; object-position:left; border:1px solid #e2e8f0; border-radius:4px; margin-bottom:14px;" />` : '<p style="color:#6b7280; font-size:8pt; margin-bottom:14px;">Grafik bulunamadı.</p>'}
+
                     <div style="font-size:8pt; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; color:#374151;">📋 Öğrenci İşlem Geçmişi (Sicil)</div>
                     ${historyHTML}
                 </div>
