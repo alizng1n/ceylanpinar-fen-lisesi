@@ -1,0 +1,12 @@
+# Geçici ve gereksiz dosyalar
+step_*.py
+temp_*.js
+temp_*.html
+*_clean.html
+test_out.txt
+*.msi
+orig_*.css
+portal_exam_style.css
+__pycache__/
+*.pyc
+.DS_Store
