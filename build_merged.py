@@ -5308,6 +5308,22 @@ function showSchoolManagementView() {
             if (window.lucide) lucide.createIcons();
         }
 
+        function generateUsernameFromName(name) {
+            const trMap = {'ç':'c','Ç':'c','ğ':'g','Ğ':'g','ı':'i','İ':'i','ö':'o','Ö':'o','ş':'s','Ş':'s','ü':'u','Ü':'u'};
+            return name.replace(/[çÇğĞıİöÖşŞüÜ]/g, c => trMap[c] || c)
+                       .toLowerCase()
+                       .replace(/[^a-z0-9]/g, '');
+        }
+
+        function generateRandomPassword(len = 10) {
+            const chars = 'abcdefghjkmnpqrstuvwxyz23456789ABCDEFGHJKMNPQRSTUVWXYZ';
+            let pw = '';
+            for (let i = 0; i < len; i++) {
+                pw += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return pw;
+        }
+
         function openSchoolModal(recordOrId) {
             let record = null;
             if (recordOrId && typeof recordOrId !== 'object') {
@@ -5327,9 +5343,9 @@ function showSchoolManagementView() {
                 const credFields = isAdmin ? `
                     <div style="border-top:1px solid var(--border-color); padding-top:0.75rem; margin-top:0.25rem;">
                         <p style="font-size:0.75rem; color:var(--text-secondary); margin:0 0 0.75rem 0; font-weight:600;">🔐 Giriş Bilgileri (Sadece Admin)</p>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
-                            <div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Kullanıcı Adı</label><input id="mf-kullanici_adi" class="input-field" value="${record?record.kullanici_adi||'':''}" placeholder="kullanici_adi"></div>
-                            <div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Şifre (boş=değişmez)</label><input id="mf-sifre" class="input-field" type="password" value="" placeholder="yeni şifre"></div>
+                        <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                            <div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Kullanıcı Adı <span style="font-size:0.7rem;font-weight:400;color:var(--text-secondary);">(Ad Soyad girilince otomatik dolar)</span></label><input id="mf-kullanici_adi" class="input-field" value="${record?record.kullanici_adi||'':''}" placeholder="kullanici_adi"></div>
+                            <div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Şifre (boş=değişmez)</label><div style="display:flex;gap:0.5rem;align-items:center;"><input id="mf-sifre" class="input-field" type="text" value="" placeholder="yeni şifre" style="flex:1;"><button type="button" onclick="document.getElementById('mf-sifre').value=generateRandomPassword()" style="white-space:nowrap;padding:0 0.85rem;height:44px;border-radius:var(--radius-md);background:var(--accent-gradient);color:#fff;border:none;font-size:0.78rem;font-weight:600;cursor:pointer;">🎲 Rastgele Üret</button></div></div>
                         </div>
                     </div>` : '';
                 fields = '<div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">ID</label><input id="mf-id" class="input-field" value="' + (record?record.id||'':'') + '" placeholder="Sıra no"></div><div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Ad Soyad</label><input id="mf-ad_soyad" class="input-field" value="' + (record?record.ad_soyad||'':'') + '" placeholder="Ad Soyad"></div>' + credFields;
@@ -5337,9 +5353,9 @@ function showSchoolManagementView() {
                 const credFields = isAdmin ? `
                     <div style="border-top:1px solid var(--border-color); padding-top:0.75rem; margin-top:0.25rem;">
                         <p style="font-size:0.75rem; color:var(--text-secondary); margin:0 0 0.75rem 0; font-weight:600;">🔐 Giriş Bilgileri (Sadece Admin)</p>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
-                            <div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Kullanıcı Adı</label><input id="mf-kullanici_adi" class="input-field" value="${record?record.kullanici_adi||'':''}" placeholder="kullanici_adi"></div>
-                            <div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Şifre (boş=değişmez)</label><input id="mf-sifre" class="input-field" type="password" value="" placeholder="yeni şifre"></div>
+                        <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                            <div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Kullanıcı Adı <span style="font-size:0.7rem;font-weight:400;color:var(--text-secondary);">(Ad Soyad girilince otomatik dolar)</span></label><input id="mf-kullanici_adi" class="input-field" value="${record?record.kullanici_adi||'':''}" placeholder="kullanici_adi"></div>
+                            <div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Şifre (boş=değişmez)</label><div style="display:flex;gap:0.5rem;align-items:center;"><input id="mf-sifre" class="input-field" type="text" value="" placeholder="yeni şifre" style="flex:1;"><button type="button" onclick="document.getElementById('mf-sifre').value=generateRandomPassword()" style="white-space:nowrap;padding:0 0.85rem;height:44px;border-radius:var(--radius-md);background:var(--accent-gradient);color:#fff;border:none;font-size:0.78rem;font-weight:600;cursor:pointer;">🎲 Rastgele Üret</button></div></div>
                         </div>
                     </div>` : '';
                 fields = '<div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">ID</label><input id="mf-id" class="input-field" value="' + (record?record.id||'':'') + '" placeholder="Sıra no"></div><div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Ad Soyad</label><input id="mf-ad_soyad" class="input-field" value="' + (record?record.ad_soyad||'':'') + '" placeholder="Ad Soyad"></div><div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Unvan</label><input id="mf-unvan" class="input-field" value="' + (record?record.unvan||'':'') + '" placeholder="Örn: Müdür"></div>' + credFields;
@@ -5347,6 +5363,30 @@ function showSchoolManagementView() {
 
             document.getElementById('school-modal-body').innerHTML = fields;
             document.getElementById('school-modal').style.display = 'flex';
+
+            // Otomatik kullanıcı adı: Ad Soyad inputu değişince kullanıcı adını türet
+            const adSoyadEl = document.getElementById('mf-ad_soyad');
+            const uAdEl = document.getElementById('mf-kullanici_adi');
+
+            // Modal açılışında: kullanıcı adı boşsa ama ad soyad doluysa hemen türet
+            if (adSoyadEl && uAdEl && !uAdEl.value.trim() && adSoyadEl.value.trim()) {
+                uAdEl.value = generateUsernameFromName(adSoyadEl.value);
+            }
+
+            if (adSoyadEl) {
+                adSoyadEl.addEventListener('input', function() {
+                    const uEl = document.getElementById('mf-kullanici_adi');
+                    if (uEl && !uEl.dataset.edited) {
+                        uEl.value = generateUsernameFromName(this.value);
+                    }
+                });
+            }
+            // Kullanıcı adını elle düzenlerse otomatik doldurma devre dışı kalır
+            if (uAdEl) {
+                uAdEl.addEventListener('input', function() {
+                    this.dataset.edited = '1';
+                });
+            }
         }
 
         function closeSchoolModal() {
