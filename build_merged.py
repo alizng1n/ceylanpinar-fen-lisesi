@@ -3733,6 +3733,12 @@ function navigate(state, push = true) {
 
                 applyRolePermissions();
 
+                // Scroll sıfırlama: main elementi overflow-y:auto olduğu için
+                // hem window hem de main'in kendi scroll'u sıfırlanmalı
+                window.scrollTo(0, 0);
+                const mainEl = document.querySelector('main');
+                if (mainEl) mainEl.scrollTop = 0;
+
                 if (push) {
                     window.history.pushState({ state: state }, "", '#' + state);
                 }
