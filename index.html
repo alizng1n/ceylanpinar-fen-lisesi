@@ -297,10 +297,16 @@
             user-select: none;
             letter-spacing: 0.5px;
             box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+            animation: avatarPulse 2.4s ease-in-out infinite;
+        }
+        @keyframes avatarPulse {
+            0%, 100% { box-shadow: 0 2px 8px rgba(99,102,241,0.3), 0 0 0 0 rgba(99,102,241,0.0); }
+            50%       { box-shadow: 0 2px 8px rgba(99,102,241,0.3), 0 0 0 6px rgba(99,102,241,0.18); }
         }
         .profile-avatar:hover {
             transform: scale(1.05);
             box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+            animation: none;
         }
         .profile-dropdown {
             position: absolute;
@@ -1988,9 +1994,7 @@
         </div>
         <div class="header-actions">
             <!-- Veritabanı Bağlantı Durum Rozeti -->
-            <div id="db-status-badge" style="width:32px; height:32px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:rgba(100,116,139,0.08); border: 1px solid rgba(100,116,139,0.15); transition: all 0.2s ease;" title="Veritabanı: Bağlanıyor...">
-                <span id="db-status-dot" style="width:8px; height:8px; border-radius:50%; background:#64748b; display:inline-block; transition: all 0.2s ease;"></span>
-            </div>
+            <span id="db-status-dot" style="width:9px; height:9px; border-radius:50%; background:#64748b; display:inline-block; transition: all 0.3s ease; flex-shrink:0;" title="Veritabanı: Bağlanıyor..."></span>
 
             <!-- Profil Avatar + Dropdown -->
             <div class="profile-wrapper" id="profile-wrapper">
@@ -3238,22 +3242,17 @@
         }
 
         function updateDbStatusBadge(isCloud) {
-            const badge = document.getElementById('db-status-badge');
             const dot = document.getElementById('db-status-dot');
-            if (!badge || !dot) return;
+            if (!dot) return;
 
             if (isCloud) {
-                badge.style.background = 'rgba(16,185,129,0.08)';
-                badge.style.borderColor = 'rgba(16,185,129,0.2)';
-                badge.title = 'Bulut Bağlantısı Aktif (Supabase)';
+                dot.title = 'Bulut Bağlantısı Aktif (Supabase)';
                 dot.style.background = '#10b981';
-                dot.style.boxShadow = '0 0 6px #10b981';
+                dot.style.boxShadow = '0 0 10px 2px rgba(16,185,129,0.55)';
             } else {
-                badge.style.background = 'rgba(239,68,68,0.08)';
-                badge.style.borderColor = 'rgba(239,68,68,0.2)';
-                badge.title = 'Bağlantı Yok (Çevrimdışı)';
+                dot.title = 'Bağlantı Yok (Çevrimdışı)';
                 dot.style.background = '#ef4444';
-                dot.style.boxShadow = '0 0 6px #ef4444';
+                dot.style.boxShadow = '0 0 10px 2px rgba(239,68,68,0.5)';
             }
         }
 
