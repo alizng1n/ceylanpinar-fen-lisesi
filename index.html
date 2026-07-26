@@ -2658,33 +2658,6 @@
                     <span>Sınav verilerini yüklemeden önce şablon formatına uygun olduğundan emin olun.</span>
                     <button onclick="downloadExamTemplate()" style="display:inline-flex; align-items:center; gap:0.25rem; border:none; background:none; color:#10b981; cursor:pointer; font-weight:600; font-size:0.82rem; padding:0; text-decoration:underline;"><i data-lucide="download" size="12"></i> Örnek Şablonu İndir</button>
                 </div>
-                
-                <!-- Daha Fazla / Şablon Detayları (Collapsible) -->
-                <div style="margin-top:0.75rem; border-top:1px solid var(--border-color); padding-top:0.75rem;">
-                    <button onclick="toggleExamRulesDetails()" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; font-size:0.8rem; font-weight:600; padding:0; display:inline-flex; align-items:center; gap:0.25rem;">
-                        <span id="exam-rules-toggle-text">Detaylı Şablon Kuralları (Daha Fazla...)</span>
-                        <i id="exam-rules-toggle-icon" data-lucide="chevron-down" size="14"></i>
-                    </button>
-                    <div id="exam-rules-details-content" style="display:none; margin-top:0.5rem; max-height:150px; overflow-y:auto; font-size:0.78rem; color:var(--text-secondary); background:var(--bg-card); padding:0.75rem; border-radius:6px; border:1px solid var(--border-color);">
-                        <strong style="color:var(--text-primary); display:block; margin-bottom:0.25rem;">📊 Sütun Düzeni (Sıralı):</strong>
-                        <ul style="margin:0; padding-left:1.1rem; list-style-type:disc;">
-                            <li><strong>Sütun A (0):</strong> Öğrenci Numarası (NO)</li>
-                            <li><strong>Sütun B (1):</strong> Öğrenci Adı ve Soyadı</li>
-                            <li><strong>Sütun C-D (2-3):</strong> Sınıf ve Şube</li>
-                            <li><strong>Sütun E-H (4-7):</strong> Türkçe (Doğru, Yanlış, Boş, Net)</li>
-                            <li><strong>Sütun I-L (8-11):</strong> Sosyal Bilimler (Doğru, Yanlış, Boş, Net)</li>
-                            <li><strong>Sütun M-P (12-15):</strong> Temel Matematik (Doğru, Yanlış, Boş, Net)</li>
-                            <li><strong>Sütun Q-T (16-19):</strong> Geometri (Doğru, Yanlış, Boş, Net)</li>
-                            <li><strong>Sütun U-X (20-23):</strong> Fizik (Doğru, Yanlış, Boş, Net)</li>
-                            <li><strong>Sütun Y-AB (24-27):</strong> Kimya (Doğru, Yanlış, Boş, Net)</li>
-                            <li><strong>Sütun AC-AF (28-31):</strong> Biyoloji (Doğru, Yanlış, Boş, Net)</li>
-                            <li><strong>Sütun AG-AJ (32-35):</strong> Toplam (Doğru, Yanlış, Boş, Net)</li>
-                            <li><strong>Sütun AK (36):</strong> Sınav Puanı</li>
-                            <li><strong>Sütun AL (37):</strong> Okul/Genel Sıralaması</li>
-                            <li><strong>Sütun AM (38):</strong> Sınav Adı (örn: <em>"Özdebir TYT-1"</em>)</li>
-                        </ul>
-                    </div>
-                </div>
             </div>
 
             <!-- Sürükle Bırak / Dosya Seçme Alanı -->
@@ -6157,19 +6130,7 @@ function showSchoolManagementView() {
             document.getElementById('exam-import-modal').style.display = 'none';
         }
 
-        function toggleExamRulesDetails() {
-            const content = document.getElementById('exam-rules-details-content');
-            const toggleText = document.getElementById('exam-rules-toggle-text');
-            if (!content || !toggleText) return;
 
-            if (content.style.display === 'none') {
-                content.style.display = 'block';
-                toggleText.innerText = 'Detaylı Şablon Kuralları (Gizle)';
-            } else {
-                content.style.display = 'none';
-                toggleText.innerText = 'Detaylı Şablon Kuralları (Daha Fazla...)';
-            }
-        }
 
         function handleExamExcelImport(event) {
             const file = event.target.files[0];
@@ -6328,21 +6289,8 @@ function showSchoolManagementView() {
 
         function downloadExamTemplate() {
             try {
-                const row0 = ["NO", "ADI SOYADI", "SINIF", "ŞUBE", "TÜRKÇE", "", "", "", "SOSYAL", "", "", "", "MATEMATİK", "", "", "", "GEOMETRİ", "", "", "", "FİZİK", "", "", "", "KİMYA", "", "", "", "BİYOLOJİ", "", "", "", "TOPLAM", "", "", "", "PUAN", "SIRALAMA", "SINAV ADI"];
-                const row1 = ["", "", "", "", "D", "Y", "B", "N", "D", "Y", "B", "N", "D", "Y", "B", "N", "D", "Y", "B", "N", "D", "Y", "B", "N", "D", "Y", "B", "N", "D", "Y", "B", "N", "D", "Y", "B", "N", "", "", ""];
-                const row2 = [118, "BÜNYAMİN ZORLU", "10", "E", 30, 5, 5, 28.75, 15, 3, 2, 14.25, 35, 2, 3, 34.5, 8, 1, 1, 7.75, 5, 1, 1, 4.75, 6, 0, 0, 6.0, 5, 1, 0, 4.75, 104, 13, 12, 100.75, 450.25, 1, "Örnek Sınav TYT-1"];
-                const row3 = [119, "ALİ RIZA BOZ", "9", "A", 25, 10, 5, 22.5, 12, 5, 3, 10.75, 20, 10, 10, 17.5, 5, 3, 2, 4.25, 4, 2, 1, 3.5, 3, 3, 0, 2.25, 3, 3, 0, 2.25, 72, 36, 12, 63.0, 310.5, 2, "Örnek Sınav TYT-1"];
-                
-                const worksheetData = [row0, row1, row2, row3];
-                const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-                const workbook = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(workbook, worksheet, "Sınav Sonuçları");
-                
-                const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-                const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                
                 const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
+                link.href = 'ceylanpinar_ornek_sinav_sablonu.xlsx';
                 link.download = 'ceylanpinar_ornek_sinav_sablonu.xlsx';
                 document.body.appendChild(link);
                 link.click();
@@ -6350,8 +6298,8 @@ function showSchoolManagementView() {
                 
                 showToast("Örnek sınav şablonu indirildi.");
             } catch (error) {
-                console.error("Exam template generation error:", error);
-                showToast("Sınav şablonu oluşturulurken hata oluştu.", "error");
+                console.error("Exam template download error:", error);
+                showToast("Sınav şablonu indirilirken hata oluştu.", "error");
             }
         }
 
