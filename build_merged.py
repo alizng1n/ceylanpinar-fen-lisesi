@@ -5126,14 +5126,16 @@ function openDocumentModal(studentNo) {
                                 ad_soyad: st.ad_soyad,
                                 unvan: st.unvan,
                                 kullanici_adi: st.kullanici_adi || '',
-                                sifre: st.sifre || ''
+                                sifre: st.sifre || '',
+                                role: 'ogretmen'
                             })),
-                            idare: (staff || []).filter(st => st.role === 'idare').map(st => ({
+                            idare: (staff || []).filter(st => st.role === 'idare' || st.role === 'admin').map(st => ({
                                 id: String(st.id),
                                 ad_soyad: st.ad_soyad,
                                 unvan: st.unvan,
                                 kullanici_adi: st.kullanici_adi || '',
-                                sifre: st.sifre || ''
+                                sifre: st.sifre || '',
+                                role: 'idare'
                             }))
                         };
                         updateDbStatusBadge(true);
@@ -5339,22 +5341,38 @@ function showSchoolManagementView() {
             if (currentSchoolTab === 'ogrenci') {
                 fields = '<div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Öğrenci No</label><input id="mf-no" class="input-field" value="' + (record?record.no||'':'') + '" placeholder="Örn: 1001"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;"><div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Ad</label><input id="mf-ad" class="input-field" value="' + (record?record.ad||'':'') + '" placeholder="Ad"></div><div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Soyad</label><input id="mf-soyad" class="input-field" value="' + (record?record.soyad||'':'') + '" placeholder="Soyad"></div></div><div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Sınıf</label><input id="mf-snf" class="input-field" value="' + (record?record.snf||'':'') + '" placeholder="Örn: 10-A"></div>';
             } else if (currentSchoolTab === 'ogretmen') {
+                const roleVal = record ? (record.role || 'ogretmen') : 'ogretmen';
                 const credFields = isAdmin ? `
                     <div style="border-top:1px solid var(--border-color); padding-top:0.75rem; margin-top:0.25rem;">
                         <p style="font-size:0.75rem; color:var(--text-secondary); margin:0 0 0.75rem 0; font-weight:600;">🔐 Giriş Bilgileri (Sadece Admin)</p>
                         <div style="display:flex; flex-direction:column; gap:0.75rem;">
                             <div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Kullanıcı Adı <span style="font-size:0.7rem;font-weight:400;color:var(--text-secondary);">(Ad Soyad girilince otomatik dolar)</span></label><input id="mf-kullanici_adi" class="input-field" value="${record?record.kullanici_adi||'':''}" placeholder="kullanici_adi"></div>
                             <div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Şifre (boş=değişmez)</label><div style="display:flex;gap:0.5rem;align-items:center;"><input id="mf-sifre" class="input-field" type="text" value="" placeholder="yeni şifre" style="flex:1;"><button type="button" onclick="document.getElementById('mf-sifre').value=generateRandomPassword()" style="white-space:nowrap;padding:0 0.85rem;height:44px;border-radius:var(--radius-md);background:var(--accent-gradient);color:#fff;border:none;font-size:0.78rem;font-weight:600;cursor:pointer;">🎲 Rastgele Üret</button></div></div>
+                            <div>
+                                <label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Sistem Rolü</label>
+                                <select id="mf-role" class="input-field" style="width:100%; height:44px; padding:0 0.75rem; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-primary); cursor:pointer;">
+                                    <option value="ogretmen" ${roleVal === 'ogretmen' ? 'selected' : ''}>Öğretmen</option>
+                                    <option value="idare" ${roleVal === 'idare' ? 'selected' : ''}>Admin</option>
+                                </select>
+                            </div>
                         </div>
                     </div>` : '';
                 fields = '<div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">ID</label><input id="mf-id" class="input-field" value="' + (record?record.id||'':'') + '" placeholder="Sıra no"></div><div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Ad Soyad</label><input id="mf-ad_soyad" class="input-field" value="' + (record?record.ad_soyad||'':'') + '" placeholder="Ad Soyad"></div>' + credFields;
             } else {
+                const roleVal = record ? (record.role || 'idare') : 'idare';
                 const credFields = isAdmin ? `
                     <div style="border-top:1px solid var(--border-color); padding-top:0.75rem; margin-top:0.25rem;">
                         <p style="font-size:0.75rem; color:var(--text-secondary); margin:0 0 0.75rem 0; font-weight:600;">🔐 Giriş Bilgileri (Sadece Admin)</p>
                         <div style="display:flex; flex-direction:column; gap:0.75rem;">
                             <div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Kullanıcı Adı <span style="font-size:0.7rem;font-weight:400;color:var(--text-secondary);">(Ad Soyad girilince otomatik dolar)</span></label><input id="mf-kullanici_adi" class="input-field" value="${record?record.kullanici_adi||'':''}" placeholder="kullanici_adi"></div>
                             <div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Şifre (boş=değişmez)</label><div style="display:flex;gap:0.5rem;align-items:center;"><input id="mf-sifre" class="input-field" type="text" value="" placeholder="yeni şifre" style="flex:1;"><button type="button" onclick="document.getElementById('mf-sifre').value=generateRandomPassword()" style="white-space:nowrap;padding:0 0.85rem;height:44px;border-radius:var(--radius-md);background:var(--accent-gradient);color:#fff;border:none;font-size:0.78rem;font-weight:600;cursor:pointer;">🎲 Rastgele Üret</button></div></div>
+                            <div>
+                                <label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Sistem Rolü</label>
+                                <select id="mf-role" class="input-field" style="width:100%; height:44px; padding:0 0.75rem; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-primary); cursor:pointer;">
+                                    <option value="ogretmen" ${roleVal === 'ogretmen' ? 'selected' : ''}>Öğretmen</option>
+                                    <option value="idare" ${roleVal === 'idare' ? 'selected' : ''}>Admin</option>
+                                </select>
+                            </div>
                         </div>
                     </div>` : '';
                 fields = '<div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">ID</label><input id="mf-id" class="input-field" value="' + (record?record.id||'':'') + '" placeholder="Sıra no"></div><div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Ad Soyad</label><input id="mf-ad_soyad" class="input-field" value="' + (record?record.ad_soyad||'':'') + '" placeholder="Ad Soyad"></div><div><label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Unvan</label><input id="mf-unvan" class="input-field" value="' + (record?record.unvan||'':'') + '" placeholder="Örn: Müdür"></div>' + credFields;
@@ -5438,23 +5456,52 @@ function showSchoolManagementView() {
                 const ad_soyad = (document.getElementById('mf-ad_soyad')?.value || '').trim();
                 const kullanici_adi = (document.getElementById('mf-kullanici_adi')?.value || '').trim();
                 const sifre_yeni = (document.getElementById('mf-sifre')?.value || '').trim();
+                const selectedRole = document.getElementById('mf-role')?.value || 'ogretmen';
                 if (!ad_soyad) { alert('Ad Soyad zorunludur!'); return; }
 
+                const isAdmin = sessionStorage.getItem('user_role') === 'admin';
+
                 if (supabaseClient) {
-                    const updateData = { ad_soyad, unvan: 'Rehber Öğretmen' };
+                    const updateData = { ad_soyad };
+                    if (isAdmin) {
+                        updateData.role = selectedRole;
+                        updateData.unvan = selectedRole === 'idare' ? 'Müdür Yardımcısı' : 'Rehber Öğretmen';
+                    } else {
+                        updateData.unvan = 'Rehber Öğretmen';
+                    }
                     if (kullanici_adi) updateData.kullanici_adi = kullanici_adi;
                     if (sifre_yeni) updateData.sifre = sifre_yeni;
+
                     if (schoolEditId) {
                         await supabaseClient.from('staff').update(updateData).eq('id', schoolEditId);
                     } else {
-                        await supabaseClient.from('staff').insert({ ad_soyad, unvan: 'Rehber Öğretmen', role: 'ogretmen', kullanici_adi: kullanici_adi || null, sifre: sifre_yeni || null });
+                        await supabaseClient.from('staff').insert({ 
+                            ad_soyad, 
+                            unvan: updateData.unvan, 
+                            role: selectedRole, 
+                            kullanici_adi: kullanici_adi || null, 
+                            sifre: sifre_yeni || null 
+                        });
                     }
                 } else {
                     if (schoolEditId) {
                         const idx = schoolData.ogretmen.findIndex(r => String(r.id) === String(schoolEditId));
-                        if (idx >= 0) schoolData.ogretmen[idx] = {id, ad_soyad};
+                        if (idx >= 0) {
+                            const updated = { id, ad_soyad, role: selectedRole, unvan: selectedRole === 'idare' ? 'Müdür Yardımcısı' : 'Rehber Öğretmen' };
+                            if (selectedRole === 'ogretmen') {
+                                schoolData.ogretmen[idx] = updated;
+                            } else {
+                                schoolData.ogretmen.splice(idx, 1);
+                                schoolData.idare.push(updated);
+                            }
+                        }
                     } else {
-                        schoolData.ogretmen.push({id: id || String(schoolData.ogretmen.length + 1), ad_soyad});
+                        const newRec = { id: id || String(schoolData.ogretmen.length + 1), ad_soyad, role: selectedRole, unvan: selectedRole === 'idare' ? 'Müdür Yardımcısı' : 'Rehber Öğretmen' };
+                        if (selectedRole === 'ogretmen') {
+                            schoolData.ogretmen.push(newRec);
+                        } else {
+                            schoolData.idare.push(newRec);
+                        }
                     }
                 }
             } else {
@@ -5463,23 +5510,52 @@ function showSchoolManagementView() {
                 const unvan = (document.getElementById('mf-unvan')?.value || '').trim();
                 const kullanici_adi = (document.getElementById('mf-kullanici_adi')?.value || '').trim();
                 const sifre_yeni = (document.getElementById('mf-sifre')?.value || '').trim();
+                const selectedRole = document.getElementById('mf-role')?.value || 'idare';
                 if (!ad_soyad) { alert('Ad Soyad zorunludur!'); return; }
 
+                const isAdmin = sessionStorage.getItem('user_role') === 'admin';
+
                 if (supabaseClient) {
-                    const updateData = { ad_soyad, unvan };
+                    const updateData = { ad_soyad };
+                    if (isAdmin) {
+                        updateData.role = selectedRole;
+                        updateData.unvan = selectedRole === 'ogretmen' ? 'Rehber Öğretmen' : unvan;
+                    } else {
+                        updateData.unvan = unvan;
+                    }
                     if (kullanici_adi) updateData.kullanici_adi = kullanici_adi;
                     if (sifre_yeni) updateData.sifre = sifre_yeni;
+
                     if (schoolEditId) {
-                        await supabaseClient.from('staff').update(updateData).eq('id', schoolEditId).eq('role', currentSchoolTab);
+                        await supabaseClient.from('staff').update(updateData).eq('id', schoolEditId);
                     } else {
-                        await supabaseClient.from('staff').insert({ ad_soyad, unvan, role: currentSchoolTab, kullanici_adi: kullanici_adi || null, sifre: sifre_yeni || null });
+                        await supabaseClient.from('staff').insert({ 
+                            ad_soyad, 
+                            unvan: updateData.unvan, 
+                            role: selectedRole, 
+                            kullanici_adi: kullanici_adi || null, 
+                            sifre: sifre_yeni || null 
+                        });
                     }
                 } else {
                     if (schoolEditId) {
                         const idx = schoolData.idare.findIndex(r => String(r.id) === String(schoolEditId));
-                        if (idx >= 0) schoolData.idare[idx] = {id, ad_soyad, unvan};
+                        if (idx >= 0) {
+                            const updated = { id, ad_soyad, unvan: selectedRole === 'ogretmen' ? 'Rehber Öğretmen' : unvan, role: selectedRole };
+                            if (selectedRole === 'idare') {
+                                schoolData.idare[idx] = updated;
+                            } else {
+                                schoolData.idare.splice(idx, 1);
+                                schoolData.ogretmen.push(updated);
+                            }
+                        }
                     } else {
-                        schoolData.idare.push({id: id || String(schoolData.idare.length + 1), ad_soyad, unvan});
+                        const newRec = { id: id || String(schoolData.idare.length + 1), ad_soyad, unvan: selectedRole === 'ogretmen' ? 'Rehber Öğretmen' : unvan, role: selectedRole };
+                        if (selectedRole === 'idare') {
+                            schoolData.idare.push(newRec);
+                        } else {
+                            schoolData.ogretmen.push(newRec);
+                        }
                     }
                 }
             }
@@ -5549,7 +5625,7 @@ function showSchoolManagementView() {
                                     await supabaseClient.from('document_history').delete().eq('student_no', id);
                                     await supabaseClient.from('students').delete().eq('no', id);
                                 } else {
-                                    await supabaseClient.from('staff').delete().eq('id', id).eq('role', tab);
+                                    await supabaseClient.from('staff').delete().eq('id', id);
                                 }
                             } else {
                                 // Local fallback
