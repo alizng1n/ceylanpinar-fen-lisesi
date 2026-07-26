@@ -6663,6 +6663,16 @@ function showSchoolManagementView() {
                 tbody.appendChild(tr);
             });
 
+            let totalRank = 0;
+            let rankCount = 0;
+            studentRecords.forEach(r => {
+                if (r.siralama && r.siralama > 0) {
+                    totalRank += r.siralama;
+                    rankCount++;
+                }
+            });
+            const avgRank = rankCount > 0 ? (totalRank / rankCount).toFixed(1) : '-';
+
             const avgRow = document.createElement('tr');
             avgRow.className = 'total-row';
             const count = studentRecords.length;
@@ -6676,7 +6686,8 @@ function showSchoolManagementView() {
                 <td colspan="3"></td><td class="cell-net">${(sumNets.kimya / count).toFixed(2)}</td>
                 <td colspan="3"></td><td class="cell-net">${(sumNets.biyoloji / count).toFixed(2)}</td>
                 <td colspan="3"></td><td class="cell-net">${(sumNets.toplam / count).toFixed(2)}</td>
-                <td colspan="2"></td>
+                <td class="cell-score" style="text-align:center;">-</td>
+                <td class="cell-rank" style="text-align:center; font-weight:bold;">${avgRank}</td>
             `;
             tbody.appendChild(avgRow);
 
@@ -6826,7 +6837,7 @@ function showSchoolManagementView() {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     ${isAdmin ? `
-                    <td style="text-align:center; vertical-align:middle; width: 50px;">
+                    <td class="results-delete-cell" style="text-align:center; vertical-align:middle; width: 50px;">
                         <button onclick="deleteExamRecord(${r.id}, '${r.deneme.replace(/'/g, "\'")}', ${r.no})" class="btn-delete-row" style="background:none; border:none; color:#ef4444; cursor:pointer; padding:6px; display:inline-flex; align-items:center; justify-content:center; transition: all 0.2s;" title="Bu deneme kaydını sil">
                             <i data-lucide="trash-2" style="width:16px; height:16px;"></i>
                         </button>
@@ -6851,6 +6862,16 @@ function showSchoolManagementView() {
                 tbody.appendChild(tr);
             });
 
+            let totalRank = 0;
+            let rankCount = 0;
+            records.forEach(r => {
+                if (r.siralama && r.siralama > 0) {
+                    totalRank += r.siralama;
+                    rankCount++;
+                }
+            });
+            const avgRank = rankCount > 0 ? (totalRank / rankCount).toFixed(1) : '-';
+
             const avgRow = document.createElement('tr');
             avgRow.className = 'total-row';
             const count = records.length;
@@ -6864,7 +6885,8 @@ function showSchoolManagementView() {
                 <td colspan="3"></td><td class="cell-net">${(sumNets.kimya / count).toFixed(2)}</td>
                 <td colspan="3"></td><td class="cell-net">${(sumNets.biyoloji / count).toFixed(2)}</td>
                 <td colspan="3"></td><td class="cell-net">${(sumNets.toplam / count).toFixed(2)}</td>
-                <td colspan="2"></td>
+                <td class="cell-score" style="text-align:center;">-</td>
+                <td class="cell-rank" style="text-align:center; font-weight:bold;">${avgRank}</td>
             `;
             tbody.appendChild(avgRow);
 
@@ -6994,7 +7016,18 @@ function showSchoolManagementView() {
 
             // 2. Sonuç tablosunu al
             const tableEl = document.getElementById('results-table');
-            const tableHTML = tableEl ? tableEl.outerHTML : '<p>Tablo bulunamadı.</p>';
+            let tableHTML = '<p>Tablo bulunamadı.</p>';
+            if (tableEl) {
+                const tempTable = tableEl.cloneNode(true);
+                const delHeader = tempTable.querySelector('#results-delete-header');
+                if (delHeader) delHeader.remove();
+                tempTable.querySelectorAll('.results-delete-cell').forEach(cell => cell.remove());
+                const totalRowTitle = tempTable.querySelector('.total-row td');
+                if (totalRowTitle) {
+                    totalRowTitle.setAttribute('colspan', '1');
+                }
+                tableHTML = tempTable.outerHTML;
+            }
 
             // 3. Öğrenci bilgilerini al
             const studentName = document.getElementById('report-student-name')?.innerText || '-';
