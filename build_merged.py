@@ -1850,7 +1850,7 @@ def build_merged_app():
                 width: 85mm !important;
                 height: 128mm !important;
                 margin-top: 10mm !important;
-                margin-left: 10mm !important;
+                margin-left: 55mm !important;
                 margin-right: 0 !important;
                 margin-bottom: 0 !important;
                 padding: 5mm 4mm !important;
