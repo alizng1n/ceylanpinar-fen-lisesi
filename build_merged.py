@@ -33,8 +33,8 @@ def fetch_live_news_python():
     return news_list
 
 def build_merged_app():
-    json_path = r"c:\Users\Acer\Desktop\deneme analiz p\current_database.json"
-    html_out_path = r"c:\Users\Acer\Desktop\ceylanpinar-portal\index.html"
+    json_path = r"./current_database.json"
+    html_out_path = r"./index.html"
     
     print(f"Reading JSON database from: {json_path}")
     if not os.path.exists(json_path):
