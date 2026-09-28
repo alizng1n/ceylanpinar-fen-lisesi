@@ -3717,47 +3717,44 @@ function navigate(state, push = true) {
             const adVal = cleanTurkishString(document.getElementById('student-login-ad').value);
             const soyadVal = cleanTurkishString(document.getElementById('student-login-soyad').value);
             const snfVal = document.getElementById('student-login-snf').value.trim();
-            
+
             const errorDiv = document.getElementById('student-login-error');
             if (errorDiv) errorDiv.style.display = 'none';
-            
+
             if (!noVal || !adVal || !soyadVal || !snfVal) {
                 alert("Lütfen tüm alanları doldurunuz.");
                 return;
             }
-            
-            await loadSchoolData();
-            
-            if (!schoolData || !schoolData.ogrenci) {
-                alert("Öğrenci veritabanı yüklenemedi. Lütfen internet bağlantınızı kontrol edin.");
+
+            if (!supabaseClient) {
+                alert("Veritabanı bağlantısı kurulamadı.");
                 return;
             }
-            
-            // snf alanı veritabanında '11/A' formatında birleşik tutuluyor
-            const matched = schoolData.ogrenci.find(s => {
-                const dbNo = String(s.no).trim();
-                const dbAd = cleanTurkishString(s.ad);
-                const dbSoyad = cleanTurkishString(s.soyad);
-                const dbSnf = String(s.snf || '').trim();
-                
-                return dbNo === String(noVal) &&
-                       dbAd === adVal &&
-                       dbSoyad === soyadVal &&
-                       dbSnf === snfVal;
+
+            // Öğrenci listesi tarayıcıya gelmez — sunucu kontrol eder
+            const { data, error } = await supabaseClient.rpc('ogrenci_dogrula', {
+                p_no: parseInt(noVal),
+                p_ad: adVal.trim(),
+                p_soyad: soyadVal.trim(),
+                p_snf: snfVal
             });
-            
-            if (matched) {
-                try {
-                    sessionStorage.setItem('student_logged_in', 'true');
-                    sessionStorage.setItem('user_role', 'student');
-                    sessionStorage.setItem('student_no', String(matched.no));
-                } catch(e) {}
-                
-                closeStudentLoginModal();
-                navigate('student-hub');
-            } else {
+
+            if (error || !data || data.length === 0) {
                 if (errorDiv) errorDiv.style.display = 'block';
+                return;
             }
+
+            const matched = data[0];
+
+            try {
+                sessionStorage.setItem('student_logged_in', 'true');
+                sessionStorage.setItem('user_role', 'student');
+                sessionStorage.setItem('student_no', String(matched.no));
+            } catch(e) {}
+
+            closeStudentLoginModal();
+            await loadSchoolData(true);
+            navigate('student-hub');
         }
 
         function openStudentLoginModal() {
@@ -5321,18 +5318,33 @@ function showSchoolManagementView() {
                         updateData.unvan = 'Rehber Öğretmen';
                     }
                     if (kullanici_adi) updateData.kullanici_adi = kullanici_adi;
-                    if (sifre_yeni) updateData.sifre = sifre_yeni;
 
                     if (schoolEditId) {
                         await supabaseClient.from('staff').update(updateData).eq('id', schoolEditId);
                     } else {
-                        await supabaseClient.from('staff').insert({ 
-                            ad_soyad, 
-                            unvan: updateData.unvan, 
-                            role: selectedRole, 
-                            kullanici_adi: kullanici_adi || null, 
-                            sifre: sifre_yeni || null 
+                        await supabaseClient.from('staff').insert({
+                            ad_soyad,
+                            unvan: updateData.unvan,
+                            role: selectedRole,
+                            kullanici_adi: kullanici_adi || null
                         });
+                        // Yeni Auth hesabı oluştur (mevcut admin oturumunu bozmadan)
+                        if (kullanici_adi && sifre_yeni) {
+                            try {
+                                const aktifUrl = localStorage.getItem('supabase_url') || supabaseUrl;
+                                const aktifKey = localStorage.getItem('supabase_key') || supabaseKey;
+                                const tempClient = window.supabase.createClient(aktifUrl, aktifKey, {
+                                    auth: { persistSession: false, autoRefreshToken: false }
+                                });
+                                const { error: authErr } = await tempClient.auth.signUp({
+                                    email: `${kullanici_adi.toLowerCase()}@okul.local`,
+                                    password: sifre_yeni
+                                });
+                                if (authErr && !authErr.message.includes('already registered')) {
+                                    console.warn('Auth hesabı oluşturulamadı:', authErr.message);
+                                }
+                            } catch(e) { console.warn('Auth oluşturma hatası:', e); }
+                        }
                     }
                 } else {
                     if (schoolEditId) {
@@ -5375,18 +5387,33 @@ function showSchoolManagementView() {
                         updateData.unvan = unvan;
                     }
                     if (kullanici_adi) updateData.kullanici_adi = kullanici_adi;
-                    if (sifre_yeni) updateData.sifre = sifre_yeni;
 
                     if (schoolEditId) {
                         await supabaseClient.from('staff').update(updateData).eq('id', schoolEditId);
                     } else {
-                        await supabaseClient.from('staff').insert({ 
-                            ad_soyad, 
-                            unvan: updateData.unvan, 
-                            role: selectedRole, 
-                            kullanici_adi: kullanici_adi || null, 
-                            sifre: sifre_yeni || null 
+                        await supabaseClient.from('staff').insert({
+                            ad_soyad,
+                            unvan: updateData.unvan,
+                            role: selectedRole,
+                            kullanici_adi: kullanici_adi || null
                         });
+                        // Yeni Auth hesabı oluştur (mevcut admin oturumunu bozmadan)
+                        if (kullanici_adi && sifre_yeni) {
+                            try {
+                                const aktifUrl = localStorage.getItem('supabase_url') || supabaseUrl;
+                                const aktifKey = localStorage.getItem('supabase_key') || supabaseKey;
+                                const tempClient = window.supabase.createClient(aktifUrl, aktifKey, {
+                                    auth: { persistSession: false, autoRefreshToken: false }
+                                });
+                                const { error: authErr } = await tempClient.auth.signUp({
+                                    email: `${kullanici_adi.toLowerCase()}@okul.local`,
+                                    password: sifre_yeni
+                                });
+                                if (authErr && !authErr.message.includes('already registered')) {
+                                    console.warn('Auth hesabı oluşturulamadı:', authErr.message);
+                                }
+                            } catch(e) { console.warn('Auth oluşturma hatası:', e); }
+                        }
                     }
                 } else {
                     if (schoolEditId) {
