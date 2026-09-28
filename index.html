@@ -3647,55 +3647,51 @@ function navigate(state, push = true) {
                 return;
             }
 
-            await loadSchoolData();
-
-            if (!schoolData) {
-                alert('Veritabanı bağlantısı kurulamadı. Lütfen internet bağlantınızı kontrol edin.');
+            if (!supabaseClient) {
+                alert('Veritabanı bağlantısı kurulamadı. Lütfen Supabase ayarlarını kontrol edin.');
                 return;
             }
 
-            // Önce idare (admin/müdür) listesinde ara
-            const adminMatch = (schoolData.idare || []).find(s =>
-                s.kullanici_adi && s.kullanici_adi.trim() === usernameVal &&
-                s.sifre && s.sifre.trim() === passwordVal
-            );
+            // Supabase Auth ile giriş — şifre hiç tarayıcıya gelmez
+            const email = usernameVal.toLowerCase() + '@okul.local';
+            const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: passwordVal
+            });
 
-            if (adminMatch) {
-                try {
-                    sessionStorage.setItem('teacher_logged_in', 'true');
-                    sessionStorage.setItem('user_role', 'admin');
-                    sessionStorage.setItem('staff_id', String(adminMatch.id));
-                    sessionStorage.setItem('staff_name', adminMatch.ad_soyad || '');
-                    sessionStorage.setItem('staff_username', adminMatch.kullanici_adi || '');
-                } catch (e) {}
-                closeLoginModal();
-                navigate('teacher-hub');
+            if (authError || !authData?.user) {
+                if (errorDiv) errorDiv.style.display = 'block';
+                document.getElementById('password-input').value = '';
+                document.getElementById('password-input').focus();
                 return;
             }
 
-            // Sonra öğretmen listesinde ara
-            const teacherMatch = (schoolData.ogretmen || []).find(s =>
-                s.kullanici_adi && s.kullanici_adi.trim() === usernameVal &&
-                s.sifre && s.sifre.trim() === passwordVal
-            );
+            // Giriş başarılı — staff tablosundan kimlik bilgilerini çek (şifre gelmez)
+            const { data: staffRow, error: staffError } = await supabaseClient
+                .from('staff')
+                .select('id, ad_soyad, kullanici_adi, role')
+                .eq('kullanici_adi', usernameVal)
+                .single();
 
-            if (teacherMatch) {
-                try {
-                    sessionStorage.setItem('teacher_logged_in', 'true');
-                    sessionStorage.setItem('user_role', 'teacher');
-                    sessionStorage.setItem('staff_id', String(teacherMatch.id));
-                    sessionStorage.setItem('staff_name', teacherMatch.ad_soyad || '');
-                    sessionStorage.setItem('staff_username', teacherMatch.kullanici_adi || '');
-                } catch (e) {}
-                closeLoginModal();
-                navigate('teacher-hub');
+            if (staffError || !staffRow) {
+                await supabaseClient.auth.signOut();
+                if (errorDiv) errorDiv.style.display = 'block';
                 return;
             }
 
-            // Eşleşme yok
-            if (errorDiv) errorDiv.style.display = 'block';
-            document.getElementById('password-input').value = '';
-            document.getElementById('password-input').focus();
+            const userRole = (staffRow.role === 'idare' || staffRow.role === 'admin') ? 'admin' : 'teacher';
+
+            try {
+                sessionStorage.setItem('teacher_logged_in', 'true');
+                sessionStorage.setItem('user_role', userRole);
+                sessionStorage.setItem('staff_id', String(staffRow.id));
+                sessionStorage.setItem('staff_name', staffRow.ad_soyad || '');
+                sessionStorage.setItem('staff_username', staffRow.kullanici_adi || '');
+            } catch (e) {}
+
+            closeLoginModal();
+            await loadSchoolData(true);
+            navigate('teacher-hub');
         }
 
         function cleanTurkishString(str) {
@@ -3784,7 +3780,7 @@ function navigate(state, push = true) {
             }
         }
 
-        function logout() {
+        async function logout() {
             try {
                 sessionStorage.removeItem('teacher_logged_in');
                 sessionStorage.removeItem('user_role');
@@ -3794,6 +3790,10 @@ function navigate(state, push = true) {
                 sessionStorage.removeItem('staff_name');
                 sessionStorage.removeItem('staff_username');
             } catch (e) {}
+            // Supabase Auth oturumunu da kapat
+            if (supabaseClient) {
+                try { await supabaseClient.auth.signOut(); } catch(e) {}
+            }
             navigate('home');
         }
 
@@ -3916,27 +3916,31 @@ function navigate(state, push = true) {
             const staffId = sessionStorage.getItem('staff_id');
             if (!staffId) { alert('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.'); return; }
 
-            const role = sessionStorage.getItem('user_role');
-            const list = role === 'admin' ? (schoolData ? schoolData.idare : []) : (schoolData ? schoolData.ogretmen : []);
-            const me = list.find(s => String(s.id) === String(staffId));
+            if (!supabaseClient) { alert('Veritabanı bağlantısı yok!'); return; }
 
-            if (!me || me.sifre !== currentPw) {
+            // Mevcut şifreyi Supabase Auth ile doğrula (re-auth)
+            const currentUsername = sessionStorage.getItem('staff_username') || '';
+            const currentEmail = currentUsername.toLowerCase() + '@okul.local';
+            const { error: reAuthError } = await supabaseClient.auth.signInWithPassword({
+                email: currentEmail,
+                password: currentPw
+            });
+            if (reAuthError) {
                 errDiv.textContent = 'Mevcut şifre hatalı!';
                 errDiv.style.display = 'block'; return;
             }
 
-            // Benzersiz kullanıcı adı kontrolü (hem öğretmenler hem idareciler arasında)
-            await loadSchoolData();
-            const allStaff = [...(schoolData?.idare || []), ...(schoolData?.ogretmen || [])];
-            const duplicate = allStaff.find(s => 
-                s.kullanici_adi && 
-                s.kullanici_adi.trim().toLowerCase() === newUsername.toLowerCase() && 
-                String(s.id) !== String(staffId)
-            );
-
-            if (duplicate) {
-                errDiv.textContent = 'Bu kullanıcı adı sistemde zaten kullanılmaktadır. Lütfen başka bir ad seçiniz.';
-                errDiv.style.display = 'block'; return;
+            // Benzersiz kullanıcı adı kontrolü (staff tablosunda)
+            if (newUsername.toLowerCase() !== currentUsername.toLowerCase()) {
+                const { data: dupCheck } = await supabaseClient
+                    .from('staff')
+                    .select('id')
+                    .eq('kullanici_adi', newUsername)
+                    .neq('id', staffId);
+                if (dupCheck && dupCheck.length > 0) {
+                    errDiv.textContent = 'Bu kullanıcı adı sistemde zaten kullanılmaktadır. Lütfen başka bir ad seçiniz.';
+                    errDiv.style.display = 'block'; return;
+                }
             }
 
             if (newPw) {
@@ -3944,20 +3948,20 @@ function navigate(state, push = true) {
                     errDiv.textContent = 'Yeni şifreler eşleşmiyor!';
                     errDiv.style.display = 'block'; return;
                 }
-                if (newPw.length < 4) {
-                    errDiv.textContent = 'Yeni şifre en az 4 karakter olmalıdır.';
+                if (newPw.length < 6) {
+                    errDiv.textContent = 'Yeni şifre en az 6 karakter olmalıdır.';
+                    errDiv.style.display = 'block'; return;
+                }
+                // Şifreyi Supabase Auth üzerinden güncelle
+                const { error: pwUpdateError } = await supabaseClient.auth.updateUser({ password: newPw });
+                if (pwUpdateError) {
+                    errDiv.textContent = 'Şifre güncellenemedi: ' + pwUpdateError.message;
                     errDiv.style.display = 'block'; return;
                 }
             }
 
-            if (!supabaseClient) { alert('Veritabanı bağlantısı yok!'); return; }
-            
-            const updateData = { kullanici_adi: newUsername };
-            if (newPw) {
-                updateData.sifre = newPw;
-            }
-
-            const { error } = await supabaseClient.from('staff').update(updateData).eq('id', staffId);
+            // Kullanıcı adını staff tablosunda güncelle (şifre sütununa dokunma)
+            const { error } = await supabaseClient.from('staff').update({ kullanici_adi: newUsername }).eq('id', staffId);
             if (error) {
                 errDiv.textContent = 'Güncelleme hatası: ' + error.message;
                 errDiv.style.display = 'block'; return;
@@ -4975,7 +4979,6 @@ function openDocumentModal(studentNo) {
                                 ad_soyad: st.ad_soyad,
                                 unvan: st.unvan,
                                 kullanici_adi: st.kullanici_adi || '',
-                                sifre: st.sifre || '',
                                 role: 'ogretmen'
                             })),
                             idare: (staff || []).filter(st => st.role === 'idare' || st.role === 'admin').map(st => ({
@@ -4983,7 +4986,6 @@ function openDocumentModal(studentNo) {
                                 ad_soyad: st.ad_soyad,
                                 unvan: st.unvan,
                                 kullanici_adi: st.kullanici_adi || '',
-                                sifre: st.sifre || '',
                                 role: 'idare'
                             }))
                         };
