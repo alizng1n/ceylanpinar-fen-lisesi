@@ -53,8 +53,6 @@ Projeyi olabildiğince sade tutmak istedim; yüklenmesi hızlı, kurulumu yok, t
 
 ![Ana Sayfa](screenshot_1.png)
 
-![Öğretmen Portalı](screenshot_2.png)
-
 ## Geliştirici
 
 **Ali Zengin** / [github.com/alizng1n](https://github.com/alizng1n)
