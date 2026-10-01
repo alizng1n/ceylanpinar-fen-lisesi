@@ -49,8 +49,6 @@ Açık ve koyu tema arasında geçiş yapılabiliyor. Tema tercihi oturum boyunc
 
 Projeyi olabildiğince sade tutmak istedim; yüklenmesi hızlı, kurulumu yok, tarayıcıda direkt çalışıyor.
 
-## Ekran Görüntüleri
-
 ![Ana Sayfa](screenshot_1.png)
 
 ## Geliştirici
