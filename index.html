@@ -363,6 +363,75 @@
         .profile-dropdown-item:hover {
             background: var(--bg-page);
         }
+
+        #app-bootstrap-loading {
+            position: fixed;
+            inset: 0;
+            z-index: 100000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-page);
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .bootstrap-loading-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            animation: bootstrap-fade-in 0.35s ease-out;
+        }
+
+        .bootstrap-loading-logo {
+            width: 76px;
+            height: 76px;
+            object-fit: contain;
+            border-radius: 20px;
+            filter: drop-shadow(0 8px 16px rgba(30, 60, 114, 0.18));
+        }
+
+        .bootstrap-loading-spinner {
+            position: absolute;
+            width: 94px;
+            height: 94px;
+            border: 3px solid rgba(220, 38, 38, 0.18);
+            border-top-color: #dc2626;
+            border-radius: 50%;
+            animation: bootstrap-spin 0.8s linear infinite;
+        }
+
+        .bootstrap-loading-logo-wrap {
+            position: relative;
+            width: 94px;
+            height: 94px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bootstrap-loading-title {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .bootstrap-loading-subtitle {
+            margin: -0.5rem 0 0;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        @keyframes bootstrap-spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes bootstrap-fade-in {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         .profile-dropdown-item.danger {
             color: #ef4444;
         }
@@ -522,6 +591,77 @@
             text-align: center;
         }
 
+        .homepage-top-area {
+            position: relative;
+            isolation: isolate;
+        }
+
+        .homepage-top-area::before {
+            position: absolute;
+            inset: 0;
+            z-index: -2;
+            content: "";
+            background-image: url('school-building-outline.png');
+            background-position: center -75px;
+            background-repeat: no-repeat;
+            background-size: 125% 190%;
+            opacity: 0.1;
+            filter: contrast(1.3);
+            pointer-events: none;
+        }
+
+        .homepage-top-area::after {
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            content: "";
+            background: radial-gradient(
+                circle at 50% 18%,
+                rgba(255, 92, 92, 0.95) 0 72%,
+                rgba(239, 68, 68, 0.9) 86%,
+                transparent 100%
+            );
+            background-position: center 18%;
+            background-repeat: no-repeat;
+            background-size: 12% 12%;
+            -webkit-mask-image: url('school-building-outline.png');
+            mask-image: url('school-building-outline.png');
+            -webkit-mask-position: center -75px;
+            mask-position: center -75px;
+            -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+            -webkit-mask-size: 125% 190%;
+            mask-size: 125% 190%;
+            opacity: 0.34;
+            pointer-events: none;
+            animation: building-pulse 230s linear infinite;
+        }
+
+        [data-theme="dark"] .homepage-top-area::before {
+            filter: invert(1) contrast(1.3);
+            opacity: 0.24;
+        }
+
+        [data-theme="dark"] .homepage-top-area::after {
+            background-image: radial-gradient(
+                circle at 50% 18%,
+                rgba(255, 112, 112, 1) 0 72%,
+                rgba(248, 74, 74, 0.98) 86%,
+                transparent 100%
+            );
+            opacity: 0.43;
+        }
+
+        @keyframes building-pulse {
+            0% {
+                background-size: 3% 3%;
+            }
+            100% {
+                background-size: 650% 650%;
+            }
+        }
+
+
         .welcome-logo {
             width: 90px;
             height: 90px;
@@ -531,12 +671,13 @@
 
         .portal-category {
             text-transform: uppercase;
-            font-size: 0.72rem;
-            letter-spacing: 0.16em;
-            font-weight: 700;
+            font-size: 0.92rem;
+            letter-spacing: 0.14em;
+            font-weight: 800;
             color: #000000;
-            margin-bottom: 0.1rem;
+            margin: 0.2rem 0 0.35rem;
             opacity: 1;
+            text-align: center;
         }
 
         [data-theme="dark"] .portal-category {
@@ -1363,21 +1504,50 @@
 
         /* Print CSS Styling */
         @media print {
+            @page {
+                size: A4 landscape;
+                margin: 0;
+            }
+            @page karne-landscape {
+                size: A4 landscape;
+                margin: 0;
+            }
+
             body.print-karne > *:not(#karne-print-area) {
                 display: none !important;
             }
             #karne-print-area {
                 display: block !important;
+                page: karne-landscape;
                 position: absolute;
                 top: 0; left: 0;
-                width: 210mm;
-                min-height: 297mm;
+                width: 297mm;
+                min-height: 210mm;
                 background: #fff;
                 color: #000;
                 font-family: 'Inter', 'Outfit', sans-serif;
                 font-size: 9pt;
-                padding: 12mm 6mm;
+                padding: 8mm 10mm;
                 box-sizing: border-box;
+            }
+            #karne-print-area.print-landscape {
+                width: 297mm;
+                min-height: 210mm;
+                padding: 8mm 10mm;
+                font-size: 8pt;
+            }
+            #karne-print-area.print-landscape table {
+                margin-top: 6px !important;
+                margin-bottom: 6px !important;
+            }
+            #karne-print-area.print-landscape th,
+            #karne-print-area.print-landscape td {
+                padding: 2px 1px !important;
+                font-size: 6.5pt !important;
+            }
+            #karne-print-area.print-landscape img {
+                max-height: 105px !important;
+                margin-bottom: 8px !important;
             }
             #karne-print-area table {
                 width: 100% !important;
@@ -1718,9 +1888,12 @@
                 margin: 0;
                 padding: 0;
             }
-            @page {
+            @page doc-portrait {
                 size: A4 portrait;
                 margin: 0;
+            }
+            #print-section {
+                page: doc-portrait;
             }
             .school-doc-paper.a6-paper {
                 width: 85mm !important;
@@ -1980,6 +2153,16 @@
     </style>
 </head>
 <body class="portal-mode">
+    <div id="app-bootstrap-loading" role="status" aria-live="polite">
+        <div class="bootstrap-loading-content">
+            <div class="bootstrap-loading-logo-wrap">
+                <img class="bootstrap-loading-logo" src="logo.png" alt="">
+                <div class="bootstrap-loading-spinner" aria-hidden="true"></div>
+            </div>
+            <p class="bootstrap-loading-title">Ceylanpınar Fen Lisesi</p>
+            <p class="bootstrap-loading-subtitle">Yükleniyor...</p>
+        </div>
+    </div>
 
     <header>
         <!-- Id and default hidden logo for selection page header -->
@@ -2056,11 +2239,10 @@
             <div class="portal-selection" id="selection-screen">
                 
                 <!-- Üst Kısım: Karşılama ve Giriş Butonları -->
-                <div style="display: flex; flex-direction: column; gap: 2rem; width: 100%; align-items: center; text-align: center;">
+                <div class="homepage-top-area" style="display: flex; flex-direction: column; gap: 2rem; width: 100%; align-items: center; text-align: center;">
                     <div class="portal-welcome">
                         <img class="welcome-logo" src="logo.png" alt="Okul Logosu">
                         <span class="portal-category">T.C. MİLLÎ EĞİTİM BAKANLIĞI</span>
-                        <h2>Ceylanpınar Fen Lisesi</h2>
                     </div>
 
                     <div class="selection-grid">
@@ -2299,6 +2481,7 @@
                             <canvas id="studentDashboardChart"></canvas>
                         </div>
                     </div>
+
                 </div>
             </div>
 
@@ -2396,6 +2579,12 @@
                         <div class="chart-wrapper">
                             <canvas id="progressChart"></canvas>
                         </div>
+                    </div>
+                    <div class="chart-card" id="analysis-student-history-card" style="margin-top:0.75rem;">
+                        <h3>
+                            <span><i data-lucide="history" style="display:inline; vertical-align:-3px; margin-right:4px;"></i> Öğrenci İşlem Geçmişi (Sicil)</span>
+                        </h3>
+                        <div id="analysis-student-history" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
                     </div>
                 </div>
 
@@ -3091,6 +3280,7 @@
         let examDatabase = [];
         let activeStudent = null;
         let progressChart = null;
+        let analysisHistoryRequestId = 0;
         let isNavigating = false; // History Router flag
 
         // Supabase Client Global Config
@@ -3116,12 +3306,27 @@
             try { setupDragAndDrop(); } catch (e) { console.error("DragAndDrop init error:", e); }
             try { initNewsFetcher(); } catch (e) { console.error("NewsFetcher init error:", e); }
             try { initSupabase(); } catch (e) { console.error("Supabase init error:", e); }
-            try { 
-                loadSchoolData().then(() => {
-                    loadExamData();
+            try {
+                Promise.all([
+                    loadSchoolData(),
+                    loadExamData()
+                ]).then(() => {
+                    initRouter();
+                    document.getElementById('app-bootstrap-loading')?.remove();
+                }).catch(e => {
+                    console.error("Data load init error:", e);
+                    initRouter();
+                    document.getElementById('app-bootstrap-loading')?.remove();
                 });
-            } catch (e) { console.error("Data load init error:", e); }
-            try { initRouter(); } catch (e) { console.error("Router init error:", e); }
+            } catch (e) {
+                console.error("Data load init error:", e);
+                try {
+                    initRouter();
+                    document.getElementById('app-bootstrap-loading')?.remove();
+                } catch (routerError) {
+                    console.error("Router init error:", routerError);
+                }
+            }
             
             // ESC tuşu ile modalları kapatma desteği
             document.addEventListener('keydown', (event) => {
@@ -4095,6 +4300,16 @@ function navigate(state, push = true) {
                 document.getElementById('analysis-tab-istatistik').style.display = 'none';
                 document.getElementById('analysis-tab-ayarlar').style.display = 'none';
             }
+
+            const savedStudentNo = sessionStorage.getItem('selected_teacher_student_no');
+            if (savedStudentNo) {
+                const savedRecords = examDatabase.filter(r => String(r.no) === String(savedStudentNo));
+                if (savedRecords.length > 0) {
+                    savedRecords.sort((a, b) => extractDate(a.deneme) - extractDate(b.deneme));
+                    activeStudent = savedRecords;
+                    displayStudentReport(savedRecords);
+                }
+            }
             
             refreshDashboard();
         }
@@ -4177,6 +4392,46 @@ function navigate(state, push = true) {
             }
         }
 
+async function loadStudentHistory(studentNo) {
+    if (String(studentNo) === 'ADI') return [];
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+        if (!supabaseClient) {
+            initSupabase();
+        }
+
+        if (!supabaseClient) {
+            await new Promise(resolve => setTimeout(resolve, 250));
+            continue;
+        }
+
+        try {
+            const { data, error } = await supabaseClient
+                .from('document_history')
+                .select('id, student_no, tarih, tur, detay')
+                .eq('student_no', Number(studentNo))
+                .order('created_at', { ascending: false });
+
+            if (!error) {
+                return (data || []).map(item => ({
+                    id: item.id,
+                    tarih: item.tarih,
+                    tur: item.tur,
+                    detay: item.detay || ''
+                }));
+            }
+
+            console.error(`Student history load error (attempt ${attempt + 1}):`, error);
+        } catch (error) {
+            console.error(`Student history load exception (attempt ${attempt + 1}):`, error);
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 400));
+    }
+
+    return null;
+}
+
 function renderStudentHistory(student) {
             const container = document.getElementById('doc-student-history');
             if (!container) return;
@@ -4244,7 +4499,7 @@ function renderStudentHistory(student) {
             renderStudentHistory(selectedDocStudent);
         }
 
-function openDocumentModal(studentNo) {
+async function openDocumentModal(studentNo) {
             let student = null;
             if (String(studentNo) === 'ADI') {
                 student = {
@@ -4259,6 +4514,7 @@ function openDocumentModal(studentNo) {
             }
             if (!student) return;
             selectedDocStudent = student;
+            selectedDocStudent.history = await loadStudentHistory(student.no);
             
             const isAnonymous = String(student.no) === 'ADI';
             if (isAnonymous) {
@@ -4946,30 +5202,22 @@ function openDocumentModal(studentNo) {
                     // Eşzamanlı sorguları tek bir promise ile birleştirelim
                     const fetchPromise = Promise.all([
                         supabaseClient.from('students').select('*').order('no', { ascending: true }),
-                        supabaseClient.from('staff').select('*').order('id', { ascending: true }),
-                        supabaseClient.from('document_history').select('*').order('created_at', { ascending: false })
+                        supabaseClient.from('staff').select('*').order('id', { ascending: true })
                     ]);
 
                     // Sorgular ile zaman aşımını yarıştıralım
                     const [resOgr, resStaff, resHist] = await Promise.race([fetchPromise, timeoutPromise]);
                     const { data: students, error: errOgr } = resOgr;
                     const { data: staff, error: errStaff } = resStaff;
-                    const { data: history, error: errHist } = resHist;
 
-                    if (!errOgr && !errStaff && !errHist) {
+                    if (!errOgr && !errStaff) {
                         schoolData = {
                             ogrenci: (students || []).map(s => ({
                                 no: s.no,
                                 ad: s.ad,
                                 soyad: s.soyad,
                                 snf: s.snf,
-                                sube: s.sube || '',
-                                history: (history || []).filter(h => String(h.student_no) === String(s.no)).map(h => ({
-                                    id: h.id,
-                                    tarih: h.tarih,
-                                    tur: h.tur,
-                                    detay: h.detay || ''
-                                }))
+                                sube: s.sube || ''
                             })),
                             ogretmen: (staff || []).filter(st => st.role === 'ogretmen').map(st => ({
                                 id: String(st.id),
@@ -4991,7 +5239,7 @@ function openDocumentModal(studentNo) {
                         console.log("School data loaded successfully from Supabase!");
                         return;
                     } else {
-                        console.error("Supabase load query errors:", errOgr, errStaff, errHist);
+                        console.error("Supabase load query errors:", errOgr, errStaff);
                     }
                 } catch(e) {
                     console.error("Supabase load exception:", e);
@@ -5627,6 +5875,65 @@ function showSchoolManagementView() {
                     }
                 }
             });
+
+            renderAnalysisStudentHistory(records);
+        }
+
+        async function renderAnalysisStudentHistory(records) {
+            const container = document.getElementById('analysis-student-history');
+            if (!container) return;
+
+            const studentNo = records && records.length > 0 ? records[0].no : null;
+            const requestId = ++analysisHistoryRequestId;
+            container.innerHTML = `
+                <div style="background:var(--bg-page); border:1px solid var(--border-color); border-radius:8px; padding:0.85rem; text-align:center; color:var(--text-secondary); font-size:0.85rem;">
+                    Sicil bilgileri yükleniyor...
+                </div>
+            `;
+            const history = await loadStudentHistory(studentNo);
+            if (requestId !== analysisHistoryRequestId) return;
+
+            if (history === null) {
+                container.innerHTML = `
+                    <div style="background:rgba(239,68,68,0.06); border:1px dashed rgba(239,68,68,0.3); border-radius:8px; padding:0.85rem; text-align:center; color:#dc2626; font-size:0.85rem; font-weight:500;">
+                        Sicil bilgisi yüklenemedi. Lütfen sayfayı yenileyiniz.
+                    </div>
+                `;
+            } else if (history.length === 0) {
+                container.innerHTML = `
+                    <div style="background:rgba(16,185,129,0.06); border:1px dashed rgba(16,185,129,0.25); border-radius:8px; padding:0.85rem; text-align:center; color:#10b981; font-size:0.85rem; font-weight:500;">
+                        <i data-lucide="check-circle" size="16" style="vertical-align:middle; margin-right:0.25rem;"></i>
+                        Bu öğrenciye ait işlem geçmişi bulunmamaktadır (Temiz Sicil)
+                    </div>
+                `;
+            } else {
+                container.innerHTML = '';
+                history.forEach(item => {
+                    const entry = document.createElement('div');
+                    entry.style.cssText = 'background:var(--bg-page); border:1px solid var(--border-color); border-radius:8px; padding:0.75rem 1rem; font-size:0.85rem; display:flex; flex-direction:column; gap:0.25rem;';
+
+                    const heading = document.createElement('div');
+                    heading.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:1rem;';
+
+                    const type = document.createElement('strong');
+                    type.style.color = 'var(--text-primary)';
+                    type.textContent = item.tur || 'İşlem';
+
+                    const date = document.createElement('span');
+                    date.style.cssText = 'color:var(--text-secondary); font-size:0.78rem; font-weight:500; white-space:nowrap;';
+                    date.textContent = item.tarih || '-';
+
+                    const detail = document.createElement('span');
+                    detail.style.cssText = 'color:var(--text-secondary); line-height:1.4;';
+                    detail.textContent = item.detay || '-';
+
+                    heading.append(type, date);
+                    entry.append(heading, detail);
+                    container.appendChild(entry);
+                });
+            }
+
+            if (window.lucide) lucide.createIcons();
         }
 
         // Excel Drag and Drop
@@ -6536,6 +6843,8 @@ function showSchoolManagementView() {
             const studentRecords = examDatabase.filter(r => r.no === studentNo);
             if (studentRecords.length === 0) return;
 
+            sessionStorage.setItem('selected_teacher_student_no', String(studentNo));
+
             studentRecords.sort((a, b) => {
                 const dateA = extractDate(a.deneme);
                 const dateB = extractDate(b.deneme);
@@ -6578,6 +6887,7 @@ function showSchoolManagementView() {
                     studentDashboardChart.destroy();
                     studentDashboardChart = null;
                 }
+                renderStudentDashboardHistory(studentNo);
                 return;
             }
 
@@ -6673,6 +6983,62 @@ function showSchoolManagementView() {
             }
 
             renderStudentDashboardChart(studentRecords);
+            renderStudentDashboardHistory(studentNo);
+        }
+
+        async function renderStudentDashboardHistory(studentNo) {
+            const container = document.getElementById('student-dashboard-history');
+            if (!container) return;
+
+            container.innerHTML = `
+                <div style="background:var(--bg-page); border:1px solid var(--border-color); border-radius:8px; padding:0.85rem; text-align:center; color:var(--text-secondary); font-size:0.85rem;">
+                    Sicil bilgileri yükleniyor...
+                </div>
+            `;
+
+            const history = await loadStudentHistory(studentNo);
+
+            if (history === null) {
+                container.innerHTML = `
+                    <div style="background:rgba(239,68,68,0.06); border:1px dashed rgba(239,68,68,0.3); border-radius:8px; padding:0.85rem; text-align:center; color:#dc2626; font-size:0.85rem; font-weight:500;">
+                        Sicil bilgisi yüklenemedi. Lütfen sayfayı yenileyiniz.
+                    </div>
+                `;
+            } else if (history.length === 0) {
+                container.innerHTML = `
+                    <div style="background:rgba(16,185,129,0.06); border:1px dashed rgba(16,185,129,0.25); border-radius:8px; padding:0.85rem; text-align:center; color:#10b981; font-size:0.85rem; font-weight:500;">
+                        <i data-lucide="check-circle" size="16" style="vertical-align:middle; margin-right:0.25rem;"></i>
+                        Bu öğrenciye ait işlem geçmişi bulunmamaktadır (Temiz Sicil)
+                    </div>
+                `;
+            } else {
+                container.innerHTML = '';
+                history.forEach(item => {
+                    const entry = document.createElement('div');
+                    entry.style.cssText = 'background:var(--bg-page); border:1px solid var(--border-color); border-radius:8px; padding:0.75rem 1rem; font-size:0.85rem; display:flex; flex-direction:column; gap:0.25rem;';
+
+                    const heading = document.createElement('div');
+                    heading.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:1rem;';
+
+                    const type = document.createElement('strong');
+                    type.style.color = 'var(--text-primary)';
+                    type.textContent = item.tur || 'İşlem';
+
+                    const date = document.createElement('span');
+                    date.style.cssText = 'color:var(--text-secondary); font-size:0.78rem; font-weight:500; white-space:nowrap;';
+                    date.textContent = item.tarih || '-';
+
+                    const detail = document.createElement('span');
+                    detail.style.cssText = 'color:var(--text-secondary); line-height:1.4;';
+                    detail.textContent = item.detay || '-';
+
+                    heading.append(type, date);
+                    entry.append(heading, detail);
+                    container.appendChild(entry);
+                });
+            }
+
+            if (window.lucide) lucide.createIcons();
         }
 
         function renderStudentDashboardChart(records) {
@@ -6983,7 +7349,7 @@ function showSchoolManagementView() {
             }
         }
 
-                async function printKarne() {
+        async function printKarne() {
             // schoolData yüklenmemişse yükle
             await loadSchoolData();
 
@@ -7017,18 +7383,16 @@ function showSchoolManagementView() {
             const noMatch = studentNo.match(/\d+/);
             const noStr = noMatch ? noMatch[0] : '';
 
-            // 5. Sicil kayıtlarını schoolData'dan çek
+            // 5. Sicil kayıtlarını yalnızca seçilen öğrenciden çek
             let historyHTML = '<p style="color:#6b7280; font-size:8pt;">Bu öğrenciye ait belge geçmişi bulunmamaktadır.</p>';
-            if (noStr && typeof schoolData !== 'undefined' && schoolData.ogrenci) {
-                const ogr = schoolData.ogrenci.find(s => String(s.no) === noStr);
-                if (ogr && ogr.history && ogr.history.length > 0) {
+            const history = await loadStudentHistory(noStr);
+            if (history && history.length > 0) {
                     historyHTML = '<table style="width:100%; border-collapse:collapse; font-size:8pt;">';
                     historyHTML += '<thead><tr style="background:#f3f4f6;"><th style="padding:3px 6px; text-align:left; border:1px solid #d1d5db;">Belge Türü</th><th style="padding:3px 6px; text-align:left; border:1px solid #d1d5db;">Tarih</th><th style="padding:3px 6px; text-align:left; border:1px solid #d1d5db;">Detay</th></tr></thead><tbody>';
-                    ogr.history.forEach(h => {
+                    history.forEach(h => {
                         historyHTML += `<tr><td style="padding:3px 6px; border:1px solid #d1d5db;">${h.tur || '-'}</td><td style="padding:3px 6px; border:1px solid #d1d5db;">${h.tarih || '-'}</td><td style="padding:3px 6px; border:1px solid #d1d5db;">${h.detay || '-'}</td></tr>`;
                     });
                     historyHTML += '</tbody></table>';
-                }
             }
 
             // 6. Karne HTML'ini oluştur
@@ -7075,6 +7439,7 @@ function showSchoolManagementView() {
             const printArea = document.getElementById('karne-print-area');
             printArea.innerHTML = karneHTML;
             printArea.style.display = 'block';
+            printArea.classList.add('print-landscape');
             document.body.classList.add('print-karne');
 
             const originalTitle = document.title;
@@ -7085,6 +7450,7 @@ function showSchoolManagementView() {
                 window.print();
                 setTimeout(() => {
                     document.body.classList.remove('print-karne');
+                    printArea.classList.remove('print-landscape');
                     printArea.style.display = 'none';
                     printArea.innerHTML = '';
                     document.title = originalTitle;
@@ -7111,16 +7477,14 @@ function showSchoolManagementView() {
             const noStr = noMatch ? noMatch[0] : '';
 
             let historyHTML = '<p style="color:#6b7280; font-size:8pt;">Bu öğrenciye ait belge geçmişi bulunmamaktadır.</p>';
-            if (noStr && typeof schoolData !== 'undefined' && schoolData.ogrenci) {
-                const ogr = schoolData.ogrenci.find(s => String(s.no) === noStr);
-                if (ogr && ogr.history && ogr.history.length > 0) {
+            const history = await loadStudentHistory(noStr);
+            if (history && history.length > 0) {
                     historyHTML = '<table style="width:100%; border-collapse:collapse; font-size:8pt;">';
                     historyHTML += '<thead><tr style="background:#f3f4f6;"><th style="padding:3px 6px; text-align:left; border:1px solid #d1d5db;">Belge Türü</th><th style="padding:3px 6px; text-align:left; border:1px solid #d1d5db;">Tarih</th><th style="padding:3px 6px; text-align:left; border:1px solid #d1d5db;">Detay</th></tr></thead><tbody>';
-                    ogr.history.forEach(h => {
+                    history.forEach(h => {
                         historyHTML += `<tr><td style="padding:3px 6px; border:1px solid #d1d5db;">${h.tur || '-'}</td><td style="padding:3px 6px; border:1px solid #d1d5db;">${h.tarih || '-'}</td><td style="padding:3px 6px; border:1px solid #d1d5db;">${h.detay || '-'}</td></tr>`;
                     });
                     historyHTML += '</tbody></table>';
-                }
             }
 
             const today = new Date();
@@ -7161,6 +7525,7 @@ function showSchoolManagementView() {
             const printArea = document.getElementById('karne-print-area');
             printArea.innerHTML = karneHTML;
             printArea.style.display = 'block';
+            printArea.classList.add('print-landscape');
             document.body.classList.add('print-karne');
 
             const originalTitle = document.title;
@@ -7171,6 +7536,7 @@ function showSchoolManagementView() {
                 window.print();
                 setTimeout(() => {
                     document.body.classList.remove('print-karne');
+                    printArea.classList.remove('print-landscape');
                     printArea.style.display = 'none';
                     printArea.innerHTML = '';
                     document.title = originalTitle;
